@@ -34,4 +34,4 @@ async def shutdown():
 
 
 def async_gridfs(bucket_name: str):
-    return motor.motor_asyncio.AsyncIOMotorGridFSBucket(async_db(), bucket_name=bucket_name, disable_md5=True)
+    return motor.motor_asyncio.AsyncIOMotorGridFSBucket(async_db(), bucket_name=bucket_name)

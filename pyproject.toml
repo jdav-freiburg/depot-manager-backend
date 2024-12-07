@@ -6,11 +6,11 @@ authors = ["Lukas Voegtle <lukas@infornautik.de>"]
 
 [tool.poetry.dependencies]
 python = ">=3.8"
-pydantic = ">=1.5"
+pydantic = ">=1.5, <2"
 fastapi = ">=0"
 motor = ">=2"
 oyaml = ">=1"
-authlib = ">=0"
+authlib = ">=0, <1"
 pytz = ">=2021"
 uvicorn = ">=0"
 httpx = ">=0"

@@ -19,10 +19,10 @@ oauth2:
 mail:
   host: localhost
   sender: "admin@localhost"
-  #port: 25
-  #ssl: false
-  #starttls: false
-  #keyfile: null
-  #certfile: null
-  #user: ""
-  #password: ""
+  port: 25
+  ssl: false
+  starttls: false
+  keyfile: null
+  certfile: null
+  user: ""
+  password: ""
