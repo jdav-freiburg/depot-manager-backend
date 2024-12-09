@@ -1,3 +1,4 @@
+import os
 import httpx
 from authlib.common.errors import AuthlibBaseError, AuthlibHTTPError
 from authlib.integrations.starlette_client import OAuth as _OAuth, StarletteRemoteApp as _StarletteRemoteApp
@@ -11,6 +12,11 @@ from typing import Optional, List, Tuple
 from depot_server.config import config
 from depot_server.db import collections, DbReservation
 from depot_server.model import User
+
+AUTH_OFF = bool(os.getenv("NO_AUTH", False))
+
+if AUTH_OFF:
+    print("Running without authentication!")
 
 
 class StarletteRemoteApp(_StarletteRemoteApp):
@@ -35,8 +41,10 @@ class OAuth(_OAuth):
 oauth = OAuth()
 oauth.register('server', **config.oauth2.dict())
 
-
 async def get_profile(user_id: str) -> dict:
+    if AUTH_OFF:
+        return {'sub': 'unknown', 'name': 'unknown', 'email': 'unknown.because@no.auth'}
+
     server_metadata = await oauth.server.load_server_metadata()
     issuer = server_metadata['issuer']
     profile_url = f"{issuer}/profiles/{user_id}"
@@ -47,6 +55,9 @@ async def get_profile(user_id: str) -> dict:
 
 
 async def get_profiles() -> List[dict]:
+    if AUTH_OFF:
+        return []
+
     server_metadata = await oauth.server.load_server_metadata()
     issuer = server_metadata['issuer']
     profiles_url = f"{issuer}/profiles"
@@ -73,6 +84,8 @@ class Authentication:
             self,
             authorization_code: HTTPAuthorizationCredentials = Depends(HTTPBearer(auto_error=False)),
     ) -> Optional[UserInfo]:
+        if AUTH_OFF:
+            return UserInfo({'email': 'local@freiburg.jdav', 'name': 'local-fake-user', 'given_name': 'Local Fake User', 'roles': ['admin', 'manager']})
         if authorization_code is None:
             if self.auto_error:
                 raise HTTPException(

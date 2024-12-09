@@ -1,5 +1,5 @@
-<a href="https://cloud.docker.com/repository/docker/voegtlel/depot-manager-backend/builds">
-  <img src="https://img.shields.io/docker/cloud/build/voegtlel/depot-manager-backend.svg" alt="Docker build status" />
+<a href="https://github.com/jdav-freiburg/depot-manager-backend/actions/workflows/publish_docker.yml">
+    <img src="https://github.com/jdav-freiburg/depot-manager-backend/actions/workflows/publish_docker.yml/badge.svg" />
 </a>
 <img src="https://img.shields.io/github/license/voegtlel/depot-manager-backend.svg" alt="License" />
 
