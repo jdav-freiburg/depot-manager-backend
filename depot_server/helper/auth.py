@@ -85,7 +85,7 @@ class Authentication:
             authorization_code: HTTPAuthorizationCredentials = Depends(HTTPBearer(auto_error=False)),
     ) -> Optional[UserInfo]:
         if AUTH_OFF:
-            return UserInfo({'email': 'local@freiburg.jdav', 'name': 'local-fake-user', 'given_name': 'Local Fake User', 'roles': ['admin', 'manager']})
+            return UserInfo({'email': 'local@freiburg.jdav', 'name': 'local-fake-user', 'given_name': 'Local Fake User', 'roles': ['admin', 'manager'], 'sub': 'unknown'})
         if authorization_code is None:
             if self.auto_error:
                 raise HTTPException(
