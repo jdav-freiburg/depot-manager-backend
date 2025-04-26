@@ -19,18 +19,18 @@ class ItemCondition(str, Enum):
 
 
 class StrChange(BaseModel):
-    previous: Optional[str]
-    next: Optional[str]
+    previous: Optional[str] = None
+    next: Optional[str] = None
 
 
 class IdChange(BaseModel):
-    previous: Optional[UUID]
-    next: Optional[UUID]
+    previous: Optional[UUID] = None
+    next: Optional[UUID] = None
 
 
 class DateChange(BaseModel):
-    previous: Optional[date]
-    next: Optional[date]
+    previous: Optional[date] = None
+    next: Optional[date] = None
 
 
 class TagsChange(BaseModel):
@@ -39,8 +39,8 @@ class TagsChange(BaseModel):
 
 
 class TotalReportStateChange(BaseModel):
-    previous: Optional[TotalReportState]
-    next: Optional[TotalReportState]
+    previous: Optional[TotalReportState] = None
+    next: Optional[TotalReportState] = None
 
 
 class ItemConditionChange(BaseModel):

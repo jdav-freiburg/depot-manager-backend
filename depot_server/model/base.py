@@ -1,4 +1,4 @@
-from pydantic import BaseModel as _BaseModel
+from pydantic import ConfigDict, BaseModel as _BaseModel
 
 
 def camelcase(name: str) -> str:
@@ -7,7 +7,4 @@ def camelcase(name: str) -> str:
 
 
 class BaseModel(_BaseModel):
-    class Config:
-        populate_by_name = True
-
-        alias_generator = camelcase
+    model_config = ConfigDict(populate_by_name=True, alias_generator=camelcase)

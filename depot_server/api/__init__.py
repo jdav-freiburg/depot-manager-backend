@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 import traceback
 
 from fastapi import FastAPI, APIRouter, Request, Response
@@ -29,20 +30,20 @@ router.include_router(reservations_router, prefix='/api/v1/depot')
 router.include_router(pictures_router, prefix='/api/v1/depot')
 router.include_router(users_router, prefix='/api/v1/depot')
 
-
-@router.on_event('startup')
-async def startup():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # startup stuff before the application starts
     await db_startup()
     await mail_cron_startup()
 
+    yield
 
-@router.on_event('shutdown')
-async def shutdown():
+    # tear down and cleanup before quitting the application
     await mail_cron_shutdown()
     await db_shutdown()
 
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=config.allow_origins,
@@ -53,6 +54,10 @@ app.add_middleware(
 
 app.include_router(router)
 
+@app.get("/")
+def root():
+    print("Inside root")  # This should show in PyCharm debug console
+    return {"message": "Hello from debug"}
 
 @app.middleware('http')
 async def catch_exceptions_middleware(request: Request, call_next):
@@ -74,7 +79,7 @@ async def catch_exceptions_middleware(request: Request, call_next):
         elif isinstance(resp, Response):
             if resp.status_code >= 400:
                 print(f"Header: {resp.headers}")
-                print(f"Body: {resp.body!r}")
+                print(f"Body: {resp.body()!r}")
         else:
             print(f"Unknown response type: {type(resp)}")
         return resp

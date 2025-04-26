@@ -7,7 +7,7 @@ class User(BaseModel):
     sub: str
     name: str
     email: str
-    picture: Optional[str]
-    phone_number: Optional[str]
-    roles: Optional[List[str]]
-    teams: Optional[List[str]]
+    picture: Optional[str] = None
+    phone_number: Optional[str] = None
+    roles: Optional[List[str]] = None
+    teams: Optional[List[str]] = None

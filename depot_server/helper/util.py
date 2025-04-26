@@ -5,7 +5,7 @@ from typing import Any
 
 
 def utc_now() -> datetime:
-    now = datetime.utcnow()
+    now = datetime.now(tz=pytz.UTC)
     return now.replace(tzinfo=pytz.UTC, microsecond=now.microsecond // 1000 * 1000)
 
 

@@ -18,26 +18,26 @@ def test_bay(monkeypatch, motor_mock):
             '/api/v1/depot/bays', data=create_bay.json(), auth=MockAuth(sub='admin1', roles=['admin']),
         )
         assert resp.status_code == 201, resp.text
-        created_bay = Bay.validate(resp.json())
-        assert BayInWrite.validate(created_bay) == create_bay
+        created_bay = Bay.model_validate(resp.json())
+        assert BayInWrite.model_validate(created_bay) == create_bay
 
         resp = client.get('/api/v1/depot/bays', auth=MockAuth(sub='user1'))
         assert resp.status_code == 200, resp.text
-        bays = [Bay.validate(b) for b in resp.json()]
+        bays = [Bay.model_validate(b) for b in resp.json()]
         assert len(bays) == 1
         assert bays[0] == created_bay
 
         resp = client.get(f'/api/v1/depot/bays/{created_bay.id}', auth=MockAuth(sub='user1'))
         assert resp.status_code == 200, resp.text
-        assert Bay.validate(resp.json()) == created_bay
+        assert Bay.model_validate(resp.json()) == created_bay
 
         update_bay = BayInWrite(external_id='bay_1_upd', name="Bay 1 Upd", description="Top Right")
         resp = client.put(
             f'/api/v1/depot/bays/{created_bay.id}', data=update_bay.json(), auth=MockAuth(sub='admin1', roles=['admin'])
         )
         assert resp.status_code == 200, resp.text
-        updated_bay = Bay.validate(resp.json())
-        assert BayInWrite.validate(updated_bay) == update_bay
+        updated_bay = Bay.model_validate(resp.json())
+        assert BayInWrite.model_validate(updated_bay) == update_bay
 
         resp = client.delete(
             f'/api/v1/depot/bays/{created_bay.id}', auth=MockAuth(sub='admin1', roles=['admin'])

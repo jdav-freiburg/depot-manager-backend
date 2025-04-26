@@ -19,7 +19,7 @@ async def get_users(
     if 'admin' not in _user['roles']:
         raise HTTPException(403, "Not admin")
     return [
-        User.validate(profile)
+        User.model_validate(profile)
         for profile in await get_profiles()
         if profile.get('email') and profile.get('name')
     ]
@@ -34,4 +34,4 @@ async def get_user(
         user_id: str,
         _user: UserInfo = Depends(Authentication()),
 ) -> User:
-    return User.validate(await get_profile(user_id))
+    return User.model_validate(await get_profile(user_id))

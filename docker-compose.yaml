@@ -1,0 +1,32 @@
+services:
+  backend:
+    build:
+      context: .
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    environment:
+      # Override any config.yaml variable by typing API_CONFIG_<container>_<container...>_<variable>
+      # where the names are automagically converted from camelCase to underscore_notation (ignoring casing).
+
+      # Set this if you use different origin
+      # API_CONFIG_ALLOW_ORIGINS: "['https://api.depot.example.com']"
+      API_CONFIG_ALLOW_ORIGINS: "['https://depot.jdav-freiburg.de']"
+
+      API_CONFIG_FRONTEND_BASE_URL: "https://depot.jdav-freiburg.de"
+
+      API_CONFIG_MONGO_URI: "mongodb://mongo/depot"
+
+      API_CONFIG_OAUTH2_SERVER_METADATA_URL: "https://auth.jdav-freiburg.de/.well-known/openid-configuration"
+      API_CONFIG_OAUTH2_CLIENT_ID: "depot"
+      API_CONFIG_OAUTH2_CLIENT_SECRET: "8jlwHTq3gwrrJvxd4oEEAI010rflgMP1"
+
+      #API_CONFIG_MAIL_HOST: "mail"
+      API_CONFIG_MAIL_HOST: "dummy" # Not sending mails for now
+      API_CONFIG_MAIL_SENDER: "support@jdav-freiburg.de"
+
+  mongo:
+    image: mongo:6
+    ports:
+      - "27017:27017"
+
