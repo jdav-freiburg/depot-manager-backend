@@ -1,6 +1,6 @@
 import httpx
 from authlib.common.errors import AuthlibBaseError, AuthlibHTTPError
-from authlib.integrations.starlette_client import OAuth as _OAuth, StarletteRemoteApp as _StarletteRemoteApp
+from authlib.integrations.starlette_client import OAuth as _OAuth, StarletteOAuth2App
 from authlib.oidc.core import UserInfo
 from datetime import date
 from fastapi import HTTPException, Depends
@@ -13,7 +13,7 @@ from depot_server.db import collections, DbReservation
 from depot_server.model import User
 
 
-class StarletteRemoteApp(_StarletteRemoteApp):
+class StarletteRemoteApp(StarletteOAuth2App):
 
     # Hotfix patch
     async def _fetch_server_metadata(self, url):
@@ -23,11 +23,11 @@ class StarletteRemoteApp(_StarletteRemoteApp):
             return resp.json()
 
     async def parse_access_token_raw(self, token: str) -> UserInfo:
-        return await self._parse_id_token({'id_token': token, 'access_token': True}, nonce=None, claims_options=None)
+        return await self.parse_id_token({'id_token': token, 'access_token': True}, nonce=None, claims_options=None)
 
 
 class OAuth(_OAuth):
-    framework_client_cls = StarletteRemoteApp
+    oauth2_client_cls = StarletteRemoteApp
 
     server: StarletteRemoteApp
 

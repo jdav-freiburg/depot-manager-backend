@@ -8,6 +8,6 @@ def camelcase(name: str) -> str:
 
 class BaseModel(_BaseModel):
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
         alias_generator = camelcase

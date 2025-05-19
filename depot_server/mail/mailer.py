@@ -26,8 +26,8 @@ class Mailer:
             port = config.mail.port
 
         return aiosmtplib.SMTP(
-            config.mail.host,
-            port,
+            hostname=config.mail.host,
+            port=port,
             username=config.mail.user,
             password=config.mail.password,
             use_tls=config.mail.ssl,
