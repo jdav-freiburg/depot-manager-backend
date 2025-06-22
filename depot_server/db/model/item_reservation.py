@@ -1,10 +1,11 @@
-from datetime import date
 from pydantic import Field
 from pymongo import IndexModel, ASCENDING, DESCENDING
 from uuid import UUID
 
 from depot_server.db.model.base import BaseDocument
 from depot_server.model import ReservationState
+from depot_server.helper.util import date
+
 
 
 class DbItemReservation(BaseDocument):
