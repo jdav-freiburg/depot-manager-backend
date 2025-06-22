@@ -19,7 +19,7 @@ async def get_report_profiles(
         _user: UserInfo = Depends(Authentication()),
 ) -> List[ReportProfile]:
     return [
-        ReportProfile.model_validate(report_profile)
+        ReportProfile.model_validate(report_profile, from_attributes=True)
         async for report_profile in collections.report_profile_collection.find({})
     ]
 
@@ -36,7 +36,7 @@ async def get_report_profile(
     report_profile_data = await collections.report_profile_collection.find_one({'_id': report_profile_id})
     if report_profile_data is None:
         raise HTTPException(404)
-    return ReportProfile.model_validate(report_profile_data)
+    return ReportProfile.model_validate(report_profile_data, from_attributes=True)
 
 
 @router.post(
@@ -54,7 +54,7 @@ async def create_report_profile(
         **report_profile.model_dump()
     )
     await collections.report_profile_collection.insert_one(db_report_profile)
-    return ReportProfile.model_validate(db_report_profile)
+    return ReportProfile.model_validate(db_report_profile, from_attributes=True)
 
 
 @router.put(
@@ -73,7 +73,7 @@ async def update_report_profile(
     )
     if not await collections.report_profile_collection.replace_one(db_report_profile):
         raise HTTPException(404, f"No report_profile for id {report_profile_id}")
-    return ReportProfile.model_validate(db_report_profile)
+    return ReportProfile.model_validate(db_report_profile, from_attributes=True)
 
 
 @router.delete(

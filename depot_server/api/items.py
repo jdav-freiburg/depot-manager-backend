@@ -104,7 +104,7 @@ async def get_items(
         _user: UserInfo = Depends(Authentication()),
 ) -> List[Item]:
     return [
-        Item.model_validate(item)
+        Item.model_validate(item, from_attributes=True)
         async for item in collections.item_collection.find({} if all else {'condition': {'$ne': 'gone'}})
     ]
 
@@ -121,7 +121,7 @@ async def get_item(
     item_data = await collections.item_collection.find_one({'_id': item_id})
     if item_data is None:
         raise HTTPException(404, f"Item {item_id} not found")
-    return Item.model_validate(item_data)
+    return Item.model_validate(item_data, from_attributes=True)
 
 
 @router.post(
@@ -179,7 +179,7 @@ async def update_item(
         }):
             reservation = await collections.reservation_collection.find_one({'_id': item_reservation.reservation_id})
             background_tasks.add_task(send_reservation_item_removed, _user, db_item, reservation)
-    return Item.model_validate(db_item)
+    return Item.model_validate(db_item, from_attributes=True)
 
 
 @router.put(
@@ -209,7 +209,7 @@ async def report_item(
     await _save_state(item_data, db_item, report, change_comment, _user['sub'])
     if not await collections.item_collection.replace_one(db_item):
         raise HTTPException(404, f"Item {item_id} not found")
-    return Item.model_validate(db_item)
+    return Item.model_validate(db_item, from_attributes=True)
 
 
 @router.delete(

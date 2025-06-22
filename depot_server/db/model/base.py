@@ -3,7 +3,7 @@ from enum import Enum
 from datetime import datetime, date
 from pydantic import ConfigDict, BaseModel
 from pymongo import IndexModel
-from typing import List, Any, Sequence, Mapping, TypeVar, Type, get_origin, Union, ClassVar, Dict
+from typing import List, Any, Sequence, Mapping, TypeVar, Type, Union, ClassVar
 from uuid import UUID
 
 
@@ -21,36 +21,6 @@ def _safe_document(doc: Any):
     if isinstance(doc, date):
         return doc.toordinal()
     raise ValueError(f"Invalid document of type {type(doc)}: {doc}")
-
-
-""" def _validate_document(doc: Any, type_: Type) -> Any:
-    if doc is None:
-        return doc
-
-    org = get_origin(type_)
-
-    if isinstance(type_, type) and issubclass(type_, BaseModel):
-        assert isinstance(doc, dict)
-        return type_(**{
-            field.alias: _validate_document(doc.get(field.alias, doc.get(field.name)), field.annotation)
-            for field in type__.__fields__.values()
-            if field.alias in doc or field.name in doc
-        })
-
-    elif org is not None and isinstance(org, type) and issubclass(org, List):
-        assert isinstance(doc, list)
-        t_inner = type_.__args__[0]
-        return [_validate_document(value, t_inner) for value in doc]
-
-    elif org is not None and issubclass(org, Dict):
-        assert isinstance(doc, dict)
-        t_k_inner, t_v_inner = type_.__args__
-        return {_validate_document(k, t_k_inner): _validate_document(v, t_v_inner) for k, v in doc.items()}
-
-    elif isinstance(type_, type) and issubclass(type_, date) and isinstance(doc, (int, float)):
-        return date.fromordinal(int(doc))
-
-    return doc """
 
 TDocument = TypeVar('TDocument', bound='BaseSubDocument')
 

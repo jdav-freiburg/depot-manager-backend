@@ -18,7 +18,7 @@ router = APIRouter()
 async def get_bays(
         _user: UserInfo = Depends(Authentication()),
 ) -> List[Bay]:
-    return [Bay.model_validate(bay) async for bay in collections.bay_collection.find({})]
+    return [Bay.model_validate(bay, from_attributes=True) async for bay in collections.bay_collection.find({})]
 
 
 @router.get(
@@ -33,7 +33,7 @@ async def get_bay(
     bay_data = await collections.bay_collection.find_one({'_id': bay_id})
     if bay_data is None:
         raise HTTPException(404)
-    return Bay.model_validate(bay_data)
+    return Bay.model_validate(bay_data, from_attributes=True)
 
 
 @router.post(
@@ -51,7 +51,7 @@ async def create_bay(
         **bay.model_dump()
     )
     await collections.bay_collection.insert_one(db_bay)
-    return Bay.model_validate(db_bay)
+    return Bay.model_validate(db_bay, from_attributes=True)
 
 
 @router.put(
@@ -70,7 +70,7 @@ async def update_bay(
     )
     if not await collections.bay_collection.replace_one(db_bay):
         raise HTTPException(404, f"No bay for id {bay_id}")
-    return Bay.model_validate(db_bay)
+    return Bay.model_validate(db_bay, from_attributes=True)
 
 
 @router.delete(

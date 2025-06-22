@@ -22,7 +22,7 @@ async def startup():
     #assert get_loop_attr('async_client') is None, "Already initialized"
     #assert get_loop_attr('async_db') is None, "Already initialized"
 
-    async_client = motor.motor_asyncio.AsyncIOMotorClient(config.mongo.uri, uuidRepresentation='standard')
+    async_client = motor.motor_asyncio.AsyncIOMotorClient(config.mongo.uri, uuidRepresentation='pythonLegacy')
     set_loop_attr('async_client', async_client)
     set_loop_attr('async_db', async_client.get_database())
 

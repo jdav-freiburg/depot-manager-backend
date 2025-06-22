@@ -27,6 +27,8 @@ def truncate_datetimes(dt: datetime.datetime) -> datetime.date:
             return dt.date()
         case int(_):
             return datetime.datetime.fromordinal(dt).date()
+        case str(_):
+            return datetime.datetime.fromisoformat(dt)
         case _:
             raise ValueError(f"Invlaid date of type {type(dt)}: {dt}")
 """

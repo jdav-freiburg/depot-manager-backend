@@ -31,11 +31,11 @@ async def get_device_reservation(
         item_docs = item_reservation_doc.pop('items')
         item_reservations.append(DbItemReservation.validate_document(item_reservation_doc))
         for item_doc in item_docs:
-            items.append(Item.model_validate(DbItem.validate_document(item_doc)))
+            items.append(Item.model_validate(DbItem.validate_document(item_doc), from_attributes=True))
     bay_ids = list({item.bay_id for item in items if item.bay_id is not None})
     if len(bay_ids):
         bays = [
-            Bay.model_validate(bay)
+            Bay.model_validate(bay, from_attributes=True)
             async for bay in collections.bay_collection.find({'_id': {'$in': bay_ids}})
         ]
     else:
@@ -74,6 +74,6 @@ async def get_device_items(
         _auth: Tuple[User, DbReservation] = Depends(DeviceAuthentication()),
 ) -> List[Item]:
     return [
-        Item.model_validate(item)
+        Item.model_validate(item, from_attributes=True)
         async for item in collections.item_collection.find({'condition': {'$ne': ItemCondition.Gone.value}})
     ]

@@ -19,7 +19,7 @@ async def get_report_elements(
         _user: UserInfo = Depends(Authentication()),
 ) -> List[ReportElement]:
     return [
-        ReportElement.model_validate(report_element)
+        ReportElement.model_validate(report_element, from_attributes=True)
         async for report_element in collections.report_element_collection.find({})
     ]
 
@@ -36,7 +36,7 @@ async def get_report_element(
     report_element_data = await collections.report_element_collection.find_one({'_id': report_element_id})
     if report_element_data is None:
         raise HTTPException(404)
-    return ReportElement.model_validate(report_element_data)
+    return ReportElement.model_validate(report_element_data, from_attributes=True)
 
 
 @router.post(
@@ -54,7 +54,7 @@ async def create_report_element(
         **report_element.model_dump()
     )
     await collections.report_element_collection.insert_one(db_report_element)
-    return ReportElement.model_validate(db_report_element)
+    return ReportElement.model_validate(db_report_element, from_attributes=True)
 
 
 @router.put(
@@ -73,7 +73,7 @@ async def update_report_element(
     )
     if not await collections.report_element_collection.replace_one(db_report_element):
         raise HTTPException(404, f"No report_element for id {report_element_id}")
-    return ReportElement.model_validate(db_report_element)
+    return ReportElement.model_validate(db_report_element, from_attributes=True)
 
 
 @router.delete(

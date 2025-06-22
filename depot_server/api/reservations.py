@@ -185,8 +185,8 @@ async def get_reservation(
             reservation.team_id not in _user.get(config.oauth2.teams_property, []) or
             reservation.team_id is None
     ) and 'admin' not in _user['roles']:
-        return Reservation.model_validate({**reservation.model_dump(exclude={'code'}), 'items': items})
-    return Reservation.model_validate({**reservation.model_dump(), 'items': items})
+        return Reservation.model_validate({**reservation.model_dump(exclude={'code'}), 'items': items}, from_attributes=True)
+    return Reservation.model_validate({**reservation.model_dump(), 'items': items}, from_attributes=True)
 
 
 @router.post(
@@ -237,7 +237,8 @@ async def create_reservation(
     await _check_items(reservation.items, reservation.start, reservation.end)
     await collections.reservation_collection.insert_one(db_reservation)
     await collections.item_reservation_collection.insert_many(db_item_reservations)
-    return Reservation.model_validate({**db_reservation.model_dump(), 'items': db_item_reservations})
+    items = [reservation.model_dump() for reservation in db_item_reservations]
+    return Reservation.model_validate({**db_reservation.model_dump(), 'items': items})
 
 
 @router.put(
