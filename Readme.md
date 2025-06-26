@@ -5,12 +5,19 @@
 
 # Server for Depot Manager
 
-This is the backend for [depot-manager-frontend](https://github.com/voegtlel/depot-manager-frontend).
-See [depot-manager-frontend](https://github.com/voegtlel/depot-manager-frontend) for more documentation.
+This is the backend for [depot-manager-frontend](https://github.com/jdav-freiburg/depot-manager-frontend/tree/develop).
+See [depot-manager-frontend](https://github.com/jdav-freiburg/depot-manager-frontend/tree/develop) for more documentation.
 
-## Development server
+## Development server and developing
+1. Install [poetry](https://python-poetry.org/docs/#installation).
+2. Install all dependencies + development dependencies: `poetry install --with dev`
+3. Run `poetry run python -m uvicorn depot_server.api:app` for a dev server.
 
-Run `python -m uvicorn depot_server.api:app` for a dev server.
+> [!info]
+> Run with `NO_AUTH=1` environment variable to turn off the authentication logic
+
+If you're using VSCode, run the `API no auth` target for local development and 
+disabled authentication logic.
 
 ## Deployment server
 

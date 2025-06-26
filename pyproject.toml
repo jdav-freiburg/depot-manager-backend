@@ -1,6 +1,9 @@
 [tool.poetry]
 name = "depot-server"
+# do not bump by hand, use poetry for this!
+# https://python-poetry.org/docs/cli/#version
 version = "1.0.3"
+# -------------------------------------------
 description = ""
 authors = ["Lukas Voegtle <lukas@infornautik.de>"]
 
@@ -19,7 +22,7 @@ aiosmtplib = "^4"
 python-multipart = "^0.0"
 pillow = "^11"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 pytest = "^8"
 pytest-mypy = "^1"
 pytest-flake8 = "^1"
@@ -30,9 +33,6 @@ types-requests = "^2"
 
 [tool.poetry.scripts]
 migrate = "depot_server.db.migrate:main"
-
-[tool.poetry.group.dev.dependencies]
-bump-pydantic = "^0.8.0"
 
 [build-system]
 requires = ["poetry>=0.12"]
