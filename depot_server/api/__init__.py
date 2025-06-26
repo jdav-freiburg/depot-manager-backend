@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 import traceback
 
 from fastapi import FastAPI, APIRouter, Request, Response
@@ -18,31 +19,33 @@ from depot_server.db import startup as db_startup, shutdown as db_shutdown
 
 from depot_server.mail.return_reservation_mail import startup as mail_cron_startup, shutdown as mail_cron_shutdown
 
+v1_prefix = '/api/v1/depot'
+
 router = APIRouter()
-router.include_router(bays_router, prefix='/api/v1/depot')
-router.include_router(device_router, prefix='/api/v1/depot')
-router.include_router(item_history_router, prefix='/api/v1/depot')
-router.include_router(items_router, prefix='/api/v1/depot')
-router.include_router(report_elements_router, prefix='/api/v1/depot')
-router.include_router(report_profiles_router, prefix='/api/v1/depot')
-router.include_router(reservations_router, prefix='/api/v1/depot')
-router.include_router(pictures_router, prefix='/api/v1/depot')
-router.include_router(users_router, prefix='/api/v1/depot')
+router.include_router(bays_router, prefix=v1_prefix)
+router.include_router(device_router, prefix=v1_prefix)
+router.include_router(item_history_router, prefix=v1_prefix)
+router.include_router(items_router, prefix=v1_prefix)
+router.include_router(report_elements_router, prefix=v1_prefix)
+router.include_router(report_profiles_router, prefix=v1_prefix)
+router.include_router(reservations_router, prefix=v1_prefix)
+router.include_router(pictures_router, prefix=v1_prefix)
+router.include_router(users_router, prefix=v1_prefix)
 
-
-@router.on_event('startup')
-async def startup():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # startup stuff before the application starts
     await db_startup()
     await mail_cron_startup()
 
+    yield
 
-@router.on_event('shutdown')
-async def shutdown():
+    # tear down and cleanup before quitting the application
     await mail_cron_shutdown()
     await db_shutdown()
 
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=config.allow_origins,
@@ -53,12 +56,17 @@ app.add_middleware(
 
 app.include_router(router)
 
+@app.get("/")
+def root():
+    from depot_server import __version__
+      # This should show in PyCharm debug console
+    return {"version": __version__}
 
-@app.middleware('http')
+#@app.middleware('http')
 async def catch_exceptions_middleware(request: Request, call_next):
     try:
         resp = await call_next(request)
-        if isinstance(resp, StreamingResponse):
+        if isinstance(resp, Response):
             if resp.status_code >= 400:
                 print(f"Header: {resp.headers}")
 
@@ -74,7 +82,10 @@ async def catch_exceptions_middleware(request: Request, call_next):
         elif isinstance(resp, Response):
             if resp.status_code >= 400:
                 print(f"Header: {resp.headers}")
-                print(f"Body: {resp.body!r}")
+                # this is a streaming response now, which doesn't have a body
+                # but it's also not the streaming response from above
+                # TODO: find a way to print the body if the status code is >= 400
+                #print(f"Body: {resp.body()!r}")
         else:
             print(f"Unknown response type: {type(resp)}")
         return resp

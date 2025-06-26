@@ -1,7 +1,7 @@
 import os
 import httpx
 from authlib.common.errors import AuthlibBaseError, AuthlibHTTPError
-from authlib.integrations.starlette_client import OAuth as _OAuth, StarletteOAuth2App
+from authlib.integrations.starlette_client import OAuth 
 from authlib.oidc.core import UserInfo
 from datetime import date
 from fastapi import HTTPException, Depends
@@ -17,25 +17,6 @@ AUTH_OFF = bool(os.getenv("NO_AUTH", False))
 
 if AUTH_OFF:
     print("Running without authentication!")
-
-
-class StarletteRemoteApp(StarletteOAuth2App):
-
-    # Hotfix patch
-    async def _fetch_server_metadata(self, url):
-        async with self._get_oauth_client() as client:
-            from httpx import USE_CLIENT_DEFAULT
-            resp = await client.request('GET', url, auth=USE_CLIENT_DEFAULT, withhold_token=True)
-            return resp.json()
-
-    async def parse_access_token_raw(self, token: str) -> UserInfo:
-        return await self.parse_id_token({'id_token': token, 'access_token': True}, nonce=None, claims_options=None)
-
-
-class OAuth(_OAuth):
-    oauth2_client_cls = StarletteRemoteApp
-
-    server: StarletteRemoteApp
 
 
 oauth = OAuth()
@@ -148,4 +129,4 @@ class DeviceAuthentication:
         if profile is None:
             raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="No profile for user id")
 
-        return User.validate(profile), reservation
+        return User.model_validate(profile), reservation

@@ -91,7 +91,7 @@ async def _get_report(report_profile_id: Optional[UUID], report: List[ItemReport
     for report_entry in report:
         if report_entry.report_element_id not in report_elements_by_id:
             raise HTTPException(400, f"Invalid report element: {report_entry.report_element_id}")
-    return [DbItemReport(**report_entry.dict(exclude_none=True)) for report_entry in report]
+    return [DbItemReport(**report_entry.model_dump(exclude_none=True)) for report_entry in report]
 
 
 @router.get(
@@ -104,7 +104,7 @@ async def get_items(
         _user: UserInfo = Depends(Authentication()),
 ) -> List[Item]:
     return [
-        Item.validate(item)
+        Item.model_validate(item, from_attributes=True)
         async for item in collections.item_collection.find({} if all else {'condition': {'$ne': 'gone'}})
     ]
 
@@ -121,7 +121,7 @@ async def get_item(
     item_data = await collections.item_collection.find_one({'_id': item_id})
     if item_data is None:
         raise HTTPException(404, f"Item {item_id} not found")
-    return Item.validate(item_data)
+    return Item.model_validate(item_data, from_attributes=True)
 
 
 @router.post(
@@ -137,12 +137,12 @@ async def create_item(
     change_comment = item.change_comment
     db_item = DbItem(
         id=uuid4(),
-        **item.dict(exclude_none=True, exclude={'change_comment', 'report'}),
+        **item.model_dump(exclude_none=True, exclude={'change_comment', 'report'}),
     )
     report = await _get_report(db_item.report_profile_id, item.report)
     await collections.item_collection.insert_one(db_item)
     await _save_state(DbItem(id=db_item.id, name=""), db_item, report, change_comment, _user['sub'])
-    return Item.validate(db_item)
+    return Item.model_validate(db_item.model_dump(exclude_none=True))
 
 
 @router.put(
@@ -167,7 +167,7 @@ async def update_item(
         id=item_id,
         total_report_state=item_data.total_report_state,
         last_service=item_data.last_service,
-        **item.dict(exclude_none=True, exclude={'change_comment', 'last_service', 'total_report_state'})
+        **item.model_dump(exclude_none=True, exclude={'change_comment', 'last_service', 'total_report_state'})
     )
     await _save_state(item_data, db_item, None, change_comment, _user['sub'])
     if not await collections.item_collection.replace_one(db_item):
@@ -179,7 +179,7 @@ async def update_item(
         }):
             reservation = await collections.reservation_collection.find_one({'_id': item_reservation.reservation_id})
             background_tasks.add_task(send_reservation_item_removed, _user, db_item, reservation)
-    return Item.validate(db_item)
+    return Item.model_validate(db_item, from_attributes=True)
 
 
 @router.put(
@@ -201,7 +201,7 @@ async def report_item(
             raise HTTPException(404, f"Bay {item.bay_id} not found")
     db_item = DbItem(
         id=item_id,
-        **item.dict(exclude_none=True, exclude={'change_comment', 'report'})
+        **item.model_dump(exclude_none=True, exclude={'change_comment', 'report'})
     )
 
     report = await _get_report(db_item.report_profile_id, item.report)
@@ -209,7 +209,7 @@ async def report_item(
     await _save_state(item_data, db_item, report, change_comment, _user['sub'])
     if not await collections.item_collection.replace_one(db_item):
         raise HTTPException(404, f"Item {item_id} not found")
-    return Item.validate(db_item)
+    return Item.model_validate(db_item, from_attributes=True)
 
 
 @router.delete(

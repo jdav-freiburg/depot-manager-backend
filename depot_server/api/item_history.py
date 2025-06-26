@@ -39,7 +39,7 @@ async def get_item_history(
             'timestamp': {'$lt': start},
         }
         before_start = [
-            ItemState.validate(item_state)
+            ItemState.model_validate(item_state, from_attributes=True)
             async for item_state in collections.item_state_collection.find(
                 before_query, limit=limit_before_start, sort=[('timestamp', DESCENDING)]
             )
@@ -55,7 +55,7 @@ async def get_item_history(
             'timestamp': {'$gt': end}
         }
         after_end = [
-            ItemState.validate(item_state)
+            ItemState.model_validate(item_state, from_attributes=True)
             async for item_state in collections.item_state_collection.find(
                 after_query, limit=limit_after_end, sort=[('timestamp', ASCENDING)]
             )
@@ -72,7 +72,7 @@ async def get_item_history(
             query['timestamp'] = {'$lt': end}
 
     return before_start + [
-        ItemState.validate(item_state)
+        ItemState.model_validate(item_state, from_attributes=True)
         async for item_state in collections.item_state_collection.find(
             query,
             skip=offset,
@@ -103,7 +103,7 @@ async def get_items_histories(
         else:
             query['timestamp'] = {'$lt': end}
     return [
-        ItemState.validate(item_state)
+        ItemState.model_validate(item_state, from_attributes=True)
         async for item_state in collections.item_state_collection.find(
             query,
             skip=offset,

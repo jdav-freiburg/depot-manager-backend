@@ -83,4 +83,4 @@ def load_config(
             _assign_key(
                 config, lower_key, yaml.load(io.StringIO(env_val), Loader=yaml.SafeLoader), env_prefix[:-1]
             )
-    return model_cls.validate(config)
+    return model_cls.model_validate(config)

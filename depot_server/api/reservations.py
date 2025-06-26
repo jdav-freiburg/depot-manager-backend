@@ -76,7 +76,7 @@ async def get_reservations(
             'end': {'$lt': start.toordinal()},
         }
         before_start = [
-            Reservation.validate(reservation.dict(exclude={'code'}))
+            Reservation.model_validate(reservation.model_dump(exclude={'code'}))
             async for reservation in collections.reservation_collection.find(
                 before_query, limit=limit_before_start, sort=[('start', DESCENDING)]
             )
@@ -91,7 +91,7 @@ async def get_reservations(
             'start': {'$gt': end.toordinal()}
         }
         after_end = [
-            Reservation.validate(reservation.dict(exclude={'code'}))
+            Reservation.model_validate(reservation.model_dump(exclude={'code'}))
             async for reservation in collections.reservation_collection.find(
                 after_query, limit=limit_after_end, sort=[('start', ASCENDING)]
             )
@@ -107,7 +107,7 @@ async def get_reservations(
 
     if (limit is None or limit > 0) and (start is None or end is None or start < end):
         mid = [
-            Reservation.validate(reservation.dict(exclude={'code'}))
+            Reservation.model_validate(reservation.model_dump(exclude={'code'}))
             async for reservation in collections.reservation_collection.find(
                 query, skip=offset, limit=limit, sort=[('start', DESCENDING)]
             )
@@ -185,8 +185,8 @@ async def get_reservation(
             reservation.team_id not in _user.get(config.oauth2.teams_property, []) or
             reservation.team_id is None
     ) and 'admin' not in _user['roles']:
-        return Reservation.validate({**reservation.dict(exclude={'code'}), 'items': items})
-    return Reservation.validate({**reservation.dict(), 'items': items})
+        return Reservation.model_validate({**reservation.model_dump(exclude={'code'}), 'items': items}, from_attributes=True)
+    return Reservation.model_validate({**reservation.model_dump(), 'items': items}, from_attributes=True)
 
 
 @router.post(
@@ -237,7 +237,8 @@ async def create_reservation(
     await _check_items(reservation.items, reservation.start, reservation.end)
     await collections.reservation_collection.insert_one(db_reservation)
     await collections.item_reservation_collection.insert_many(db_item_reservations)
-    return Reservation.validate({**db_reservation.dict(), 'items': db_item_reservations})
+    items = [reservation.model_dump() for reservation in db_item_reservations]
+    return Reservation.model_validate({**db_reservation.model_dump(), 'items': items})
 
 
 @router.put(
@@ -338,7 +339,7 @@ async def update_reservation(
         await collections.item_reservation_collection.delete_many(
             {'_id': {'$in': [ri.id for ri in removed_reservation_items]}}
         )
-    return Reservation.validate({**db_reservation.dict(), 'items': list(reserved_items.values())})
+    return Reservation.model_validate({**db_reservation.model_dump(), 'items': list(reserved_items.values())})
 
 
 @router.delete(

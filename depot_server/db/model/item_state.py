@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import datetime
 from pydantic import Field
 from pymongo import IndexModel, ASCENDING, DESCENDING
 from typing import List, Optional
@@ -6,21 +6,23 @@ from uuid import UUID
 
 from depot_server.db.model.base import BaseDocument, BaseSubDocument
 from depot_server.model import ItemCondition, ReportState, TotalReportState
+from depot_server.helper.util import date
+
 
 
 class DbStrChange(BaseSubDocument):
-    previous: Optional[str]
-    next: Optional[str]
+    previous: Optional[str] = None
+    next: Optional[str] = None
 
 
 class DbIdChange(BaseSubDocument):
-    previous: Optional[UUID]
-    next: Optional[UUID]
+    previous: Optional[UUID] = None
+    next: Optional[UUID] = None
 
 
 class DbDateChange(BaseSubDocument):
-    previous: Optional[date]
-    next: Optional[date]
+    previous: Optional[date] = None
+    next: Optional[date] = None
 
 
 class DbTagsChange(BaseSubDocument):
@@ -29,8 +31,8 @@ class DbTagsChange(BaseSubDocument):
 
 
 class DbTotalReportStateChange(BaseSubDocument):
-    previous: Optional[TotalReportState]
-    next: Optional[TotalReportState]
+    previous: Optional[TotalReportState] = None
+    next: Optional[TotalReportState] = None
 
 
 class DbItemConditionChange(BaseSubDocument):

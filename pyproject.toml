@@ -1,32 +1,35 @@
 [tool.poetry]
 name = "depot-server"
-version = "0.1.0"
+# do not bump by hand, use poetry for this!
+# https://python-poetry.org/docs/cli/#version
+version = "1.0.3"
+# -------------------------------------------
 description = ""
 authors = ["Lukas Voegtle <lukas@infornautik.de>"]
 
 [tool.poetry.dependencies]
-python = ">=3.8"
-pydantic = ">=1.5"
-fastapi = ">=0"
-motor = ">=2"
-oyaml = ">=1"
-authlib = ">=0"
-pytz = ">=2021"
-uvicorn = ">=0"
-httpx = ">=0"
-mako = ">=1"
-aiosmtplib = ">=1"
-python-multipart = ">=0"
-pillow = ">=8"
+python = "^3.12"
+pydantic = "^2.11"
+fastapi = "^0.115"
+motor = "^3"
+oyaml = "^1"
+authlib = "^1"
+pytz = "^2025.2"
+uvicorn = "^0.34"
+httpx = "^0.28"
+mako = "^1"
+aiosmtplib = "^4"
+python-multipart = "^0.0"
+pillow = "^11"
 
-[tool.poetry.dev-dependencies]
-pytest = ">=6"
-pytest-mypy = ">=0"
-pytest-flake8 = ">=1"
-requests = ">=2"
-mongomock = ">=3"
-types-pytz = ">=2021"
-types-requests = ">=2"
+[tool.poetry.group.dev.dependencies]
+pytest = "^8"
+pytest-mypy = "^1"
+pytest-flake8 = "^1"
+requests = "^2"
+mongomock = "^4"
+types-pytz = "^2025"
+types-requests = "^2"
 
 [tool.poetry.scripts]
 migrate = "depot_server.db.migrate:main"
