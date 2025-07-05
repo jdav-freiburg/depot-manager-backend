@@ -10,12 +10,11 @@ RUN curl -sSL https://install.python-poetry.org | POETRY_HOME=/opt/poetry python
 
 # Copy using poetry.lock* in case it doesn't exist yet
 COPY ./pyproject.toml ./poetry.lock /app/
+COPY ./depot_server /app/depot_server
 
 WORKDIR /app
 
-RUN poetry install --no-root
-
-COPY ./depot_server /app/depot_server
+RUN poetry install
 
 ENV MODULE_NAME=depot_server.api
 ENV VARIABLE_NAME=app
