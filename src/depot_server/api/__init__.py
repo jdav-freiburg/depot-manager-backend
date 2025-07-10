@@ -58,9 +58,9 @@ app.include_router(router)
 
 @app.get("/")
 def root():
-    from depot_server import __version__
+    from depot_server.version import version, commit_hash
       # This should show in PyCharm debug console
-    return {"version": __version__}
+    return {"version": version, "commit_hash": commit_hash}
 
 #@app.middleware('http')
 async def catch_exceptions_middleware(request: Request, call_next):

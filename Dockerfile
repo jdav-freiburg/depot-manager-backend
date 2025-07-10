@@ -1,22 +1,21 @@
-FROM python:3.13-slim
+FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim AS builder
 
-RUN apt update && apt install -y curl
-
-# Install Poetry
-RUN curl -sSL https://install.python-poetry.org | POETRY_HOME=/opt/poetry python - && \
-    cd /usr/local/bin && \
-    ln -s /opt/poetry/bin/poetry && \
-    poetry config virtualenvs.create false
-
-# Copy using poetry.lock* in case it doesn't exist yet
-COPY ./pyproject.toml ./poetry.lock /app/
-COPY ./depot_server /app/depot_server
-
+RUN apt update && apt install -y git
+COPY ./ /app/
 WORKDIR /app
 
-RUN poetry install
+RUN uv sync --locked --no-install-project --no-editable
+RUN uv build
 
-ENV MODULE_NAME=depot_server.api
-ENV VARIABLE_NAME=app
 
-CMD ["uvicorn", "depot_server.api:app", "--host", "0.0.0.0", "--port", "80", "--log-level", "debug"]
+FROM python:3.13-alpine
+
+RUN addgroup -S app && adduser -S app -G app && mkdir /app && chown app:app /app
+
+COPY --from=builder /app/dist/depot_server*.tar.gz /tmp
+RUN pip install /tmp/depot_server*.tar.gz && rm /tmp/depot_server*.tar.gz
+
+USER app
+WORKDIR app
+
+CMD ["uvicorn", "depot_server.api:app", "--host", "0.0.0.0", "--port", "80", "--log-level", "info"]
