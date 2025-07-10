@@ -14,6 +14,7 @@ from .report_profiles import router as report_profiles_router
 from .reservations import router as reservations_router
 from .pictures import router as pictures_router
 from .users import router as users_router
+from .version import router as version_router
 from depot_server.config import config
 from depot_server.db import startup as db_startup, shutdown as db_shutdown
 
@@ -31,6 +32,7 @@ router.include_router(report_profiles_router, prefix=v1_prefix)
 router.include_router(reservations_router, prefix=v1_prefix)
 router.include_router(pictures_router, prefix=v1_prefix)
 router.include_router(users_router, prefix=v1_prefix)
+router.include_router(version_router, prefix=v1_prefix)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -56,11 +58,7 @@ app.add_middleware(
 
 app.include_router(router)
 
-@app.get("/")
-def root():
-    from depot_server.version import version, commit_hash
-      # This should show in PyCharm debug console
-    return {"version": version, "commit_hash": commit_hash}
+
 
 #@app.middleware('http')
 async def catch_exceptions_middleware(request: Request, call_next):
