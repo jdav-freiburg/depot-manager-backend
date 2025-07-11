@@ -3,7 +3,7 @@ from authlib.oidc.core import UserInfo
 from datetime import date
 from fastapi import APIRouter, Depends, Body, Query, HTTPException, BackgroundTasks, Response
 from pymongo import DESCENDING, ASCENDING
-from typing import Annotated, List, Optional, Set, Dict
+from typing import List, Optional, Set, Dict
 from uuid import UUID, uuid4
 
 from depot_server.config import config
@@ -129,42 +129,6 @@ async def get_reservations(
             reservations_by_id[item_reservation_entry.reservation_id].items.append(ReservationItem(
                 item_id=item_reservation_entry.item_id, state=item_reservation_entry.state
             ))
-
-    return reservations
-
-
-# Returns reservations associated with a given item (including inactive).
-# 
-# The reservations are sorted by start date in descending order.
-# 
-# Currently, this API endpoint enforces pagination.
-@router.get(
-        '/reservation_history/{item_id}',
-        tags=['Reservation'],
-        response_model=List[Reservation]
-)
-async def get_reservation_history(
-    item_id: UUID,
-    page: Annotated[int, Query(gt=0)] = 1,
-    pageSize: Annotated[int, Query(gt=0)] = 10,
-) -> List[Reservation]:
-    reservation_ids = [
-        item_reservation.reservation_id
-        async for item_reservation in collections.item_reservation_collection.find(
-            filter = { 'item_id': {'$eq': item_id} }, 
-            skip = (page - 1) * pageSize, 
-            limit = pageSize,
-            sort = [('start', DESCENDING)]
-        )
-    ]
-
-    reservations = [
-        Reservation.model_validate(reservation.model_dump(exclude={'code'}))
-        async for reservation in collections.reservation_collection.find(
-            filter = { '_id': {'$in': reservation_ids } },
-            sort = [('start', DESCENDING)]
-        )
-    ]
 
     return reservations
 
