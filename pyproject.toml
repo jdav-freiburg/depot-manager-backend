@@ -1,6 +1,6 @@
 [project]
 name = "depot-server"
-version = "1.1.0"
+version = "1.2.0"
 description = "Backend service for the jdav equipment depot service"
 authors = [
     { name = "Lukas Voegtle", email = "lukas@infornautik.de" },
