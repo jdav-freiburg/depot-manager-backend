@@ -1,7 +1,8 @@
 from authlib.oidc.core import UserInfo
 from fastapi import APIRouter, Depends, Body, Query, HTTPException, BackgroundTasks, Response
-from typing import List, Optional, Dict
+from typing import Annotated, List, Optional, Dict
 from uuid import UUID, uuid4
+from pymongo import DESCENDING
 
 from depot_server.db import collections, DbItem, DbItemState, DbStrChange, \
     DbItemStateChanges, DbItemConditionChange, DbDateChange, DbIdChange, DbTagsChange, DbTotalReportStateChange, \
@@ -9,6 +10,7 @@ from depot_server.db import collections, DbItem, DbItemState, DbStrChange, \
 from depot_server.helper.auth import Authentication
 from depot_server.helper.util import utc_now
 from depot_server.model import Item, ItemInWrite, ReportItemInWrite, ItemCondition, ReservationState
+from depot_server.model.reservation import Reservation
 from ..db.model import DbReportElement
 from ..mail.reservation_item_removed import send_reservation_item_removed
 from ..model.item_state import ItemReport
@@ -122,6 +124,42 @@ async def get_item(
     if item_data is None:
         raise HTTPException(404, f"Item {item_id} not found")
     return Item.model_validate(item_data, from_attributes=True)
+
+
+# Returns reservations associated with a given item (including inactive).
+# 
+# The reservations are sorted by start date in descending order.
+# 
+# Currently, this API endpoint enforces pagination.
+@router.get(
+        '/items/{item_id}/reservations',
+        tags=['Reservation'],
+        response_model=List[Reservation]
+)
+async def get_reservation_history(
+    item_id: UUID,
+    page: Annotated[int, Query(gt=0)] = 1,
+    pageSize: Annotated[int, Query(gt=0)] = 10,
+) -> List[Reservation]:
+    reservation_ids = [
+        item_reservation.reservation_id
+        async for item_reservation in collections.item_reservation_collection.find(
+            filter = { 'item_id': {'$eq': item_id} }, 
+            skip = (page - 1) * pageSize, 
+            limit = pageSize,
+            sort = [('start', DESCENDING)]
+        )
+    ]
+
+    reservations = [
+        Reservation.model_validate(reservation.model_dump(exclude={'code'}))
+        async for reservation in collections.reservation_collection.find(
+            filter = { '_id': {'$in': reservation_ids } },
+            sort = [('start', DESCENDING)]
+        )
+    ]
+
+    return reservations
 
 
 @router.post(
