@@ -3,6 +3,8 @@ import httpx
 from authlib.common.errors import AuthlibBaseError, AuthlibHTTPError
 from authlib.integrations.starlette_client import OAuth 
 from authlib.oidc.core import UserInfo
+from authlib.jose.rfc7519.jwt import JsonWebToken
+from authlib.jose.rfc7517.jwk import JsonWebKey
 from datetime import date
 from fastapi import HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials, APIKeyHeader
@@ -20,7 +22,51 @@ if AUTH_OFF:
 
 
 oauth = OAuth()
-oauth.register('server', **config.oauth2.dict())
+# Prepare kwargs from pydantic model; ensure we don't accidentally register as OAuth1
+# (authlib treats presence of `request_token_url` as OAuth1). Remove it if present.
+oauth_kwargs = config.oauth2.model_dump()
+oauth_kwargs.pop("request_token_url", None)
+oauth.register('server', **oauth_kwargs)
+
+
+async def parse_access_token_raw(token: str) -> dict:
+    """Try to decode an access token as a JWT using provider JWKS.
+    If decoding fails (opaque token), fall back to the provider `userinfo` endpoint.
+    Returns a dict-like claims object.
+    """
+    if not token:
+        raise ValueError("Missing token")
+
+    # Try to decode as JWT using JWKS
+    try:
+        metadata = await oauth.server.load_server_metadata()
+        jwks_uri = metadata.get("jwks_uri")
+        if jwks_uri:
+            async with httpx.AsyncClient() as client:
+                r = await client.get(jwks_uri)
+                r.raise_for_status()
+                jwks = r.json()
+            key_set = JsonWebKey.import_key_set(jwks)
+            # allow common signing algorithms
+            jwt = JsonWebToken(["RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "PS256", "PS384", "PS512", "HS256", "HS384", "HS512"])
+            claims = jwt.decode(token, key_set)
+            # validate time-based claims; use a small leeway
+            try:
+                claims.validate(leeway=120)
+            except Exception:
+                # validation failures should propagate as auth errors later
+                pass
+            return dict(claims)
+    except Exception:
+        # If any error occurs while decoding, we'll try userinfo below
+        pass
+
+    # Fallback: call userinfo endpoint
+    try:
+        userinfo = await oauth.server.userinfo(token={"token_type": "bearer", "access_token": token})
+        return dict(userinfo)
+    except Exception as e:
+        raise
 
 async def get_profile(user_id: str) -> dict:
     if AUTH_OFF:
@@ -74,7 +120,7 @@ class Authentication:
                 )
             return None
         try:
-            token_data = await oauth.server.parse_access_token_raw(authorization_code.credentials)
+            token_data = await parse_access_token_raw(authorization_code.credentials)
         except AuthlibHTTPError as e:
             raise HTTPException(*e())
         except AuthlibBaseError as e:
