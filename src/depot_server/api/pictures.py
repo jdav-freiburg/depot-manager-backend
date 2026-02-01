@@ -151,3 +151,26 @@ async def create_picture(
         picture_id + '/preview', file.filename, thumb_f, metadata={'contentType': 'image/jpeg', 'hash': hashval}
     )
     return picture_id
+
+
+@router.delete(
+    '/pictures/{pictureId}',
+    tags=['Picture'],
+    status_code=204,
+)
+async def delete_picture(
+        pictureId: str,
+        _user: UserInfo = Depends(Authentication(require_manager=True)),
+):
+    """Delete picture and its thumbnail. Returns 204 on success, 404 if not found."""
+    picture_id = pictureId
+    try:
+        await collections.item_picture_collection().delete(picture_id)
+    except gridfs.errors.NoFile:
+        raise HTTPException(status_code=404)
+    try:
+        await collections.item_picture_thumbnail_collection().delete(picture_id + '/preview')
+    except gridfs.errors.NoFile:
+        # thumbnail missing is OK
+        pass
+    return Response(status_code=204)
