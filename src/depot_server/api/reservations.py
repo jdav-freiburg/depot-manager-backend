@@ -513,3 +513,41 @@ async def reservation_action(
         raise HTTPException(403, f"Cannot modify {reservation_id}")
 
     await reservation_action_impl(reservation, background_tasks, action, user)
+
+
+
+@router.get(
+    '/reservations-by-user',
+    tags=['Reservation'],
+    response_model=List[Reservation],
+)
+@router.get(
+    '/reservations-by-user/{user_id}',
+    tags=['Reservation'],
+    response_model=List[Reservation],
+)
+async def get_reservations_by_user(
+        user_id: Optional[str] = None,
+        include_items: Optional[bool] = Query(False),
+        _user: UserInfo = Depends(Authentication()),
+) -> List[Reservation]:
+    # If no user id provided, use the authenticated user
+    if user_id is None:
+        user_id = _user['sub']
+
+    reservations = [
+        Reservation.model_validate(res.model_dump(exclude={'code'}))
+        async for res in collections.reservation_collection.find({'user_id': user_id})
+    ]
+    if include_items and len(reservations) > 0:
+        for reservation in reservations:
+            reservation.items = []
+        reservations_by_id = {reservation.id: reservation for reservation in reservations}
+        async for item_reservation_entry in collections.item_reservation_collection.find({
+            'reservation_id': {'$in': [reservation.id for reservation in reservations]}
+        }):
+            reservations_by_id[item_reservation_entry.reservation_id].items.append(ReservationItem(
+                item_id=item_reservation_entry.item_id, state=item_reservation_entry.state
+            ))
+
+    return reservations
