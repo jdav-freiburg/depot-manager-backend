@@ -5,7 +5,8 @@ return_reservation_reminder_cron_time: 10:00:00
 reservation_code_length: 6
 reservation_code_chars: "123456789"
 reservation_automatic_return: True
-
+debug: true
+log_level: "INFO"
 device_api_key: 'abcdefg'
 
 mongo:
@@ -35,3 +36,7 @@ mail:
   certfile: null
   user: ""
   password: ""
+
+db:
+  engine: "sqlite"
+  database: "devdepot.sqlite"

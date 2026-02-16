@@ -24,6 +24,8 @@ You can also use [just](https://just.systems/man/en/) to run some targets.
 The most simple one is `just run` which starts the backend unauthenticated.
 To see all just targets run `just -l`
 
+## Altering the data model
+
 ## Versioning
 This project uses semantic versioning as defined [here](https://semver.org/).
 To bump the version, either edit the version in `pyproject.toml` or use 
@@ -31,4 +33,4 @@ To bump the version, either edit the version in `pyproject.toml` or use
 
 ## Deployment server
 
-Use a ASGI server and run on `depot_server.api:app`.
+Use a ASGI server and run the `depot_server.api:app` module.

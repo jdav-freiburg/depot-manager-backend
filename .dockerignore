@@ -2,3 +2,4 @@
 build
 dist
 .pytest_cache
+devdepot.sqlite
