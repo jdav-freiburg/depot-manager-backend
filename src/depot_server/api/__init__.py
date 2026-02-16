@@ -1,27 +1,28 @@
-from contextlib import asynccontextmanager
+import logging
 import traceback
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, APIRouter, Request, Response
 from starlette.middleware.cors import CORSMiddleware
-from starlette.responses import StreamingResponse
+from tortoise.contrib.fastapi import RegisterTortoise
 
+from depot_server.config import config
+from depot_server.mail.return_reservation_mail import startup as mail_cron_startup, shutdown as mail_cron_shutdown
+from depot_server.version import version
 from .bays import router as bays_router
 from .device import router as device_router
 from .item_history import router as item_history_router
 from .items import router as items_router
+from .pictures import router as pictures_router
 from .report_elements import router as report_elements_router
 from .report_profiles import router as report_profiles_router
 from .reservations import router as reservations_router
-from .pictures import router as pictures_router
 from .users import router as users_router
 from .version import router as version_router
-from depot_server.config import config
-from depot_server.db import startup as db_startup, shutdown as db_shutdown
-
-from depot_server.mail.return_reservation_mail import startup as mail_cron_startup, shutdown as mail_cron_shutdown
 
 v1_prefix = '/api/v1/depot'
-
+logger = logging.getLogger("Depot")
+logging.basicConfig(format='%(asctime)s [%(levelname)s] [%(name)s] %(message)s', level=config.log_level)
 router = APIRouter()
 router.include_router(bays_router, prefix=v1_prefix)
 router.include_router(device_router, prefix=v1_prefix)
@@ -34,17 +35,37 @@ router.include_router(pictures_router, prefix=v1_prefix)
 router.include_router(users_router, prefix=v1_prefix)
 router.include_router(version_router, prefix=v1_prefix)
 
+from depot_server.db2.models import Tag
+
+
+@router.get('/')
+async def test_route():
+    tag = Tag(name="Hallo")
+    await tag.save()
+    all_tags = await Tag.all()
+    return {"message": "Hello, World!", "tags": [t.name for t in all_tags]}
+
+
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    logger.info(f"Starting depot server backend, version {version}")
     # startup stuff before the application starts
-    await db_startup()
+    reg_tortoise = await  RegisterTortoise(app, config=config.db.to_tortoise_config(), add_exception_handlers=True)
+    await reg_tortoise.init_orm()
+    if config.debug:
+        logger.warning("Server is running in debug mode, don't use this in production!")
+
+    # await db_startup()
     await mail_cron_startup()
 
     yield
 
     # tear down and cleanup before quitting the application
     await mail_cron_shutdown()
-    await db_shutdown()
+    await reg_tortoise.close_orm()
+    #await db_shutdown()
 
 
 app = FastAPI(lifespan=lifespan)
