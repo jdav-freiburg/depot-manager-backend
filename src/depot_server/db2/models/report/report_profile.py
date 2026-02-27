@@ -3,7 +3,6 @@ from tortoise.models import Model
 
 from .report_element import ReportElement
 
-
 class ReportProfile(Model):
     id = fields.UUIDField(pk=True)
     name = fields.data.TextField(unique=True)

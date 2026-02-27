@@ -2,7 +2,6 @@ from enum import Enum
 
 from pydantic import Field
 from typing import List
-from uuid import UUID
 
 from .base import BaseModel
 
