@@ -1,8 +1,8 @@
 from tortoise import fields
 from tortoise.models import Model
 
-class Changelog(Model):
 
+class Changelog(Model):
     class Meta:
         table: str = "depot_changelog"
 

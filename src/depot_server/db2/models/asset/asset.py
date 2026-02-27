@@ -6,7 +6,6 @@ from .mime_type import AllowedMimeType
 
 
 class Asset(Model):
-
     class Meta:
         table: str = "depot_asset"
 
@@ -28,8 +27,6 @@ class Asset(Model):
     # todo: add validator
     uri = fields.TextField(null=False, description="The URI of the asset. Prepend assets on the filesystem")
     description = fields.TextField(null=True, description="The description of the asset")
-
-
 
     # todo: add validator
     hash_ = fields.TextField(null=False, description="The sha256 of the asset")

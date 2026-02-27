@@ -3,13 +3,12 @@ from tortoise.models import Model
 
 
 class ItemGroup(Model):
-
     class Meta:
         table: str = "deopt_item_group"
 
     id = fields.UUIDField(pk=True)
 
-    parent = fields.ForeignKeyField("item.Itemgroup",null=True, on_delete=fields.RESTRICT,
+    parent = fields.ForeignKeyField("item.Itemgroup", null=True, on_delete=fields.RESTRICT,
                                     related_name="child",
                                     description="Used to build up a tree like structure of groups")
 

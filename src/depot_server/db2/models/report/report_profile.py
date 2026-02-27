@@ -3,8 +3,8 @@ from tortoise.models import Model
 
 from .report_element import ReportElement
 
-class ReportProfile(Model):
 
+class ReportProfile(Model):
     class Meta:
         table: str = "depot_report_profile"
 

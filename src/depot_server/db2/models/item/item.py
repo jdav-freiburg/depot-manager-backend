@@ -12,14 +12,15 @@ from depot_server.db2.models.report.report_profile import ReportProfile
 from .reservation import Reservation
 from .tag import Tag
 
+
 class PsaCategory(StrEnum):
     NONE = 'none'
     CAT_1 = "cat_1"
     CAT_2 = "cat_2"
     CAT_3 = "cat_3"
 
-class Item(Model):
 
+class Item(Model):
     class Meta:
         table: str = "depot_item"
 
@@ -60,6 +61,3 @@ class Item(Model):
         Fetches the date of the last inspection of this item
         """
         raise NotImplementedError
-
-
-

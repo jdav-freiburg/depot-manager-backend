@@ -3,8 +3,8 @@ from tortoise.models import Model
 
 from ..asset.asset import Asset
 
-class StorageLocation(Model):
 
+class StorageLocation(Model):
     class Meta:
         table: str = "depot_storage_location"
 
@@ -15,4 +15,3 @@ class StorageLocation(Model):
     name = fields.CharField(max_length=255)
     description = fields.TextField(null=True)
     is_ausgabepflichtig = fields.BooleanField(default=False, null=False)
-

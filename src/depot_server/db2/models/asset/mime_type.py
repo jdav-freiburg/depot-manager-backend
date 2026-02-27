@@ -3,7 +3,6 @@ from tortoise.models import Model
 
 
 class AllowedMimeType(Model):
-
     class Meta:
         table: str = "depot_allowed_mimetype"
 

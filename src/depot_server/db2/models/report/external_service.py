@@ -3,7 +3,6 @@ from tortoise.models import Model
 
 
 class ExternalService(Model):
-
     class Meta:
         table: str = "depot_external_service"
 

@@ -7,7 +7,6 @@ from .report_profile import ReportProfile
 
 
 class InspectionReport(Model):
-
     class Meta:
         table: str = "depot_inspection_report"
 

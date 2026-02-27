@@ -5,17 +5,19 @@ from tortoise.models import Model
 
 from .item import Item
 
+
 class ReservationType(StrEnum):
     TEAM = 'team'
     PRIVATE = 'private'
+
 
 class ReservationState(StrEnum):
     RESERVED = 'reserved'
     INVENTUR = 'inventur'
     MAINTENANCE = 'maintenance'
 
-class Reservation(Model):
 
+class Reservation(Model):
     class Meta:
         table: str = "depot_reservation"
 
@@ -31,8 +33,8 @@ class Reservation(Model):
     reservation_type = fields.CharEnumField(ReservationType, null=False)
     reservation_state = fields.CharEnumField(ReservationState, null=False, default=ReservationState.RESERVED)
 
-class ReservationLink(Model):
 
+class ReservationLink(Model):
     class Meta:
         table: str = "depot_link_reservation__item"
 

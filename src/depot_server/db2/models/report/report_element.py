@@ -5,9 +5,8 @@ from depot_server.db2.common import UserIdField
 
 
 class ReportElement(Model):
-
     class Meta:
-         table: str = "depot_report_element"
+        table: str = "depot_report_element"
 
     id = fields.UUIDField(pk=True)
     title = fields.CharField(max_length=100, unique=True)
