@@ -4,7 +4,7 @@ This file contains definitions shared across multiple models
 
 from enum import StrEnum
 
-from tortoise.fields import UUIDField
+from tortoise import fields
 
 
 class Condition(StrEnum):
@@ -14,4 +14,4 @@ class Condition(StrEnum):
     GONE = "gone"
 
 
-type UserIdField = UUIDField
+type UserIdField = fields.UUIDField

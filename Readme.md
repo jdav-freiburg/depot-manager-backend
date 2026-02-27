@@ -34,3 +34,11 @@ To bump the version, either edit the version in `pyproject.toml` or use
 ## Deployment server
 
 Use a ASGI server and run the `depot_server.api:app` module.
+
+### Todo
+- [ ] add meta to each model, to keep table name disconnected from model name,
+        see [here](https://tortoise.github.io/models.html#the-meta-class)
+- [ ] Add validators
+- [ ] same formatting everywhere
+- [ ] history model
+- [ ] define useful indices, see above link

@@ -40,3 +40,7 @@ mail:
 db:
   engine: "sqlite"
   database: "devdepot.sqlite"
+
+
+cosmetics:
+  tag_default_color: "#000000"

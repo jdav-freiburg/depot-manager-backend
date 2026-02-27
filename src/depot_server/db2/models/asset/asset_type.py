@@ -12,6 +12,10 @@ class AssetType(Model):
     the user during the use of the application.
     This will get seeded initially
     """
+
+    class Meta:
+        table: str = "depot_asset_type"
+
     id = fields.UUIDField(pk=True)
     name = fields.CharField(max_length=255, unique=True)
     description = fields.TextField()

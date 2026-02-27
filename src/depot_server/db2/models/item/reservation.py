@@ -15,11 +15,15 @@ class ReservationState(StrEnum):
     MAINTENANCE = 'maintenance'
 
 class Reservation(Model):
+
+    class Meta:
+        table: str = "depot_reservation"
+
     id = fields.UUIDField(pk=True)
+
     name = fields.data.TextField()
     start = fields.DatetimeField(null=False)
     end = fields.DatetimeField(null=False)
-
     user = fields.UUIDField(null=False)
     team = fields.UUIDField(null=True)
     contact = fields.data.TextField()
@@ -28,10 +32,14 @@ class Reservation(Model):
     reservation_state = fields.CharEnumField(ReservationState, null=False, default=ReservationState.RESERVED)
 
 class ReservationLink(Model):
+
+    class Meta:
+        table: str = "depot_link_reservation__item"
+
     id = fields.UUIDField(pk=True)
 
-    reservation = fields.ForeignKeyField(Reservation, null=False, related_name="reservation_id")
-    item = fields.ForeignKeyField(Item, null=False, related_name="item_id")
+    reservation = fields.ForeignKeyField(Reservation, null=False, related_name="reservation")
+    item = fields.ForeignKeyField(Item, null=False, related_name="items")
 
     borrowed = fields.DatetimeField(null=True)
     borrowed_message = fields.data.TextField(null=True)

@@ -45,7 +45,7 @@ build-backend = "hatchling.build"
 tortoise_orm = "depot_server.config.TORTOISE_ORM"
 
 [tool.tortoise.apps.models]
-models = ["depot_server.db.models"]
+models = ["depot_server.models"]
 default_connection = "default"
 migrations = "depot_server.db2.migrations"
 

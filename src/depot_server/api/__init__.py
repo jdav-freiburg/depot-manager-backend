@@ -35,14 +35,14 @@ router.include_router(pictures_router, prefix=v1_prefix)
 router.include_router(users_router, prefix=v1_prefix)
 router.include_router(version_router, prefix=v1_prefix)
 
-from depot_server.db2.models import Tag
+from depot_server.db2.models import ItemTag
 
 
 @router.get('/')
 async def test_route():
-    tag = Tag(name="Hallo")
+    tag = ItemTag(name="Hallo")
     await tag.save()
-    all_tags = await Tag.all()
+    all_tags = await ItemTag.all()
     return {"message": "Hello, World!", "tags": [t.name for t in all_tags]}
 
 

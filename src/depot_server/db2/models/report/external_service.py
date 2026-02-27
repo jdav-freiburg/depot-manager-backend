@@ -3,7 +3,12 @@ from tortoise.models import Model
 
 
 class ExternalService(Model):
+
+    class Meta:
+        table: str = "depot_external_service"
+
     id = fields.UUIDField(pk=True)
+
     created_at = fields.DatetimeField(auto_now_add=True)
     created_by = fields.UUIDField()
     updated_at = fields.DatetimeField()
