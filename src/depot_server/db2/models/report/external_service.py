@@ -6,7 +6,7 @@ class ExternalService(Model):
     class Meta:
         table: str = "depot_external_service"
 
-    id = fields.UUIDField(pk=True)
+    id = fields.UUIDField(primary_key=True)
 
     created_at = fields.DatetimeField(auto_now_add=True)
     created_by = fields.UUIDField()

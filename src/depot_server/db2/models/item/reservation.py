@@ -21,7 +21,7 @@ class Reservation(Model):
     class Meta:
         table: str = "depot_reservation"
 
-    id = fields.UUIDField(pk=True)
+    id = fields.UUIDField(primary_key=True)
 
     name = fields.data.TextField()
     start = fields.DatetimeField(null=False)
@@ -38,7 +38,7 @@ class ReservationLink(Model):
     class Meta:
         table: str = "depot_link_reservation__item"
 
-    id = fields.UUIDField(pk=True)
+    id = fields.UUIDField(primary_key=True)
 
     reservation = fields.ForeignKeyField(Reservation, null=False, related_name="reservation")
     item = fields.ForeignKeyField(Item, null=False, related_name="items")

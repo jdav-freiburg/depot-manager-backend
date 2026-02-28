@@ -6,7 +6,7 @@ class ItemGroup(Model):
     class Meta:
         table: str = "deopt_item_group"
 
-    id = fields.UUIDField(pk=True)
+    id = fields.UUIDField(primary_key=True)
 
     parent = fields.ForeignKeyField("item.Itemgroup", null=True, on_delete=fields.RESTRICT,
                                     related_name="child",

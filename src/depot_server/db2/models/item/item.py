@@ -24,7 +24,7 @@ class Item(Model):
     class Meta:
         table: str = "depot_item"
 
-    id = fields.UUIDField(pk=True)
+    id = fields.UUIDField(primary_key=True)
 
     report_profile = fields.ForeignKeyField(ReportProfile, on_delete=fields.RESTRICT, null=True, related_name="items")
     group = fields.ForeignKeyField(ItemGroup, on_delete=fields.RESTRICT, null=False, related_name="items")

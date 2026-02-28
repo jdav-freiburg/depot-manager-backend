@@ -16,7 +16,7 @@ class AssetType(Model):
     class Meta:
         table: str = "depot_asset_type"
 
-    id = fields.UUIDField(pk=True)
+    id = fields.UUIDField(primary_key=True)
     name = fields.CharField(max_length=255, unique=True)
     description = fields.TextField()
 

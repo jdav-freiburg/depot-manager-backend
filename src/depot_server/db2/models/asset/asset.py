@@ -9,7 +9,7 @@ class Asset(Model):
     class Meta:
         table: str = "depot_asset"
 
-    id = fields.UUIDField(pk=True, unique=True)
+    id = fields.UUIDField(primary_key=True, unique=True)
 
     # RESTRICT -> When trying to delete the mimetype of this Asset, it won't be allowed. Deleting the mimetype
     # will only be possible when no asset uses it

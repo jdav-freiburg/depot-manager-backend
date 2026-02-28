@@ -6,5 +6,5 @@ class AllowedMimeType(Model):
     class Meta:
         table: str = "depot_allowed_mimetype"
 
-    mime = fields.data.CharField(null=False, pk=True, max_length=50)
+    mime = fields.data.CharField(null=False, primary_key=True, max_length=50)
     description = fields.data.TextField()

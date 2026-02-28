@@ -8,7 +8,7 @@ class ReportProfile(Model):
     class Meta:
         table: str = "depot_report_profile"
 
-    id = fields.UUIDField(pk=True)
+    id = fields.UUIDField(primary_key=True)
     name = fields.data.TextField(unique=True)
     parent_id = fields.ForeignKeyField("report.ReportProfile", null=True, related_name="child")
     version = fields.IntField()

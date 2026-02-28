@@ -10,7 +10,7 @@ class InspectionReport(Model):
     class Meta:
         table: str = "depot_inspection_report"
 
-    id = fields.UUIDField(pk=True)
+    id = fields.UUIDField(primary_key=True)
 
     report_profile = fields.ForeignKeyField(ReportProfile, on_delete=fields.RESTRICT, related_name="reports")
     item = fields.ForeignKeyField(Item, on_delete=fields.RESTRICT, related_name="reports")

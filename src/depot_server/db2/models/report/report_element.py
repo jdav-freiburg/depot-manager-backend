@@ -8,7 +8,7 @@ class ReportElement(Model):
     class Meta:
         table: str = "depot_report_element"
 
-    id = fields.UUIDField(pk=True)
+    id = fields.UUIDField(primary_key=True)
     title = fields.CharField(max_length=100, unique=True)
     parent_id = fields.ForeignKeyField("depot.ReportElement", null=True, related_name="child")
     version = fields.CharField(max_length=50)

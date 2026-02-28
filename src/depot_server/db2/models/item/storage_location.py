@@ -8,7 +8,7 @@ class StorageLocation(Model):
     class Meta:
         table: str = "depot_storage_location"
 
-    id = fields.UUIDField(pk=True)
+    id = fields.UUIDField(primary_key=True)
 
     map_asset = fields.ForeignKeyField(Asset, on_delete=fields.SET_NULL, null=True, related_name="locations")
 
