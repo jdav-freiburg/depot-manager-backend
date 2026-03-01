@@ -9,8 +9,8 @@ class ReportProfile(Model):
         table: str = "depot_report_profile"
 
     id = fields.UUIDField(primary_key=True)
-    name = fields.data.TextField(unique=True)
-    parent_id = fields.ForeignKeyField("report.ReportProfile", null=True, related_name="child")
+    name = fields.CharField(max_length=100, unique=True)
+    parent_id = fields.ForeignKeyField("depot.ReportProfile", null=True, related_name="child")
     version = fields.IntField()
     created_at = fields.DatetimeField(auto_now_add=True)
     created_by = fields.UUIDField()

@@ -3,8 +3,6 @@ from enum import StrEnum
 from tortoise import fields
 from tortoise.models import Model
 
-from .item import Item
-
 
 class ReservationType(StrEnum):
     TEAM = 'team'
@@ -40,8 +38,8 @@ class ReservationLink(Model):
 
     id = fields.UUIDField(primary_key=True)
 
-    reservation = fields.ForeignKeyField(Reservation, null=False, related_name="reservation")
-    item = fields.ForeignKeyField(Item, null=False, related_name="items")
+    reservation = fields.ForeignKeyField("depot.Reservation", null=False, related_name="reservation")
+    item = fields.ForeignKeyField("depot.Item", null=False, related_name="items")
 
     borrowed = fields.DatetimeField(null=True)
     borrowed_message = fields.data.TextField(null=True)
