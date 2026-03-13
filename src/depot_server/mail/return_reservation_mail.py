@@ -4,11 +4,11 @@ from asyncio import Task
 from datetime import datetime, date, time, timedelta
 from typing import Callable, Awaitable, Optional, Dict
 
+from depot_server.api.models import ReservationState
 from depot_server.config import config
 from depot_server.db import collections
 from depot_server.helper.auth import get_profile
 from depot_server.mail.mailer import mailer
-from depot_server.model import ReservationState
 
 
 async def dayly_cron(time_of_day: time, task: Callable[[], Awaitable]):

@@ -6,15 +6,15 @@ from fastapi import FastAPI, APIRouter, Request, Response
 from starlette.middleware.cors import CORSMiddleware
 from tortoise.contrib.fastapi import RegisterTortoise
 
-from depot_server.api.models.bays import router as bays_router
-from depot_server.api.models.device import router as device_router
-from depot_server.api.models.items import router as items_router
-from depot_server.api.models.pictures import router as pictures_router
-from depot_server.api.models.report_elements import router as report_elements_router
-from depot_server.api.models.report_profiles import router as report_profiles_router
-from depot_server.api.models.reservations import router as reservations_router
-from depot_server.api.models.users import router as users_router
-from depot_server.api.models.version import router as version_router
+from depot_server.api.bays import router as bays_router
+from depot_server.api.device import router as device_router
+from depot_server.api.items import router as items_router
+from depot_server.api.pictures import router as pictures_router
+from depot_server.api.report_elements import router as report_elements_router
+from depot_server.api.report_profiles import router as report_profiles_router
+from depot_server.api.reservations import router as reservations_router
+from depot_server.api.users import router as users_router
+from depot_server.api.version import router as version_router
 from depot_server.config import config
 from depot_server.mail.return_reservation_mail import startup as mail_cron_startup, shutdown as mail_cron_shutdown
 from depot_server.version import version
@@ -35,18 +35,6 @@ router.include_router(pictures_router, prefix=v1_prefix)
 router.include_router(users_router, prefix=v1_prefix)
 router.include_router(version_router, prefix=v1_prefix)
 
-from depot_server.db2.models import ItemTag
-
-
-@router.get('/')
-async def test_route():
-    tag = ItemTag(name="Hallo")
-    await tag.save()
-    all_tags = await ItemTag.all()
-    return {"message": "Hello, World!", "tags": [t.name for t in all_tags]}
-
-
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -65,7 +53,7 @@ async def lifespan(app: FastAPI):
     # tear down and cleanup before quitting the application
     await mail_cron_shutdown()
     await reg_tortoise.close_orm()
-    #await db_shutdown()
+    # await db_shutdown()
 
 
 app = FastAPI(lifespan=lifespan)
@@ -80,8 +68,7 @@ app.add_middleware(
 app.include_router(router)
 
 
-
-#@app.middleware('http')
+# @app.middleware('http')
 async def catch_exceptions_middleware(request: Request, call_next):
     try:
         resp = await call_next(request)
@@ -104,7 +91,7 @@ async def catch_exceptions_middleware(request: Request, call_next):
                 # this is a streaming response now, which doesn't have a body
                 # but it's also not the streaming response from above
                 # TODO: find a way to print the body if the status code is >= 400
-                #print(f"Body: {resp.body()!r}")
+                # print(f"Body: {resp.body()!r}")
         else:
             print(f"Unknown response type: {type(resp)}")
         return resp

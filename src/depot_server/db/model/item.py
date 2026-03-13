@@ -1,12 +1,12 @@
-from pydantic import Field
-from pymongo import IndexModel, ASCENDING
 from typing import List, Optional
 from uuid import UUID
 
-from depot_server.db.model.base import BaseDocument
-from depot_server.model import ItemCondition, TotalReportState
-from depot_server.helper.util import date
+from pydantic import Field
+from pymongo import IndexModel, ASCENDING
 
+from depot_server.api.models import ItemCondition, TotalReportState
+from depot_server.db.model.base import BaseDocument
+from depot_server.helper.util import date
 
 
 class DbItem(BaseDocument):

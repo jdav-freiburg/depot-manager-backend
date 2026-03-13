@@ -1,19 +1,20 @@
 import os
+from datetime import date
+from typing import Optional, List, Tuple
+
 import httpx
 from authlib.common.errors import AuthlibBaseError, AuthlibHTTPError
-from authlib.integrations.starlette_client import OAuth 
-from authlib.oidc.core import UserInfo
-from authlib.jose.rfc7519.jwt import JsonWebToken
+from authlib.integrations.starlette_client import OAuth
 from authlib.jose.rfc7517.jwk import JsonWebKey
-from datetime import date
+from authlib.jose.rfc7519.jwt import JsonWebToken
+from authlib.oidc.core import UserInfo
 from fastapi import HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials, APIKeyHeader
 from starlette.status import HTTP_403_FORBIDDEN, HTTP_401_UNAUTHORIZED
-from typing import Optional, List, Tuple
 
+from depot_server.api.models import User
 from depot_server.config import config
 from depot_server.db import collections, DbReservation
-from depot_server.model import User
 
 AUTH_OFF = bool(os.getenv("NO_AUTH", False))
 

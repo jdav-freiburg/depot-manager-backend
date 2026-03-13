@@ -12,9 +12,9 @@ from depot_server.db.model import DbReportElement
 from depot_server.helper.auth import Authentication
 from depot_server.helper.util import utc_now
 from depot_server.mail.reservation_item_removed import send_reservation_item_removed
-from depot_server.model import Item, ItemInWrite, ReportItemInWrite, ItemCondition, ReservationState
-from depot_server.model.item_state import ItemReport
-from depot_server.model.reservation import Reservation
+from .models import Item, ItemInWrite, ReportItemInWrite, ItemCondition, ReservationState
+from .models.item_state import ItemReport
+from .models.reservation import Reservation
 
 router = APIRouter()
 

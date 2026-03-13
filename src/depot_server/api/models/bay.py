@@ -1,6 +1,7 @@
-from pydantic import Field
 from typing import Optional
 from uuid import UUID
+
+from pydantic import Field
 
 from .base import BaseModel
 

@@ -7,12 +7,12 @@ from authlib.oidc.core import UserInfo
 from fastapi import APIRouter, Depends, Body, Query, HTTPException, BackgroundTasks, Response
 from pymongo import DESCENDING, ASCENDING
 
+from depot_server.api.models import Reservation, ReservationInWrite, ReservationActionInWrite, ReservationState, \
+    ReservationAction, ReservationItem
 from depot_server.config import config
 from depot_server.db import collections, DbReservation, DbItem, DbItemReservation
 from depot_server.helper.auth import Authentication
 from depot_server.mail.manager_item_problem import send_manager_item_problem, ProblemItem
-from depot_server.model import Reservation, ReservationInWrite, ReservationActionInWrite, ReservationState, \
-    ReservationAction, ReservationItem
 
 router = APIRouter()
 

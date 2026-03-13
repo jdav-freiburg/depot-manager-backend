@@ -8,9 +8,9 @@ from authlib.oidc.core import UserInfo
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Header, Response
 from starlette.responses import StreamingResponse
 
+from depot_server.api.models import Picture
 from depot_server.db import collections
 from depot_server.helper.auth import Authentication
-from depot_server.model import Picture
 
 router = APIRouter()
 

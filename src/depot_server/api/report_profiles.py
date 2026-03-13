@@ -4,9 +4,9 @@ from uuid import UUID, uuid4
 from authlib.oidc.core import UserInfo
 from fastapi import APIRouter, Depends, Body, HTTPException, Response
 
+from depot_server.api.models import ReportProfile, ReportProfileInWrite
 from depot_server.db import DbReportProfile, collections
 from depot_server.helper.auth import Authentication
-from depot_server.model import ReportProfile, ReportProfileInWrite
 
 router = APIRouter()
 

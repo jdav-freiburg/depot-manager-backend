@@ -1,12 +1,12 @@
-from pydantic import Field
-from typing import List, Optional, Annotated
+from typing import List, Optional
 from uuid import UUID
 
+from pydantic import Field
+
+from depot_server.helper.util import date
 from .base import BaseModel
 from .item_state import ItemReport, ItemCondition
 from .report_profile import TotalReportState
-from depot_server.helper.util import date
-
 
 
 class Item(BaseModel):

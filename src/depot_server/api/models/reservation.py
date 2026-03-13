@@ -1,12 +1,11 @@
 from enum import Enum
-
-from pydantic import Field
 from typing import List, Optional
 from uuid import UUID
 
-from .base import BaseModel
-from depot_server.helper.util import date
+from pydantic import Field
 
+from depot_server.helper.util import date
+from .base import BaseModel
 
 
 class ReservationType(str, Enum):

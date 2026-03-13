@@ -63,7 +63,7 @@ class DbConfig(BaseModel):
                     'default': f'postgres://{self.username}:{self.password}@{self.host}:{self.port}/{self.database}',
                 },
                 'apps': {
-                    'models': {
+                    'depot': {
                         'models': ['depot_server.db2.models'],
                         'default_connection': 'default',
                     },
@@ -75,7 +75,7 @@ class DbConfig(BaseModel):
                     'default': f'sqlite://{self.database}',
                 },
                 'apps': {
-                    'models': {
+                    'depot': {
                         'models': ['depot_server.db2.models', ],
                         'default_connection': 'default',
                     },
