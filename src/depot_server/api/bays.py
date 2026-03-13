@@ -1,11 +1,10 @@
 from typing import List
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from authlib.oidc.core import UserInfo
 from fastapi import APIRouter, Depends, Body, HTTPException, Response
 
 from depot_server.api.models import Bay, BayInWrite
-from depot_server.db import DbBay, collections
 from depot_server.helper.auth import Authentication
 
 router = APIRouter()
@@ -19,7 +18,7 @@ router = APIRouter()
 async def get_bays(
         _user: UserInfo = Depends(Authentication()),
 ) -> List[Bay]:
-    return [Bay.model_validate(bay, from_attributes=True) async for bay in collections.bay_collection.find({})]
+    return []
 
 
 @router.get(
@@ -31,10 +30,7 @@ async def get_bay(
         bay_id: UUID,
         _user: UserInfo = Depends(Authentication()),
 ) -> Bay:
-    bay_data = await collections.bay_collection.find_one({'_id': bay_id})
-    if bay_data is None:
-        raise HTTPException(404)
-    return Bay.model_validate(bay_data, from_attributes=True)
+    raise HTTPException(404)
 
 
 @router.post(
@@ -46,14 +42,8 @@ async def get_bay(
 async def create_bay(
         bay: BayInWrite = Body(...),
         _user: UserInfo = Depends(Authentication(require_admin=True)),
-) -> Bay:
-    db_bay = DbBay(
-        id=uuid4(),
-        **bay.model_dump()
-    )
-    await collections.bay_collection.insert_one(db_bay)
-    return Bay.model_validate(db_bay, from_attributes=True)
-
+) -> None:
+    raise HTTPException(404)
 
 @router.put(
     '/bays/{bay_id}',
@@ -64,14 +54,8 @@ async def update_bay(
         bay_id: UUID,
         bay: BayInWrite = Body(...),
         _user: UserInfo = Depends(Authentication(require_admin=True)),
-) -> Bay:
-    db_bay = DbBay(
-        id=bay_id,
-        **bay.model_dump()
-    )
-    if not await collections.bay_collection.replace_one(db_bay):
-        raise HTTPException(404, f"No bay for id {bay_id}")
-    return Bay.model_validate(db_bay, from_attributes=True)
+) -> None:
+    raise HTTPException(404)
 
 
 @router.delete(
@@ -84,6 +68,4 @@ async def delete_bay(
         bay_id: UUID,
         _user: UserInfo = Depends(Authentication(require_admin=True)),
 ) -> None:
-    if not await collections.bay_collection.delete_one({'_id': bay_id}):
-        raise HTTPException(404, f"No bay for id {bay_id}")
-    await collections.item_collection.update_many({'bay_id': bay_id}, {'$unset': {'bay_id': 1}})
+    raise HTTPException(404)
