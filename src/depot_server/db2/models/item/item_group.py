@@ -4,7 +4,7 @@ from tortoise.models import Model
 
 class ItemGroup(Model):
     class Meta:
-        table: str = "deopt_item_group"
+        table: str = "depot_item_group"
 
     id = fields.UUIDField(primary_key=True)
 
