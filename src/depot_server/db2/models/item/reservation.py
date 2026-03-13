@@ -7,6 +7,7 @@ from tortoise.models import Model
 class ReservationType(StrEnum):
     TEAM = 'team'
     PRIVATE = 'private'
+    EXTERNAL = 'external'
 
 
 class ReservationState(StrEnum):
