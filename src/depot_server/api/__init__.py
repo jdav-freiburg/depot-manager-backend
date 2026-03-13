@@ -6,19 +6,19 @@ from fastapi import FastAPI, APIRouter, Request, Response
 from starlette.middleware.cors import CORSMiddleware
 from tortoise.contrib.fastapi import RegisterTortoise
 
+from depot_server.api.models.bays import router as bays_router
+from depot_server.api.models.device import router as device_router
+from depot_server.api.models.items import router as items_router
+from depot_server.api.models.pictures import router as pictures_router
+from depot_server.api.models.report_elements import router as report_elements_router
+from depot_server.api.models.report_profiles import router as report_profiles_router
+from depot_server.api.models.reservations import router as reservations_router
+from depot_server.api.models.users import router as users_router
+from depot_server.api.models.version import router as version_router
 from depot_server.config import config
 from depot_server.mail.return_reservation_mail import startup as mail_cron_startup, shutdown as mail_cron_shutdown
 from depot_server.version import version
-from .bays import router as bays_router
-from .device import router as device_router
 from .item_history import router as item_history_router
-from .items import router as items_router
-from .pictures import router as pictures_router
-from .report_elements import router as report_elements_router
-from .report_profiles import router as report_profiles_router
-from .reservations import router as reservations_router
-from .users import router as users_router
-from .version import router as version_router
 
 v1_prefix = '/api/v1/depot'
 logger = logging.getLogger("Depot")

@@ -1,9 +1,10 @@
-from authlib.oidc.core import UserInfo
 from datetime import datetime
-from fastapi import APIRouter, Depends, Query, HTTPException
-from pymongo import DESCENDING, ASCENDING
 from typing import List, Optional
 from uuid import UUID
+
+from authlib.oidc.core import UserInfo
+from fastapi import APIRouter, Depends, Query, HTTPException
+from pymongo import DESCENDING, ASCENDING
 
 from depot_server.db import collections
 from depot_server.helper.auth import Authentication

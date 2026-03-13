@@ -1,6 +1,7 @@
+from typing import List
+
 from authlib.oidc.core import UserInfo
 from fastapi import APIRouter, Depends, HTTPException
-from typing import List
 
 from depot_server.helper.auth import Authentication, get_profiles, get_profile
 from depot_server.model import User

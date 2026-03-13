@@ -1,6 +1,6 @@
 from fastapi import APIRouter
-from depot_server.version import version as version_, commit_hash
 
+from depot_server.version import version as version_, commit_hash
 
 router = APIRouter()
 

@@ -1,8 +1,9 @@
-from authlib.oidc.core import UserInfo
-from fastapi import APIRouter, Depends, Body, BackgroundTasks, Response
 from typing import List, Tuple
 
-from depot_server.api.reservations import reservation_action_impl
+from authlib.oidc.core import UserInfo
+from fastapi import APIRouter, Depends, Body, BackgroundTasks, Response
+
+from depot_server.api.models.reservations import reservation_action_impl
 from depot_server.db import collections, DbReservation, DbItem, DbItemReservation
 from depot_server.helper.auth import DeviceAuthentication
 from depot_server.model import Reservation, DeviceReservation, Item, Bay, ItemCondition, User, \
