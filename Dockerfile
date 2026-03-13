@@ -1,10 +1,15 @@
 FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim AS builder
 
 RUN apt update && apt install -y git
-COPY ./ /app/
+
 WORKDIR /app
 
+# Copy only dependency files first — this layer is cached until lockfile changes
+COPY pyproject.toml uv.lock ./
 RUN uv sync --locked --no-install-project --no-editable
+
+# Now copy the rest of the source and build
+COPY ./ ./
 RUN uv build
 
 
