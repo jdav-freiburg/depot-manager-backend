@@ -27,7 +27,7 @@ migrate = "depot_server.db.migrate:main"
 
 [dependency-groups]
 dev = [
-    "pytest>=8,<9",
+    "pytest>=9.0.3,<10",
     "pytest-mypy>=1,<2",
     "pytest-flake8>=1,<2",
     "requests>=2,<3",
