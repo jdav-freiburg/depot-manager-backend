@@ -1,7 +1,7 @@
 from tortoise import fields
 from tortoise.models import Model
 
-from depot_server.db2.common import Condition
+from depot_server.db2.models.common import Condition
 from .report_profile import ReportProfile
 
 
