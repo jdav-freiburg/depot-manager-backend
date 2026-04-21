@@ -5,7 +5,7 @@ from tortoise import migrations
 from tortoise.fields.base import OnDelete
 from tortoise.migrations import operations as ops
 
-from depot_server.db2.common import Condition
+from depot_server.db2.models.common import Condition
 from depot_server.db2.models.item.reservation import ReservationState, ReservationType
 
 
