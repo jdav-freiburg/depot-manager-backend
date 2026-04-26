@@ -4,8 +4,6 @@ from uuid import UUID
 
 from tortoise.models import Model
 
-from depot_server.db2.models import Tag
-
 T = TypeVar("T", bound=Model)
 
 
@@ -102,5 +100,3 @@ class AuditableRepo(BaseRepo[T]):
         return old_changes, new_changes
 
 
-class TagRepo(AuditableRepo):
-    Db_type = Tag
