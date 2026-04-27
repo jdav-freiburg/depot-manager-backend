@@ -19,7 +19,7 @@ dependencies = [
     "mako>=1,<2",
     "aiosmtplib>=4,<5",
     "python-multipart>=0.0,<0.1",
-    "pillow>=11,<12",
+    "pillow>=12,<13",
 ]
 
 [project.scripts]
@@ -27,7 +27,7 @@ migrate = "depot_server.db.migrate:main"
 
 [dependency-groups]
 dev = [
-    "pytest>=8,<9",
+    "pytest>=9,<10",
     "pytest-mypy>=1,<2",
     "pytest-flake8>=1,<2",
     "requests>=2,<3",
