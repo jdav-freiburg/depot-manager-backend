@@ -85,6 +85,19 @@ class DbConfig(BaseModel):
             raise ValueError(f"Unsupported database engine: {self.engine}")
 
 
+class RetentionConfig(BaseModel):
+    soft_delete_days: int = Field(default=30, description="Days to retain soft-deleted assets")
+    cleanup_schedule: str = Field(default="0 2 * * *", description="Cron expression for cleanup")
+
+
+class StorageConfig(BaseModel):
+    max_file_size_mb: int = Field(default=100, description="Maximum file size in MB")
+    local_path: str = Field(default="./assets", description="Local filesystem path for file storage")
+    s3_bucket: str = Field(default="", description="S3 bucket name (empty = disabled)")
+    s3_region: str = Field(default="eu-central-1", description="S3 region")
+    retention: RetentionConfig = Field(default_factory=RetentionConfig)
+
+
 class CosmeticsConfig(BaseModel):
     tag_default_color: str = Field(default="#1683E9",
                                    description="Default color for tags in hex format, e.g. #FF0000",
@@ -97,6 +110,7 @@ class Config(BaseModel):
     mail: MailConfig = Field(...)
     oauth2: OAuth2ClientConfig = Field(...)
     db: DbConfig = Field(...)
+    storage: StorageConfig = Field(default_factory=StorageConfig)
     cosmetics: CosmeticsConfig = Field(...)
     frontend_base_url: str = Field(...)
     allow_origins: List[str] = Field(...)

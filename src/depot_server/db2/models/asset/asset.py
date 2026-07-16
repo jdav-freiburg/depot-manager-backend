@@ -24,9 +24,15 @@ class Asset(Model):
     updated_by = fields.UUIDField(null=False, description="The user id who updated the asset")
     updated_at = fields.DatetimeField(null=False, description="The timestamp when the asset was last updated")
 
-    # todo: add validator
-    uri = fields.TextField(null=False, description="The URI of the asset. Prepend assets on the filesystem")
-    description = fields.TextField(null=True, description="The description of the asset")
+    uri = fields.TextField(null=False, description="The URI of the asset (file://, s3://, or https://)")
+    hash_ = fields.TextField(null=False, description="The sha256 hash of the asset content")
+    description = fields.TextField(null=True, description="Human-readable description of the asset")
+    original_filename = fields.TextField(null=True, description="Original filename as uploaded")
 
-    # todo: add validator
-    hash_ = fields.TextField(null=False, description="The sha256 of the asset")
+    required_role = fields.CharField(max_length=20, null=False, default="user",
+                                     description="Minimum role required to access (user, manager, admin)")
+
+    data = fields.JSONField(null=True, description="Free-form key-value metadata")
+
+    deleted_at = fields.DatetimeField(null=True, description="Soft-delete timestamp (NULL = active)")
+    error_status = fields.TextField(null=True, description="Error state: UPLOAD_FAILED, FILE_MISSING, CORRUPT_FILE")

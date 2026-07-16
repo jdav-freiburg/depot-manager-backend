@@ -44,3 +44,12 @@ db:
 
 cosmetics:
   tag_default_color: "#000000"
+
+storage:
+  max_file_size_mb: 100
+  local_path: "./assets"
+  s3_bucket: ""
+  s3_region: "eu-central-1"
+  retention:
+    soft_delete_days: 30
+    cleanup_schedule: "0 2 * * *"
