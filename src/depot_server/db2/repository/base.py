@@ -64,6 +64,10 @@ class BaseRepo(RepoInterface[T]):
         return obj
 
     @classmethod
+    async def get_all(cls) -> list[T]:
+        return await cls.Db_type.all()
+
+    @classmethod
     async def get_by_id(cls, id: UUID) -> Optional[T]:
         return await cls.Db_type.get_or_none(pk=id)
 

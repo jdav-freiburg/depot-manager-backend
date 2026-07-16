@@ -5,14 +5,14 @@ info:
 
 http:
   method: POST
-  url: 127.0.0.1:8000/api/v2/depot/storage_location
+  url: 127.0.0.1:8000/api/v2/depot/item_group
   body:
     type: json
     data: |-
       {
-        "name": "Packstation",
-        "description": "Ein seeehr cooler Seilschrank",
-        "is_subject_to_issuance": true
+        "name": "Edelrid Halbseile",
+        "description": "Seile zum Klettern",
+        "parent": "9fb0c0ee-0c21-4b72-a138-3ab042131be8"
       }
   auth: inherit
 

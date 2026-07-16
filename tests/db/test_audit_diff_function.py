@@ -7,6 +7,7 @@ from tortoise import Tortoise
 from depot_server.db2.models import Item
 from depot_server.db2.models.changelog import Changelog
 from depot_server.db2.models.common import Condition
+from depot_server.db2.models.item.item_group import PsaCategory
 from depot_server.db2.repository.audit import AuditInfo
 from depot_server.db2.repository.item.item import ItemRepo
 from depot_server.db2.repository.item.repo_item_group import ItemGroupRepo
@@ -34,6 +35,7 @@ async def test_data(init_db):
         name="Test Group",
         id_prefix="TST",
         description="Test Group Description",
+        psa_category=PsaCategory.NONE
     )
 
     storage_location = await StorageLocationRepo.create(

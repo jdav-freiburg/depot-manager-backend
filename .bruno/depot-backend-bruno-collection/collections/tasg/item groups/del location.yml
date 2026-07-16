@@ -1,0 +1,15 @@
+info:
+  name: del location
+  type: http
+  seq: 4
+
+http:
+  method: DELETE
+  url: 127.0.0.1:8000/api/v2/depot/storage_location/524d20b9-489d-4c54-a3a2-83008af3123b
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

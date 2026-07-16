@@ -23,6 +23,10 @@ class TagRepo(BaseRepo):
         return tag
 
     @classmethod
+    async def delete_tag(cls, tag_id: UUID) -> None:
+        await cls.delete_by_id(tag_id)
+
+    @classmethod
     async def update_tag(cls, tag_id: UUID, **kwargs) -> Tag:
         tag = await cls.get_tag_by_id(tag_id)
         if not tag:
@@ -40,7 +44,3 @@ class TagRepo(BaseRepo):
         # save the instance
         await tag.save()
         return tag
-
-    @classmethod
-    async def delete_tag(cls, tag_id: UUID) -> None:
-        await cls.delete_by_id(tag_id)

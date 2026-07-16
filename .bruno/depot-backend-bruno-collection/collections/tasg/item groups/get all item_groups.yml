@@ -1,0 +1,15 @@
+info:
+  name: get all item_groups
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: 127.0.0.1:8000/api/v2/depot/item_group/9fb0c0ee-0c21-4b72-a138-3ab042131be8
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

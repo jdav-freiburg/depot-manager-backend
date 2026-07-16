@@ -1,5 +1,4 @@
 from datetime import datetime
-from enum import StrEnum
 
 from tortoise import fields
 from tortoise.models import Model
@@ -11,13 +10,6 @@ from depot_server.db2.models.item.storage_location import StorageLocation
 from depot_server.db2.models.report.report_profile import ReportProfile
 from .reservation import Reservation
 from .tag import Tag
-
-
-class PsaCategory(StrEnum):
-    NONE = 'none'
-    CAT_1 = "cat_1"
-    CAT_2 = "cat_2"
-    CAT_3 = "cat_3"
 
 
 class Item(Model):
