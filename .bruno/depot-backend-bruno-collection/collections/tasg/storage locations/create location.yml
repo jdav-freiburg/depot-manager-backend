@@ -1,0 +1,23 @@
+info:
+  name: create location
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: 127.0.0.1:8000/api/v2/depot/storage_location
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Seilschrank",
+        "description": "Ein seeehr cooler Seilschrank",
+        "is_subject_to_issuance": true
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,23 @@
+info:
+  name: modify location
+  type: http
+  seq: 1
+
+http:
+  method: PUT
+  url: 127.0.0.1:8000/api/v2/depot/storage_location/524d20b9-489d-4c54-a3a2-83008af3123b
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Seilschrank",
+        "description": "Ein seeehr cooler Seilschrank",
+        "is_subject_to_issuance": false
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

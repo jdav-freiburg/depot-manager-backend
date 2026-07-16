@@ -1,0 +1,15 @@
+info:
+  name: get all location
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: 127.0.0.1:8000/api/v2/depot/storage_location/b596659e-ee94-470f-8e68-62528db5030a
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
