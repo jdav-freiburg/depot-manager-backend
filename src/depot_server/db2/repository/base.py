@@ -1,5 +1,6 @@
+
 from abc import ABC, abstractmethod
-from typing import TypeVar, Optional, Generic, Any
+from typing import TypeVar, Optional, Generic
 from uuid import UUID
 
 from tortoise.models import Model
@@ -63,40 +64,4 @@ class BaseRepo(RepoInterface[T]):
     async def save(cls, obj: T) -> T:
         await obj.save()
         return obj
-
-
-class AuditableRepo(BaseRepo[T]):
-    @classmethod
-    async def create(cls, **kwargs) -> T:
-        obj = cls.Db_type(**kwargs)
-        await obj.save()
-        return obj
-
-    @classmethod
-    def _calculate_diff(cls, old: T, new: T) -> tuple[dict[str, Any], dict[str, Any]]:
-        # Determine changed fields
-        old_changes: dict[str, Any] = {}
-        new_changes: dict[str, Any] = {}
-
-        field_names = cls.Db_type._meta.fields_map.keys()
-        for name in field_names:
-            # if the currently checked field is a FK or m2m field, only
-            # check if the UUID has changed
-            changed_foreign_relation: bool = False
-            if name in old._meta.fk_fields:
-                old_val = getattr(old, f"{name}_id")
-                new_val = getattr(new, f"{name}_id")
-                changed_foreign_relation = True
-            else:
-                old_val = getattr(old, name)
-                new_val = getattr(new, name)
-
-            if old_val != new_val:
-                if changed_foreign_relation:
-                    raise NotImplementedError("Can't diff relations yet")
-                old_changes[name] = old_val
-                new_changes[name] = new_val
-
-        return old_changes, new_changes
-
 
