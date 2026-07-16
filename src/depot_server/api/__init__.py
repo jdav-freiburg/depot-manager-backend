@@ -6,8 +6,6 @@ from fastapi import FastAPI, APIRouter, Request, Response
 from starlette.middleware.cors import CORSMiddleware
 from tortoise.contrib.fastapi import RegisterTortoise
 
-from depot_server.api.bays import router as bays_router
-from depot_server.api.device import router as device_router
 from depot_server.api.items import router as items_router
 from depot_server.api.pictures import router as pictures_router
 from depot_server.api.report_elements import router as report_elements_router
@@ -15,17 +13,19 @@ from depot_server.api.report_profiles import router as report_profiles_router
 from depot_server.api.reservations import router as reservations_router
 from depot_server.api.users import router as users_router
 from depot_server.api.version import router as version_router
+from depot_server.api2.tag import router as tags_router
 from depot_server.config import config
 from depot_server.mail.return_reservation_mail import startup as mail_cron_startup, shutdown as mail_cron_shutdown
 from depot_server.version import version
 from .item_history import router as item_history_router
 
 v1_prefix = '/api/v1/depot'
+v2_prefix = '/api/v2/depot'
+
+
 logger = logging.getLogger("Depot")
 logging.basicConfig(format='%(asctime)s [%(levelname)s] [%(name)s] %(message)s', level=config.log_level)
 router = APIRouter()
-router.include_router(bays_router, prefix=v1_prefix)
-router.include_router(device_router, prefix=v1_prefix)
 router.include_router(item_history_router, prefix=v1_prefix)
 router.include_router(items_router, prefix=v1_prefix)
 router.include_router(report_elements_router, prefix=v1_prefix)
@@ -35,6 +35,7 @@ router.include_router(pictures_router, prefix=v1_prefix)
 router.include_router(users_router, prefix=v1_prefix)
 router.include_router(version_router, prefix=v1_prefix)
 
+router.include_router(tags_router, prefix=v2_prefix)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

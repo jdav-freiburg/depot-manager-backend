@@ -8,6 +8,9 @@ from tortoise.models import Model
 T = TypeVar("T", bound=Model)
 
 
+class ItemNotFound(Exception):
+    pass
+
 class RepoInterface(Generic[T], ABC):
     """
     Interface for the database repository functions.
@@ -46,6 +49,10 @@ class RepoInterface(Generic[T], ABC):
         """
         ...
 
+    @classmethod
+    @abstractmethod
+    async def delete_by_id(cls, id: UUID) -> None:
+        ...
 
 class BaseRepo(RepoInterface[T]):
     Db_type: type[T]
@@ -65,3 +72,9 @@ class BaseRepo(RepoInterface[T]):
         await obj.save()
         return obj
 
+    @classmethod
+    async def delete_by_id(cls, id: UUID) -> None:
+        item = await cls.get_by_id(id)
+        if not item:
+            raise ItemNotFound(f"Item {id} not found")
+        await item.delete()

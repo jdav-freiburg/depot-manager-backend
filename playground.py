@@ -1,11 +1,10 @@
 import asyncio
-from uuid import uuid4, UUID
+from uuid import uuid4
 
 from tortoise import Tortoise
 
 from depot_server.db2.models import Item
 from depot_server.db2.models.common import Condition
-from depot_server.db2.repository.audit import AuditInfo
 from depot_server.db2.repository.item.item import ItemRepo
 from depot_server.db2.repository.item.repo_item_group import ItemGroupRepo
 from depot_server.db2.repository.item.repo_storage_location import StorageLocationRepo
@@ -66,10 +65,7 @@ async def init():
         # Other optional fields like manufacture_date, purchase_date, etc., can be added
     )
 
-    item.report_profile = report_profile2
-    info: AuditInfo = AuditInfo(user_id=UUID('00000000-0000-0000-0000-000000000000'), comment="Commit message")
-
-    await ItemRepo.save(item, info)
+    profiles = await ReportProfileRepo.Db_type.all()
 
     await Tortoise.close_connections()
 
