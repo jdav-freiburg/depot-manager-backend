@@ -1,0 +1,23 @@
+info:
+  name: create tag
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: 127.0.0.1:8000/api/v2/depot/tag
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Test2",
+       "description": "Tag for all nice things :)",
+        "color": "#ffff00"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

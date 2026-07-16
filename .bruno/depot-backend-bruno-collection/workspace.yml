@@ -1,0 +1,12 @@
+opencollection: 1.0.0
+info:
+  name: "depot-backend-bruno-collection"
+  type: workspace
+
+collections:
+  - name: "tasg"
+    path: "collections/tasg"
+
+specs:
+
+docs: ''

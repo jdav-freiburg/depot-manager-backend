@@ -1,0 +1,15 @@
+info:
+  name: del announcement
+  type: http
+  seq: 4
+
+http:
+  method: DELETE
+  url: 127.0.0.1:8000/api/v2/depot/announcement/7c00aa74-5d89-423b-9697-9d9d3e0eb638
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

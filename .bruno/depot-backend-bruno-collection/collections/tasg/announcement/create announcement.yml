@@ -1,0 +1,23 @@
+info:
+  name: create announcement
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: 127.0.0.1:8000/api/v2/depot/announcement
+  body:
+    type: json
+    data: |-
+      {
+        "title": "Mein zweiter toller Bericht",
+        "text": "Lorem ipsum, blablabla",
+        "expires": "2026-08-01"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

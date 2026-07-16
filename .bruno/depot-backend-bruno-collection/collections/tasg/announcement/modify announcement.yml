@@ -1,0 +1,23 @@
+info:
+  name: modify announcement
+  type: http
+  seq: 1
+
+http:
+  method: PUT
+  url: 127.0.0.1:8000/api/v2/depot/tag/e6e2620e-9640-4aa3-828f-a01b852f2e85
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Test7",
+        "description": "I changed everything!!! Wirklich!",
+        "color": "#00ff00"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

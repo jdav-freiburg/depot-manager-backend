@@ -1,0 +1,15 @@
+info:
+  name: del tag
+  type: http
+  seq: 4
+
+http:
+  method: DELETE
+  url: 127.0.0.1:8000/api/v2/depot/tag/e6e2620e-9640-4aa3-828f-a01b852f2e85
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
