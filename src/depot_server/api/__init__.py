@@ -13,6 +13,7 @@ from depot_server.api.report_profiles import router as report_profiles_router
 from depot_server.api.reservations import router as reservations_router
 from depot_server.api.users import router as users_router
 from depot_server.api.version import router as version_router
+from depot_server.api2.announcement import router as announcement_router
 from depot_server.api2.tag import router as tags_router
 from depot_server.config import config
 from depot_server.mail.return_reservation_mail import startup as mail_cron_startup, shutdown as mail_cron_shutdown
@@ -36,6 +37,7 @@ router.include_router(users_router, prefix=v1_prefix)
 router.include_router(version_router, prefix=v1_prefix)
 
 router.include_router(tags_router, prefix=v2_prefix)
+router.include_router(announcement_router, prefix=v2_prefix)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
