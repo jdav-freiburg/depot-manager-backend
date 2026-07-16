@@ -11,7 +11,7 @@ class ReportProfile(Model):
     id = fields.UUIDField(primary_key=True)
     name = fields.CharField(max_length=100, unique=True)
     parent_id = fields.ForeignKeyField("depot.ReportProfile", null=True, related_name="child")
-    version = fields.IntField()
+    version = fields.IntField(default=1)
     created_at = fields.DatetimeField(auto_now_add=True)
     created_by = fields.UUIDField()
     updated_at = fields.DatetimeField(auto_now=True)
