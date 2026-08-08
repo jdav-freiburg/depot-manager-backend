@@ -10,5 +10,10 @@ async def _clear_all():
     await collections.reservation_collection.delete_many({})
 
 
+async def _startup_and_clear():
+    await collections.startup()
+    await _clear_all()
+
+
 def clear_all():
-    asyncio.get_event_loop().run_until_complete(_clear_all())
+    asyncio.get_event_loop().run_until_complete(_startup_and_clear())
