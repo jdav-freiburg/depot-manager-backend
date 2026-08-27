@@ -11,8 +11,8 @@ See [depot-manager-frontend](https://github.com/jdav-freiburg/depot-manager-fron
 ## Development server and developing
 1. Install [UV](https://docs.astral.sh/uv/getting-started/installation/).
 2. Install all dependencies + development dependencies: `uv sync --locked`
-
-3. Run `uv run uvicorn depot_server.api:app` for a dev server.
+3. Call the migration script to create the database tables `uv run tortoise -c depot_server.config.TORTOISE_ORM migrate`
+4. Run `uv run uvicorn depot_server.api:app` for a dev server.
 
 > [!INFO]  
 > Run with `NO_AUTH=1` environment variable to turn off the authentication logic
