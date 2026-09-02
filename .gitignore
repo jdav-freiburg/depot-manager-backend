@@ -6,4 +6,5 @@ venv
 .idea
 
 build/
-devdepot.sqlite
+devdepot.sqlite*
+playground.sqlite*

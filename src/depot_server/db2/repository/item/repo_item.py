@@ -9,18 +9,22 @@ class ItemRepo(AuditableRepo):
 
     @classmethod
     async def get_all_items(cls) -> list[Item]:
-        items = await cls.Db_type.all()
+        items = await cls.Db_type.all().select_related("group")
         return items
 
     @classmethod
     async def get_item_by_id(cls, item_id: UUID) -> Item | None:
-        item = await cls.Db_type.get_or_none(id=item_id)
+        item = await cls.Db_type.filter(id=item_id).select_related("group").get_or_none()
         return item
 
     @classmethod
     async def create_item(cls, **kwargs) -> Item:
         item = await cls.create(**kwargs)
         return item
+
+    @classmethod
+    async def update_by_item_group(cls, group_id: UUID, **kwargs) -> int:
+        return await cls.Db_type.filter(group_id=group_id).update(**kwargs)
 
     @classmethod
     async def delete_item(cls, item_id: UUID) -> None:

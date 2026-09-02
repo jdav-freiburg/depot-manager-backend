@@ -4,7 +4,7 @@ from tortoise import migrations
 from tortoise.fields.data import JSON_DUMPS
 from tortoise.migrations import operations as ops
 
-from depot_server.db2.models.item.item_group import PsaCategory
+from depot_server.db2.models.item.item import PsaCategory
 
 
 class Migration(migrations.Migration):

@@ -11,7 +11,19 @@ See [depot-manager-frontend](https://github.com/jdav-freiburg/depot-manager-fron
 ## Development server and developing
 1. Install [UV](https://docs.astral.sh/uv/getting-started/installation/).
 2. Install all dependencies + development dependencies: `uv sync --locked`
-3. Call the migration script to create the database tables `uv run tortoise -c depot_server.config.TORTOISE_ORM migrate`
+3. Generate the db schema
+```
+uv run python -c $'import asyncio
+from tortoise import Tortoise
+from depot_server.config import TORTOISE_ORM
+
+async def main():
+    await Tortoise.init(config=TORTOISE_ORM)
+    await Tortoise.generate_schemas(safe=True)
+    await Tortoise.close_connections()
+
+asyncio.run(main())'
+```
 4. Run `uv run uvicorn depot_server.api:app` for a dev server.
 
 > [!INFO]  

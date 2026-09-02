@@ -130,7 +130,8 @@ async def test_update_item_group_calls_repo(client):
     model_ig = ItemGroup(id=ig_id, name="Updated Group", id_prefix="UG", description="Updated description")
 
     with patch("depot_server.api2.item_group.ItemGroupRepo.update_item_group", new_callable=AsyncMock) as mock_update:
-        with patch("depot_server.api2.item_group.item_group_from_orm") as mock_from_orm:
+        with patch("depot_server.logic.item_group.ItemRepo.update_item_group", new_callable=AsyncMock) as mock_update_items:
+            with patch("depot_server.api2.item_group.item_group_from_orm") as mock_from_orm:
             mock_update.return_value = mock_db_ig
             mock_from_orm.return_value = model_ig
 
@@ -139,17 +140,22 @@ async def test_update_item_group_calls_repo(client):
                 "id_prefix": "UG",
                 "description": "Updated description"
             }
-            response = client.put(f"/item_group/{ig_id}", json=payload)
+                response = client.put(f"/item_group/{ig_id}", json=payload)
 
-            mock_update.assert_called_once()
-            call_args = mock_update.call_args
-            assert call_args[0][0] == ig_id  # First positional arg is item_group_id
-            call_kwargs = call_args[1]
-            assert call_kwargs["name"] == "Updated Group"
-            assert call_kwargs["id_prefix"] == "UG"
-            assert call_kwargs["description"] == "Updated description"
+                mock_update.assert_called_once()
+                call_args = mock_update.call_args
+                assert call_args[0][0] == ig_id  # First positional arg is item_group_id
+                call_kwargs = call_args[1]
+                assert call_kwargs["name"] == "Updated Group"
+                assert call_kwargs["id_prefix"] == "UG"
+                assert call_kwargs["description"] == "Updated description"
+                mock_update_items.assert_awaited_once_with(
+                    ig_id,
+                    name="Updated Group",
+                    description="Updated description",
+                )
 
-            assert response.status_code == 200
+                assert response.status_code == 200
 
 
 @pytest.mark.asyncio
