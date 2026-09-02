@@ -9,7 +9,7 @@ from depot_server.db2.models.changelog import Changelog
 from depot_server.db2.models.common import Condition
 from depot_server.db2.models.item.item_group import PsaCategory
 from depot_server.db2.repository.audit import AuditInfo
-from depot_server.db2.repository.item.item import ItemRepo
+from depot_server.db2.repository.item.repo_item import ItemRepo
 from depot_server.db2.repository.item.repo_item_group import ItemGroupRepo
 from depot_server.db2.repository.item.repo_storage_location import StorageLocationRepo
 from depot_server.db2.repository.item.repo_tag import TagRepo
