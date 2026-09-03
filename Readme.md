@@ -15,12 +15,14 @@ See [depot-manager-frontend](https://github.com/jdav-freiburg/depot-manager-fron
 ```
 uv run python -c $'import asyncio
 from tortoise import Tortoise
-from depot_server.config import TORTOISE_ORM
 
 async def main():
-    await Tortoise.init(config=TORTOISE_ORM)
-    await Tortoise.generate_schemas(safe=True)
-    await Tortoise.close_connections()
+    await Tortoise.init(
+        db_url=f"sqlite://devdepot.sqlite",
+        modules={"depot": ["depot_server.db2.models"]},
+        )
+    await Tortoise.generate_schemas()
+    print("Init done")
 
 asyncio.run(main())'
 ```
