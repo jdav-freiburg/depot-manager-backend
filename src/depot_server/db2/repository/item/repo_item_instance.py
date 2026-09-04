@@ -43,3 +43,8 @@ class ItemInstanceRepo(AuditableRepo):
         # save the instance
         await item_instance.save()
         return item_instance
+
+    @classmethod
+    async def get_item_instances_by_item_id(cls, item_id: UUID) -> list[ItemInstance]:
+        item_instances = await cls.Db_type.filter(item_id=item_id)
+        return item_instances

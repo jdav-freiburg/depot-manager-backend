@@ -57,3 +57,11 @@ async def delete_item_group(item_group_id: UUID) -> None:
         await ItemGroupRepo.delete_by_id(item_group_id)
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+@router.get("/item_group/{item_group_id}/children")
+async def get_item_group_children(item_group_id: UUID) -> list[ItemGroup]:
+    """Retrieve the children of an item_group"""
+    children = await ItemGroupRepo.get_children_by_parent_id(item_group_id)
+    if children is None:
+        raise HTTPException(status_code=404, detail="ItemGroup not found")
+    return [item_group_from_orm(child) for child in children]

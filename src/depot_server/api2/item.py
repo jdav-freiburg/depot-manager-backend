@@ -2,6 +2,7 @@ from uuid import UUID, uuid4
 
 from fastapi import APIRouter, HTTPException
 
+from depot_server.db2.repository.item.repo_item_instance import ItemInstanceRepo
 from src.depot_server.db2.models.item.item import Item as DbItem
 from src.depot_server.db2.repository.item.repo_item import ItemRepo
 from src.depot_server.logic.item import ItemService
@@ -41,3 +42,8 @@ async def delete_item(item_id: UUID) -> None:
         await ItemRepo.delete_item(item_id)
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+@router.get("/item/{item_id}/instances")
+async def get_item_instances(item_id: UUID) -> list[ItemInstance]:
+    item_instances = await ItemInstanceRepo.get_item_instances_by_item_id(item_id)
+    return [ItemInstance.model_validate(item_instance, from_attributes=True) for item_instance in item_instances]
