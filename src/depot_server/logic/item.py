@@ -110,6 +110,7 @@ class ItemService:
                                              storage_location_id=item.storage_location_id)
         if not db_item:
             return None
+        # Update the item group which contains only this item
         db_group = await ItemGroupRepo.update_item_group(item_group_id=db_item.group_id,
                                                          name=item.name,
                                                          description=item.description,

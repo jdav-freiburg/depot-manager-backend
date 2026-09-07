@@ -5,7 +5,6 @@ from tortoise import fields
 from tortoise.models import Model
 
 from depot_server.db2.models.asset.asset import Asset
-from depot_server.db2.models.common import Condition
 from depot_server.db2.models.item.item_group import ItemGroup
 from depot_server.db2.models.item.storage_location import StorageLocation
 from depot_server.db2.models.report.report_profile import ReportProfile
