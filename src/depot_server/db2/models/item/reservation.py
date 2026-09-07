@@ -40,10 +40,10 @@ class ReservationLink(Model):
     id = fields.UUIDField(primary_key=True)
 
     reservation = fields.ForeignKeyField("depot.Reservation", null=False, related_name="reservation")
-    item = fields.ForeignKeyField("depot.Item", null=False, related_name="items")
+    item_group = fields.ForeignKeyField("depot.ItemGroup", null=False, related_name="item_group")
 
     borrowed = fields.DatetimeField(null=True)
-    borrowed_message = fields.data.TextField(null=True)
+    borrowed_message = fields.TextField(null=True)
     returned = fields.DatetimeField(null=True)
-    returned_message = fields.data.TextField(null=True)
+    returned_message = fields.TextField(null=True)
     collector = fields.TextField(description="The person who picked up the item")

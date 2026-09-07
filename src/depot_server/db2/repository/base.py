@@ -72,7 +72,23 @@ class BaseRepo(RepoInterface[T]):
         return await cls.Db_type.get_or_none(pk=id)
 
     @classmethod
+    async def get_by_ids(cls, ids: list[UUID]) -> list[T]:
+        return await cls.Db_type.filter(pk__in=ids).all()
+
+    @classmethod
     async def save(cls, obj: T) -> T:
+        await obj.save()
+        return obj
+
+    @classmethod
+    async def update(cls, id: UUID, **kwargs) -> Optional[T]:
+        obj = await cls.get_by_id(id)
+        if not obj:
+            raise ItemNotFound(f"Item {id} not found")
+        for key, value in kwargs.items():
+            if key == obj._meta.pk_attr:
+                raise ValueError("Cannot update primary key")
+            setattr(obj, key, value)
         await obj.save()
         return obj
 

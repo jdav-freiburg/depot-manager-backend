@@ -4,23 +4,17 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-from depot_server.db2.models.item.item_group import PsaCategory
+from depot_server.db2.models.item.item import PsaCategory
 
 
-class ItemGroupPending(BaseModel):
+class ItemGroupBase(BaseModel):
     name: str
     description: str
-    manufacturer: Optional[str] = Field(default=None)
-    model: Optional[str] = Field(default=None)
-    enforce_exact_item: bool = Field(default=False)
-    id_prefix: Optional[str] = Field(default=None)
-    max_lifespan: Optional[timedelta] = Field(default=None)
-    max_usage_span: Optional[timedelta] = Field(default=None)
-    psa_category: PsaCategory = Field(default=PsaCategory.NONE)
-    data: Optional[dict[Any, Any]] = Field(default=None)
+    #data: Optional[dict[Any, Any]] = Field(default=None)
+    lendable: bool
     parent: Optional[UUID] = Field(default=None)
 
 
-class ItemGroup(ItemGroupPending):
+class ItemGroup(ItemGroupBase):
     id: UUID
-    group_children: list[UUID] | Literal["NotRequested"] = Field(default="NotRequested")
+    #group_children: list[UUID] | Literal["NotRequested"] = Field(default="NotRequested")

@@ -15,3 +15,8 @@ class Condition(StrEnum):
 
 
 type UserIdField = fields.UUIDField
+
+
+class TotalReportState(StrEnum):
+    FIT = 'fit'
+    UNFIT = 'unfit'

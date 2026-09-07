@@ -34,3 +34,8 @@ class ItemGroupRepo(BaseRepo):
         # save the instance
         await group.save()
         return group
+
+    @classmethod
+    async def get_children_by_parent_id(cls, parent_id: UUID) -> list[ItemGroup]:
+        children = await cls.Db_type.filter(parent_id=parent_id)
+        return children

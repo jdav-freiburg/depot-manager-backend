@@ -11,8 +11,22 @@ See [depot-manager-frontend](https://github.com/jdav-freiburg/depot-manager-fron
 ## Development server and developing
 1. Install [UV](https://docs.astral.sh/uv/getting-started/installation/).
 2. Install all dependencies + development dependencies: `uv sync --locked`
+3. Generate the db schema
+```
+uv run python -c $'import asyncio
+from tortoise import Tortoise
 
-3. Run `uv run uvicorn depot_server.api:app` for a dev server.
+async def main():
+    await Tortoise.init(
+        db_url=f"sqlite://devdepot.sqlite",
+        modules={"depot": ["depot_server.db2.models"]},
+        )
+    await Tortoise.generate_schemas()
+    print("Init done")
+
+asyncio.run(main())'
+```
+4. Run `uv run uvicorn depot_server.api:app` for a dev server.
 
 > [!INFO]  
 > Run with `NO_AUTH=1` environment variable to turn off the authentication logic

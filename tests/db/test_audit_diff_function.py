@@ -7,9 +7,9 @@ from tortoise import Tortoise
 from depot_server.db2.models import Item
 from depot_server.db2.models.changelog import Changelog
 from depot_server.db2.models.common import Condition
-from depot_server.db2.models.item.item_group import PsaCategory
+from depot_server.db2.models.item.item import PsaCategory
 from depot_server.db2.repository.audit import AuditInfo
-from depot_server.db2.repository.item.item import ItemRepo
+from depot_server.db2.repository.item.repo_item import ItemRepo
 from depot_server.db2.repository.item.repo_item_group import ItemGroupRepo
 from depot_server.db2.repository.item.repo_storage_location import StorageLocationRepo
 from depot_server.db2.repository.item.repo_tag import TagRepo
@@ -33,9 +33,9 @@ async def test_data(init_db):
     """Create test data for item creation"""
     group = await ItemGroupRepo.create(
         name="Test Group",
-        id_prefix="TST",
         description="Test Group Description",
-        psa_category=PsaCategory.NONE
+        lendable=True,
+        parent=None,
     )
 
     storage_location = await StorageLocationRepo.create(
@@ -84,15 +84,12 @@ async def test_save_without_audit_info_raises_error(test_data):
         group=test_data["group"],
         storage_location=test_data["storage_location"],
         report_profile=test_data["report_profile"],
-        external_id="EXT-001",
-        created_by=uuid4(),
         name="Test Item",
         description="Original description",
         manufacturer="Test Manufacturer",
         model="Model X",
-        serial_number="SN001",
+        psa_category=PsaCategory.NONE,
         lendable=True,
-        condition=Condition.GOOD,
     )
 
     # Modify the item
@@ -111,15 +108,12 @@ async def test_single_field_change_recorded_in_changelog(test_data):
         group=test_data["group"],
         storage_location=test_data["storage_location"],
         report_profile=test_data["report_profile"],
-        external_id="EXT-002",
-        created_by=uuid4(),
         name="Test Item",
         description="Original description",
         manufacturer="Test Manufacturer",
         model="Model X",
-        serial_number="SN002",
+        psa_category=PsaCategory.NONE,
         lendable=True,
-        condition=Condition.GOOD,
     )
 
     # Modify the item
@@ -147,22 +141,19 @@ async def test_multiple_field_changes_recorded_in_changelog(test_data):
         group=test_data["group"],
         storage_location=test_data["storage_location"],
         report_profile=test_data["report_profile"],
-        external_id="EXT-003",
-        created_by=uuid4(),
         name="Test Item",
         description="Original description",
         manufacturer="Test Manufacturer",
         model="Model X",
-        serial_number="SN003",
+        psa_category=PsaCategory.NONE,
         lendable=True,
-        condition=Condition.GOOD,
     )
 
     # Modify multiple fields
     item.name = "Modified Item"
     item.description = "Modified description"
     item.manufacturer = "New Manufacturer"
-    item.lendable = False
+    item.model = "Model Y"
 
     user_id = uuid4()
     info = AuditInfo(user_id=user_id, comment="Multiple changes")
@@ -179,8 +170,8 @@ async def test_multiple_field_changes_recorded_in_changelog(test_data):
     assert changelog.new["description"] == "Modified description"
     assert changelog.old["manufacturer"] == "Test Manufacturer"
     assert changelog.new["manufacturer"] == "New Manufacturer"
-    assert changelog.old["lendable"] == True
-    assert changelog.new["lendable"] == False
+    assert changelog.old["model"] == "Model X"
+    assert changelog.new["model"] == "Model Y"
 
 
 @pytest.mark.asyncio
@@ -191,15 +182,12 @@ async def test_foreign_key_change_recorded_in_changelog(test_data):
         group=test_data["group"],
         storage_location=test_data["storage_location"],
         report_profile=test_data["report_profile"],
-        external_id="EXT-004",
-        created_by=uuid4(),
         name="Test Item",
         description="Original description",
         manufacturer="Test Manufacturer",
         model="Model X",
-        serial_number="SN004",
+        psa_category=PsaCategory.NONE,
         lendable=True,
-        condition=Condition.GOOD,
     )
 
     # Modify the foreign key
@@ -228,15 +216,12 @@ async def test_no_changelog_created_when_no_changes(test_data):
         group=test_data["group"],
         storage_location=test_data["storage_location"],
         report_profile=test_data["report_profile"],
-        external_id="EXT-005",
-        created_by=uuid4(),
         name="Test Item",
         description="Original description",
         manufacturer="Test Manufacturer",
         model="Model X",
-        serial_number="SN005",
+        psa_category=PsaCategory.NONE,
         lendable=True,
-        condition=Condition.GOOD,
     )
 
     # Don't modify the item - just try to save
@@ -259,15 +244,12 @@ async def test_transaction_rollback_on_error(test_data):
         group=test_data["group"],
         storage_location=test_data["storage_location"],
         report_profile=test_data["report_profile"],
-        external_id="EXT-006",
-        created_by=uuid4(),
         name="Test Item",
         description="Original description",
         manufacturer="Test Manufacturer",
         model="Model X",
-        serial_number="SN006",
+        psa_category=PsaCategory.NONE,
         lendable=True,
-        condition=Condition.GOOD,
     )
 
     original_name = item.name
@@ -312,15 +294,12 @@ async def test_audit_info_with_empty_comment(test_data):
         group=test_data["group"],
         storage_location=test_data["storage_location"],
         report_profile=test_data["report_profile"],
-        external_id="EXT-007",
-        created_by=uuid4(),
         name="Test Item",
         description="Original description",
         manufacturer="Test Manufacturer",
         model="Model X",
-        serial_number="SN007",
+        psa_category=PsaCategory.NONE,
         lendable=True,
-        condition=Condition.GOOD,
     )
 
     # Modify the item
@@ -347,15 +326,12 @@ async def test_changelog_entry_has_correct_type_and_timestamp(test_data):
         group=test_data["group"],
         storage_location=test_data["storage_location"],
         report_profile=test_data["report_profile"],
-        external_id="EXT-008",
-        created_by=uuid4(),
         name="Test Item",
         description="Original description",
         manufacturer="Test Manufacturer",
         model="Model X",
-        serial_number="SN008",
+        psa_category=PsaCategory.NONE,
         lendable=True,
-        condition=Condition.GOOD,
     )
 
     # Modify the item
