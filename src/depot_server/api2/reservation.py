@@ -1,55 +1,57 @@
 from datetime import datetime
+from uuid import UUID
 
 from fastapi import APIRouter, HTTPException
 
 from depot_server.db2.repository.base import ItemNotFound
+from depot_server.api2.models.reservation import ReservationPending, Reservation
 from depot_server.logic.reservation import ReservationService
 
 router = APIRouter()
 
 @router.get("/reservations")
-async def get_all_reservations():
+async def get_all_reservations() -> list[Reservation]:
     """
     Get all reservations.
     """
-    reservations = ReservationService.get_all_reservations()
+    reservations = await ReservationService.get_all_reservations()
     return reservations
 
 
 @router.get("/reservations/{reservation_id}")
-async def get_reservation(reservation_id: str):
+async def get_reservation(reservation_id: UUID) -> Reservation:
     """
     Get a reservation by its ID.
     """
     try:
-        reservation = ReservationService.get_reservation(reservation_id)
+        reservation = await ReservationService.get_reservation(reservation_id)
         return reservation
     except ItemNotFound as e:
         raise HTTPException(status_code=404, detail=str(e))
 
 
 @router.get("/reservations/user/{user_id}")
-async def get_reservations_by_user(user_id: str):
+async def get_reservations_by_user(user_id: UUID) -> list[Reservation]:
     """
     Get reservations for a specific user.
     """
-    reservations = ReservationService.get_reservations_by_user(user_id)
+    reservations = await ReservationService.get_reservations_by_user(user_id)
     return reservations
 
 @router.get("/reservations/item/{item_id}")
-async def get_reservations_by_item(item_id: str):
+async def get_reservations_by_item(item_id: UUID) -> list[Reservation]:
     """
-    Get reservations for a specific item.
+    Get reservations for a specific item in chronoligical order. This endpoint is intended for itemgroups that contain only one item.
     
     Parameters:
     - item_id: The ID of an itemgroup that contains only one item.
     """
-    reservations = ReservationService.get_reservations_by_item(item_id)
+    reservations = await ReservationService.get_reservations_by_item(item_id)
     return reservations
 
 
 @router.get("/reservations/time-range/{start_time}/{end_time}")
-async def get_reservations_in_time_range(start_time: datetime, end_time: datetime):
+async def get_reservations_in_time_range(start_time: datetime, end_time: datetime) -> list[Reservation]:
     """
     Get reservations within a specific time range.
     
@@ -57,29 +59,29 @@ async def get_reservations_in_time_range(start_time: datetime, end_time: datetim
     - start_time: The start of the time range (ISO 8601 format).
     - end_time: The end of the time range (ISO 8601 format).
     """
-    reservations = ReservationService.get_reservations_in_time_range(start_time, end_time)
+    reservations = await ReservationService.get_reservations_in_time_range(start_time, end_time)
     return reservations
 
 
 @router.post("/reservations")
-async def create_reservation(reservation_data: dict):
+async def create_reservation(reservation_data: ReservationPending):
     """
     Create a new reservation.
     """
     try:
-        reservation = ReservationService.create_reservation(reservation_data)
+        reservation = await ReservationService.create_reservation(reservation_data)
         return reservation
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.put("/reservations/{reservation_id}")
-async def update_reservation(reservation_id: str, reservation_data: dict):
+async def update_reservation(reservation_id: UUID, reservation_data: ReservationPending) -> Reservation:
     """
     Update an existing reservation by its ID.
     """
     try:
-        updated_reservation = ReservationService.update_reservation(reservation_id, reservation_data)
+        updated_reservation = await ReservationService.update_reservation(reservation_id, reservation_data)
         return updated_reservation
     except ItemNotFound as e:
         raise HTTPException(status_code=404, detail=str(e))
@@ -88,12 +90,12 @@ async def update_reservation(reservation_id: str, reservation_data: dict):
 
 
 @router.delete("/reservations/{reservation_id}")
-async def delete_reservation(reservation_id: str):
+async def delete_reservation(reservation_id: UUID) -> dict:
     """
     Delete a reservation by its ID.
     """
     try:
-        ReservationService.delete_reservation(reservation_id)
+        await ReservationService.delete_reservation(reservation_id)
         return {"message": "Reservation deleted successfully."}
     except ItemNotFound as e:
         raise HTTPException(status_code=404, detail=str(e))

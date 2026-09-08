@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from depot_server.db2.models import ItemGroup
+from depot_server.db2.models import Item, ItemGroup
 from depot_server.db2.repository.base import BaseRepo, ItemNotFound, T
 
 
@@ -39,3 +39,15 @@ class ItemGroupRepo(BaseRepo):
     async def get_children_by_parent_id(cls, parent_id: UUID) -> list[ItemGroup]:
         children = await cls.Db_type.filter(parent_id=parent_id)
         return children
+
+    @classmethod
+    async def is_single_item_group(cls, item_group_id: UUID) -> bool:
+        """
+        Check if the given item group contains only one item.
+        """
+        item_group = await cls.get_by_id(item_group_id)
+        if not item_group:
+            raise ItemNotFound(f"ItemGroup with id {item_group_id} not found")
+        if await cls.Db_type.filter(parent_id=item_group_id).exists():
+            return False
+        return await Item.filter(group_id=item_group_id).count() == 1

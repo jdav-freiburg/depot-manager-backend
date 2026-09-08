@@ -25,6 +25,3 @@ class ItemGroup(Model):
         """
         return self.parent is None
 
-    @classmethod
-    def get_next_external_id(self) -> str:
-        return f"[{self.id_prefix}-{self.id_next}]"

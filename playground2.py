@@ -41,11 +41,7 @@ async def init(path):
                                                    lendable=True,
                                                    elements={attache.id: 2, hawk.id: 3}))
     all_composites = await ItemCompositeService.get_all()
-    # for c in all_composites:
-    #     print(f"Composite: {c.name}, Description: {c.description}, Lendable: {c.lendable}, id: {c.id}")
-
-    composite_single = await ItemCompositeService.get_by_id(composite.id)
-    print(f"Composite single: {composite_single.name}, Description: {composite_single.description}, Lendable: {composite_single.lendable}, id: {composite_single.id}")
+    print(await ItemGroupRepo.is_single_item_group(attache.id))
     
 
 if __name__ == "__main__":
