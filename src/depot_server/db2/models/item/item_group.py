@@ -4,9 +4,6 @@ from tortoise import fields
 from tortoise.models import Model
 
 
-
-
-
 class ItemGroup(Model):
     class Meta:
         table: str = "depot_item_group"

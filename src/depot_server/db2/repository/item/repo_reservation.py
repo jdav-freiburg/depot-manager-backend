@@ -4,3 +4,7 @@ from depot_server.db2.repository.audit import AuditableRepo
 
 class ReservationRepo(AuditableRepo):
     Db_type = Reservation
+
+
+class ReservationRepoLink(AuditableRepo):
+    Db_type = Reservation

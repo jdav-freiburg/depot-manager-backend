@@ -18,3 +18,9 @@ class ItemGroupBase(BaseModel):
 class ItemGroup(ItemGroupBase):
     id: UUID
     #group_children: list[UUID] | Literal["NotRequested"] = Field(default="NotRequested")
+
+
+class ItemGroupAmount(BaseModel):
+    item_group_id: UUID
+    total: int
+    available: int

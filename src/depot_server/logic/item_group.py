@@ -1,6 +1,7 @@
+from datetime import datetime
 from uuid import UUID
 
-from depot_server.api2.models.item_group import ItemGroup, ItemGroupBase
+from depot_server.api2.models.item_group import ItemGroup, ItemGroupAmount, ItemGroupBase
 from depot_server.db2.models.item.item_group import ItemGroup as DbItemGroup
 from depot_server.db2.repository.base import ItemNotFound
 from depot_server.db2.repository.item.repo_item_group import ItemGroupRepo
@@ -26,3 +27,21 @@ class ItemGroupService:
             description=item_group.description,
         )
         return db_item_group
+
+    @staticmethod
+    async def get_amount(item_group_id: UUID) -> ItemGroupAmount:
+        raise NotImplementedError("This method is not yet implemented")
+        return ItemGroupAmount(
+            item_group_id=item_group_id,
+            total=total,
+            available=available
+        )
+
+    @staticmethod
+    async def get_amount_in_timespan(item_group_id: UUID, start_time: datetime, end_time: datetime) -> ItemGroupAmount:
+        raise NotImplementedError("This method is not yet implemented")
+        return ItemGroupAmount(
+            item_group_id=item_group_id,
+            total=total,
+            available=available
+        )

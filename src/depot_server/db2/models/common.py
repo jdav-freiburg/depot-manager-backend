@@ -20,3 +20,15 @@ type UserIdField = fields.UUIDField
 class TotalReportState(StrEnum):
     FIT = 'fit'
     UNFIT = 'unfit'
+
+
+class ReservationImportance(StrEnum):
+    TEAM = 'team'
+    PRIVATE = 'private'
+    EXTERNAL = 'external'
+
+
+class ReservationType(StrEnum):
+    BORROW = 'borrow'
+    INVENTUR = 'inventor'
+    MAINTAINANCE = 'maintenance'
