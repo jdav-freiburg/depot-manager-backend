@@ -6,7 +6,7 @@ from tortoise.fields.base import OnDelete
 from tortoise.migrations import operations as ops
 
 from depot_server.db2.models.common import Condition
-from depot_server.db2.models.item.reservation import ReservationState, ReservationType
+from depot_server.db2.models.item.reservation import ReservationType, ReservationImportance
 
 
 class Migration(migrations.Migration):
@@ -148,10 +148,10 @@ class Migration(migrations.Migration):
                 ('is_active', fields.BooleanField()),
                 ('reservation_type',
                  fields.CharEnumField(description='TEAM: team\nPRIVATE: private\nEXTERNAL: external',
-                                      enum_type=ReservationType, max_length=8)),
-                ('reservation_state', fields.CharEnumField(default=ReservationState.RESERVED,
+                                      enum_type=ReservationImportance, max_length=8)),
+                ('reservation_state', fields.CharEnumField(default=ReservationType.RESERVED,
                                                            description='RESERVED: reserved\nINVENTUR: inventur\nMAINTENANCE: maintenance',
-                                                           enum_type=ReservationState, max_length=11)),
+                                                           enum_type=ReservationType, max_length=11)),
             ],
             options={'table': 'depot_reservation', 'app': 'depot', 'pk_attr': 'id'},
             bases=['Model'],

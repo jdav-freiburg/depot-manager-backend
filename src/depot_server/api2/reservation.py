@@ -64,7 +64,7 @@ async def get_reservations_in_time_range(start_time: datetime, end_time: datetim
 
 
 @router.post("/reservations")
-async def create_reservation(reservation_data: ReservationPending):
+async def create_reservation(reservation_data: ReservationPending) -> Reservation:
     """
     Create a new reservation.
     """

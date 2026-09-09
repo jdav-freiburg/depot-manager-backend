@@ -28,20 +28,8 @@ class ItemGroupService:
         )
         return db_item_group
 
-    @staticmethod
-    async def get_amount(item_group_id: UUID) -> ItemGroupAmount:
-        raise NotImplementedError("This method is not yet implemented")
-        return ItemGroupAmount(
-            item_group_id=item_group_id,
-            total=total,
-            available=available
-        )
 
     @staticmethod
-    async def get_amount_in_timespan(item_group_id: UUID, start_time: datetime, end_time: datetime) -> ItemGroupAmount:
-        raise NotImplementedError("This method is not yet implemented")
-        return ItemGroupAmount(
-            item_group_id=item_group_id,
-            total=total,
-            available=available
-        )
+    async def get_total_amount(item_group_id: UUID, only_lendable=True) -> int:
+        # TODO implement actual logic based on reservations and item instances
+        return 5

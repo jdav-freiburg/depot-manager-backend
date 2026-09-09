@@ -11,7 +11,7 @@ class ItemGroup(Model):
     id = fields.UUIDField(primary_key=True)
 
     parent = fields.ForeignKeyField("depot.ItemGroup", null=True, on_delete=fields.RESTRICT,
-                                    related_name="child",
+                                    related_name="children",
                                     description="Used to build up a tree like structure of groups")
 
     name = fields.TextField(null=False)

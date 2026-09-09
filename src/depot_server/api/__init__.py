@@ -20,6 +20,7 @@ from depot_server.api2.tag import router as tags_router
 from depot_server.api2.item import router as items_router_v2
 from depot_server.api2.item_instance import router as item_instance_router
 from depot_server.api2.item_composite import router as item_composite_router
+from depot_server.api2.reservation import router as reservations_router_v2
 from depot_server.config import config
 from depot_server.mail.return_reservation_mail import startup as mail_cron_startup, shutdown as mail_cron_shutdown
 from depot_server.version import version
@@ -48,7 +49,7 @@ router.include_router(item_group_router, prefix=v2_prefix)
 router.include_router(items_router_v2, prefix=v2_prefix)
 router.include_router(item_instance_router, prefix=v2_prefix)
 router.include_router(item_composite_router, prefix=v2_prefix)
-
+router.include_router(reservations_router_v2, prefix=v2_prefix)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

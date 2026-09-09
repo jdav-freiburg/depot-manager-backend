@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from depot_server.db2.models import Item, ItemGroup
+from depot_server.db2.models import ItemGroup
 from depot_server.db2.repository.base import BaseRepo, ItemNotFound, T
 
 
@@ -48,6 +48,6 @@ class ItemGroupRepo(BaseRepo):
         item_group = await cls.get_by_id(item_group_id)
         if not item_group:
             raise ItemNotFound(f"ItemGroup with id {item_group_id} not found")
-        if await cls.Db_type.filter(parent_id=item_group_id).exists():
+        if await item_group.children:
             return False
-        return await Item.filter(group_id=item_group_id).count() == 1
+        return await item_group.item.count() == 1

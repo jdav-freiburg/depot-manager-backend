@@ -4,19 +4,18 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
-from depot_server.db2.models.common import ReservationImportance, UserIdField, ReservationType
+from depot_server.db2.models.common import ReservationImportance, ReservationType
 
 class ReservationMeta(BaseModel):
-    importance: ReservationImportance
     name: Optional[str]
     start: datetime
     end: datetime
-    user_id: UserIdField
     type: ReservationType = Field(default=ReservationType.BORROW)
-    team_id: Optional[UUID]
-    contact: Optional[str]
-    active: bool = Field(default=True)
-    user_notes: Optional[str]
+    importance: ReservationImportance = Field(default=ReservationImportance.TEAM)
+    team_id: Optional[UUID] = None
+    contact: str
+    #active: bool = Field(default=True)
+    user_notes: Optional[str] = None
 
 class ReservationContent(BaseModel):
     item_groups: dict[UUID, int] = {}
@@ -27,3 +26,4 @@ class ReservationPending(ReservationMeta, ReservationContent):
 
 class Reservation(ReservationPending):
     id: UUID = Field(...)
+    user_id: UUID

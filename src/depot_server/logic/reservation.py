@@ -1,18 +1,85 @@
+import uuid
+from uuid import UUID
+from datetime import datetime
+from datetime import timedelta
 
-from depot_server.db2.repository.item.repo_reservation import ReservationRepo
+from tortoise.transactions import in_transaction
+
+from depot_server.api2.models.reservation import Reservation, ReservationPending
+from depot_server.db2.repository.item.repo_reservation import ReservationRepo, ReservationRepoLink, ReservationRepoCompositeLink
+from depot_server.db2.repository.item.repo_item_group import ItemGroupRepo
+from depot_server.logic.item_group import ItemGroupService
+from depot_server.db2.repository.base import ItemNotFound
 
 
 
 class ReservationService:
+    @staticmethod
+    def calculate_max_reserved_amount(links, start_time: datetime, end_time: datetime) -> int:
+        if start_time >= end_time:
+            return 0
+
+        changes = {}
+        for link in links:
+            reservation_start = max(link.reservation.start, start_time)
+            reservation_end = min(link.reservation.end + timedelta(days=1), end_time)
+            changes[reservation_start] = changes.get(reservation_start, 0) + link.amount
+            changes[reservation_end] = changes.get(reservation_end, 0) - link.amount
+
+        reserved_amount = 0
+        maximum_reserved_amount = 0
+        for timestamp in sorted(changes):
+            reserved_amount += changes[timestamp]
+            maximum_reserved_amount = max(maximum_reserved_amount, reserved_amount)
+
+        return maximum_reserved_amount
+
     @classmethod
-    async def create_reservation(cls, reservation_data):
-        # Logic to create a reservation
-        raise NotImplementedError("This method is not yet implemented.")
+    async def get_reserved_amount(cls, item_group_id, start_time: datetime, end_time: datetime) -> int:
+        links = await ReservationRepo.get_links_for_item_group(
+            item_group_id,
+            start_time,
+            end_time,
+        )
+        return cls.calculate_max_reserved_amount(links, start_time, end_time)
+
+    @classmethod
+    async def create_reservation(cls, reservation_data: ReservationPending) -> Reservation:
+        async with in_transaction():
+            # Check if enough items are available in the specified time range
+            if not await cls.are_items_available(reservation_data.item_groups, reservation_data.composite_items, reservation_data.start, reservation_data.end):
+                raise ValueError("Not enough items available for the specified time range.")
+            # Logic to create a reservation
+            reservation = await ReservationRepo.create(name=reservation_data.name,
+                                        start=reservation_data.start,
+                                        end=reservation_data.end,
+                                        user= uuid.uuid4(),  # TODO get actual user
+                                        team=reservation_data.team_id,
+                                        contact=reservation_data.contact,
+                                        #active=reservation_data.active,
+                                        user_notes=reservation_data.user_notes,
+                                        reservation_importance=reservation_data.importance,
+                                        reservation_type=reservation_data.type,
+                                        borrowed=None)
+            for item_group_id, quantity in reservation_data.item_groups.items():
+                if quantity <= 0:
+                    raise ValueError(f"Quantity for item group {item_group_id} must be greater than 0.")
+                await ReservationRepoLink.create(reservation_id=reservation.id,
+                                                item_group_id=item_group_id,
+                                                amount=quantity,
+                                                borrowed=False)
+            for item_composite_id, quantity in reservation_data.composite_items.items():
+                await ReservationRepoCompositeLink.create(reservation_id=reservation.id,
+                                                        composite_item_id=item_composite_id,
+                                                        amount=quantity,
+                                                        borrowed=False)
+            return Reservation(id=reservation.id, user_id=reservation.user, **reservation_data.model_dump())
 
     @classmethod
     async def get_reservation(cls, reservation_id):
-        # Logic to retrieve a reservation by ID
-        raise NotImplementedError("This method is not yet implemented.")
+        reservation = await ReservationRepo.get_by_id(reservation_id)
+        if not reservation:
+            raise ItemNotFound(f"Reservation with ID {reservation_id} not found.")
 
     @classmethod
     async def get_all_reservations(cls):
@@ -43,3 +110,16 @@ class ReservationService:
     async def delete_reservation(cls, reservation_id):
         # Logic to delete a reservation
         raise NotImplementedError("This method is not yet implemented.")
+
+    @classmethod
+    async def are_items_available(cls, item_groups: dict[UUID, int], item_composites: dict[UUID, int], start_time: datetime, end_time: datetime) -> bool:
+        for item_group_id, quantity in item_groups.items():
+            total_amount = await ItemGroupService.get_total_amount(item_group_id)
+            reserved_amount = await cls.get_reserved_amount(item_group_id, start_time, end_time)
+            if total_amount < quantity:
+                return False
+        # for composite_item_id, quantity in item_composites.items():
+        #     available_amount = await ItemCompositeService.get_total_amount(composite_item_id)
+        #     if available_amount.available < quantity:
+        #         return False
+        return True

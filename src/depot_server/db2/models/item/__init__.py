@@ -2,6 +2,6 @@ from .item import Item, PsaCategory
 from .item_group import ItemGroup
 from .item_instance import ItemInstance
 from .item_composite import ItemComposite, ItemCompositeLink
-from .reservation import Reservation, ReservationLink
+from .reservation import Reservation, ReservationGroupLink, ReservationCompositeLink
 from .storage_location import StorageLocation
 from .tag import Tag

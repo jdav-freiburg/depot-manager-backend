@@ -27,7 +27,7 @@ async def init(path):
     modules={"depot": ["depot_server.db2.models"]},
     )
     await Tortoise.generate_schemas()
-    print("Init done")
+    
 
     schraubkarabiner =await ItemGroup.create(name="Schraubkarabiner", description="Schraubkarabiner", lendable=True)
     attache = await ItemGroup.create(name="Petzl attache", description="toller Karabiner", lendable=False, parent=schraubkarabiner)
@@ -41,7 +41,7 @@ async def init(path):
                                                    lendable=True,
                                                    elements={attache.id: 2, hawk.id: 3}))
     all_composites = await ItemCompositeService.get_all()
-    print(await ItemGroupRepo.is_single_item_group(attache.id))
+    print("Init done")
     
 
 if __name__ == "__main__":

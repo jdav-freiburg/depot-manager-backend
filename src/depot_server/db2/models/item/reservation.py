@@ -3,17 +3,7 @@ from enum import StrEnum
 from tortoise import fields
 from tortoise.models import Model
 
-
-class ReservationType(StrEnum):
-    TEAM = 'team'
-    PRIVATE = 'private'
-    EXTERNAL = 'external'
-
-
-class ReservationState(StrEnum):
-    RESERVED = 'reserved'
-    INVENTUR = 'inventur'
-    MAINTENANCE = 'maintenance'
+from ..common import ReservationImportance, ReservationType
 
 
 class Reservation(Model):
@@ -22,28 +12,43 @@ class Reservation(Model):
 
     id = fields.UUIDField(primary_key=True)
 
-    name = fields.data.TextField()
+    name = fields.TextField()
     start = fields.DatetimeField(null=False)
     end = fields.DatetimeField(null=False)
     user = fields.UUIDField(null=False)
     team = fields.UUIDField(null=True)
-    contact = fields.data.TextField()
-    is_active = fields.BooleanField()
-    reservation_type = fields.CharEnumField(ReservationType, null=False)
-    reservation_state = fields.CharEnumField(ReservationState, null=False, default=ReservationState.RESERVED)
+    contact = fields.TextField()
+    user_notes = fields.TextField(null=True)
+    #is_active = fields.BooleanField()
+    reservation_importance = fields.CharEnumField(ReservationImportance, null=False)
+    reservation_type = fields.CharEnumField(ReservationType, null=False, default=ReservationType.BORROW)
 
 
-class ReservationLink(Model):
+
+class ReservationLinkBase(Model):
     class Meta:
-        table: str = "depot_link_reservation__item"
+        abstract = True
 
     id = fields.UUIDField(primary_key=True)
-
-    reservation = fields.ForeignKeyField("depot.Reservation", null=False, related_name="reservation")
-    item_group = fields.ForeignKeyField("depot.ItemGroup", null=False, related_name="item_group")
-
+    amount = fields.IntField(null=False)
     borrowed = fields.DatetimeField(null=True)
     borrowed_message = fields.TextField(null=True)
     returned = fields.DatetimeField(null=True)
     returned_message = fields.TextField(null=True)
-    collector = fields.TextField(description="The person who picked up the item")
+    collector = fields.TextField(description="The person who picked up the item", null=True)
+
+
+class ReservationGroupLink(ReservationLinkBase):
+    class Meta:
+        table: str = "depot_link_reservation__item_group"
+
+    item_group = fields.ForeignKeyField("depot.ItemGroup", null=False, related_name="item_group")
+    reservation = fields.ForeignKeyField("depot.Reservation", null=False, related_name="reservation_groups")
+
+
+class ReservationCompositeLink(ReservationLinkBase):
+    class Meta:
+        table: str = "depot_link_reservation__composite_item"
+
+    composite_item = fields.ForeignKeyField("depot.ItemComposite", null=False, related_name="composite_item")
+    reservation = fields.ForeignKeyField("depot.Reservation", null=False, related_name="reservation_composites")
