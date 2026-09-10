@@ -12,12 +12,19 @@ from depot_server.api2.models.item import FullItem, FullItemRaw, Item, ItemPendi
 
 class ItemService:
     @staticmethod
+    async def get_total_amount(item_id: UUID, only_lendable=True) -> int:
+        item = await ItemRepo.get_item_by_id(item_id)
+        if not item or (only_lendable and not item.lendable):
+            return 0
+        return await ItemInstanceRepo.get_instance_amount(item_id)
+
+    @staticmethod
     async def get_all_items() -> list[Item]:
         db_items = await ItemRepo.get_all_items()
         return [Item.model_validate({
             "id": item.id,
             "group_id": item.group_id,
-            "lendable": item.group.lendable,
+            "lendable": item.lendable,
             "name": item.name,
             "description": item.description,
             "manufacturer": item.manufacturer,
@@ -37,7 +44,7 @@ class ItemService:
         return Item.model_validate({
             "id": db_item.id,
             "group_id": db_item.group_id,
-            "lendable": db_item.group.lendable,
+            "lendable": db_item.lendable,
             "name": db_item.name,
             "description": db_item.description,
             "manufacturer": db_item.manufacturer,
@@ -57,6 +64,7 @@ class ItemService:
         db_item = await ItemRepo.create_item(group_id=db_group.id,
                                              name=item.name,
                                              description=item.description,
+                                             lendable=item.lendable,
                                              manufacturer=item.manufacturer,
                                              model=item.model,
                                              report_profile_id=item.report_profile_id,
@@ -75,7 +83,7 @@ class ItemService:
 
         return FullItem.model_validate({
             "group_id": db_group.id,
-            "lendable": db_group.lendable,
+            "lendable": db_item.lendable,
             "id": db_item.id,
             "name": db_item.name,
             "description": db_item.description,
@@ -101,6 +109,7 @@ class ItemService:
                                              group_id=item.group_id,
                                              name=item.name,
                                              description=item.description,
+                                             lendable=item.lendable,
                                              manufacturer=item.manufacturer,
                                              model=item.model,
                                              report_profile_id=item.report_profile_id,
@@ -110,14 +119,9 @@ class ItemService:
                                              storage_location_id=item.storage_location_id)
         if not db_item:
             return None
-        # Update the item group which contains only this item
-        db_group = await ItemGroupRepo.update_item_group(item_group_id=db_item.group_id,
-                                                         name=item.name,
-                                                         description=item.description,
-                                                         lendable=item.lendable)
         return Item.model_validate({"id": db_item.id,
                                    "group_id": db_item.group_id,
-                                   "lendable": db_group.lendable,
+                                   "lendable": db_item.lendable,
                                    "name": db_item.name,
                                    "description": db_item.description,
                                    "manufacturer": db_item.manufacturer,

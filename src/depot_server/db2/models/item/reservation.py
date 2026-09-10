@@ -38,12 +38,12 @@ class ReservationLinkBase(Model):
     collector = fields.TextField(description="The person who picked up the item", null=True)
 
 
-class ReservationGroupLink(ReservationLinkBase):
+class ReservationItemLink(ReservationLinkBase):
     class Meta:
-        table: str = "depot_link_reservation__item_group"
+        table: str = "depot_link_reservation__item"
 
-    item_group = fields.ForeignKeyField("depot.ItemGroup", null=False, related_name="item_group")
-    reservation = fields.ForeignKeyField("depot.Reservation", null=False, related_name="reservation_groups")
+    item = fields.ForeignKeyField("depot.Item", null=False, related_name="reservation_items")
+    reservation = fields.ForeignKeyField("depot.Reservation", null=False, related_name="reservation_items")
 
 
 class ReservationCompositeLink(ReservationLinkBase):

@@ -11,7 +11,6 @@ class ItemGroupBase(BaseModel):
     name: str
     description: str
     #data: Optional[dict[Any, Any]] = Field(default=None)
-    lendable: bool
     parent: Optional[UUID] = Field(default=None)
 
 

@@ -25,10 +25,9 @@ async def test_get_item_groups_calls_repo(client):
     mock_db_ig.id = ig_id
     mock_db_ig.name = "Group A"
     mock_db_ig.description = "First group"
-    mock_db_ig.lendable = True
     mock_db_ig.parent_id = None
 
-    model_ig = ItemGroup(id=ig_id, name="Group A", description="First group", lendable=True, parent=None)
+    model_ig = ItemGroup(id=ig_id, name="Group A", description="First group", parent=None)
 
     with patch("depot_server.api2.item_group.ItemGroupRepo.get_all", new_callable=AsyncMock) as mock_get_all:
         with patch("depot_server.api2.item_group.item_group_from_orm") as mock_from_orm:
@@ -53,10 +52,9 @@ async def test_get_item_group_by_id_calls_repo(client):
     mock_db_ig.id = ig_id
     mock_db_ig.name = "Single Group"
     mock_db_ig.description = "A single group"
-    mock_db_ig.lendable = False
     mock_db_ig.parent_id = None
 
-    model_ig = ItemGroup(id=ig_id, name="Single Group", description="A single group", lendable=False, parent=None)
+    model_ig = ItemGroup(id=ig_id, name="Single Group", description="A single group", parent=None)
 
     with patch("depot_server.api2.item_group.ItemGroupRepo.get_by_id", new_callable=AsyncMock) as mock_get:
         with patch("depot_server.api2.item_group.item_group_from_orm") as mock_from_orm:
@@ -70,7 +68,6 @@ async def test_get_item_group_by_id_calls_repo(client):
             data = response.json()
             assert data["id"] == str(ig_id)
             assert data["name"] == "Single Group"
-            assert data["lendable"] is False
 
 
 @pytest.mark.asyncio
@@ -94,10 +91,9 @@ async def test_create_item_group_calls_repo(client):
     mock_db_ig.id = ig_id
     mock_db_ig.name = "New Group"
     mock_db_ig.description = "Newly created group"
-    mock_db_ig.lendable = True
     mock_db_ig.parent_id = None
 
-    model_ig = ItemGroup(id=ig_id, name="New Group", description="Newly created group", lendable=True, parent=None)
+    model_ig = ItemGroup(id=ig_id, name="New Group", description="Newly created group", parent=None)
 
     with patch("depot_server.api2.item_group.ItemGroupRepo.create", new_callable=AsyncMock) as mock_create:
         with patch("depot_server.api2.item_group.item_group_from_orm") as mock_from_orm:
@@ -107,7 +103,6 @@ async def test_create_item_group_calls_repo(client):
             payload = {
                 "name": "New Group",
                 "description": "Newly created group",
-                "lendable": True,
                 "parent": None,
             }
             response = client.post("/item_group", json=payload)
@@ -116,7 +111,6 @@ async def test_create_item_group_calls_repo(client):
             call_kwargs = mock_create.call_args[1]
             assert call_kwargs["name"] == "New Group"
             assert call_kwargs["description"] == "Newly created group"
-            assert call_kwargs["lendable"] is True
             assert call_kwargs["parent"] is None
 
             assert response.status_code == 200
@@ -130,10 +124,9 @@ async def test_update_item_group_calls_repo(client):
     mock_db_ig.id = ig_id
     mock_db_ig.name = "Updated Group"
     mock_db_ig.description = "Updated description"
-    mock_db_ig.lendable = False
     mock_db_ig.parent_id = None
 
-    model_ig = ItemGroup(id=ig_id, name="Updated Group", description="Updated description", lendable=False, parent=None)
+    model_ig = ItemGroup(id=ig_id, name="Updated Group", description="Updated description", parent=None)
 
     with patch("depot_server.api2.item_group.item_group_service.update_item_group", new_callable=AsyncMock) as mock_update:
         with patch("depot_server.api2.item_group.item_group_from_orm") as mock_from_orm:
@@ -143,7 +136,6 @@ async def test_update_item_group_calls_repo(client):
             payload = {
                 "name": "Updated Group",
                 "description": "Updated description",
-                "lendable": False,
                 "parent": None,
             }
             response = client.put(f"/item_group/{ig_id}", json=payload)
@@ -177,10 +169,9 @@ async def test_item_group_from_orm_called(client):
     mock_db_ig.id = ig_id
     mock_db_ig.name = "Test Group"
     mock_db_ig.description = "Test description"
-    mock_db_ig.lendable = True
     mock_db_ig.parent_id = None
 
-    model_ig = ItemGroup(id=ig_id, name="Test Group", description="Test description", lendable=True, parent=None)
+    model_ig = ItemGroup(id=ig_id, name="Test Group", description="Test description", parent=None)
 
     with patch("depot_server.api2.item_group.ItemGroupRepo.get_by_id", new_callable=AsyncMock) as mock_get:
         with patch("depot_server.api2.item_group.item_group_from_orm") as mock_from_orm:

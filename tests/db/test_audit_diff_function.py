@@ -34,7 +34,6 @@ async def test_data(init_db):
     group = await ItemGroupRepo.create(
         name="Test Group",
         description="Test Group Description",
-        lendable=True,
         parent=None,
     )
 

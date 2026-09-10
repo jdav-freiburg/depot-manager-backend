@@ -51,6 +51,6 @@ class ItemInstanceRepo(AuditableRepo):
         return item_instances
 
     @classmethod
-    async def get_instance_amount(cls, item_group_id: UUID) -> int:
-        count = await cls.Db_type.filter(item__group_id=item_group_id, condition__in=[Condition.GOOD, Condition.MONITOR]).count()
+    async def get_instance_amount(cls, item_id: UUID) -> int:
+        count = await cls.Db_type.filter(item_id=item_id, condition__in=[Condition.GOOD, Condition.MONITOR]).count()
         return count

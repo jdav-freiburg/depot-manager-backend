@@ -27,13 +27,13 @@ async def item(init_db):
     group = await ItemGroupRepo.create(
         name="Test Group",
         description="Group description",
-        lendable=True,
         parent=None,
     )
     return await ItemRepo.create_item(
         group=group,
         name="Test Item",
         description="Item description",
+        lendable=True,
         psa_category=PsaCategory.NONE,
     )
 

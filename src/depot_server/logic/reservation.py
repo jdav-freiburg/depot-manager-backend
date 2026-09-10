@@ -7,8 +7,7 @@ from tortoise.transactions import in_transaction
 
 from depot_server.api2.models.reservation import Reservation, ReservationPending
 from depot_server.db2.repository.item.repo_reservation import ReservationRepo, ReservationRepoLink, ReservationRepoCompositeLink
-from depot_server.db2.repository.item.repo_item_group import ItemGroupRepo
-from depot_server.logic.item_group import ItemGroupService
+from depot_server.logic.item import ItemService
 from depot_server.logic.item_composite import ItemCompositeService
 from depot_server.db2.repository.base import ItemNotFound
 
@@ -36,9 +35,9 @@ class ReservationService:
         return maximum_reserved_amount
 
     @classmethod
-    async def get_reserved_group_amount(cls, item_group_id, start_time: datetime, end_time: datetime) -> int:
-        links = await ReservationRepo.get_links_for_item_group(
-            item_group_id,
+    async def get_reserved_item_amount(cls, item_id, start_time: datetime, end_time: datetime) -> int:
+        links = await ReservationRepo.get_links_for_item(
+            item_id,
             start_time,
             end_time,
         )
@@ -57,7 +56,7 @@ class ReservationService:
     async def create_reservation(cls, reservation_data: ReservationPending) -> Reservation:
         async with in_transaction():
             # Check if enough items are available in the specified time range
-            if not await cls.are_items_available(reservation_data.item_groups, reservation_data.composite_items, reservation_data.start, reservation_data.end):
+            if not await cls.are_items_available(reservation_data.items, reservation_data.composite_items, reservation_data.start, reservation_data.end):
                 raise ValueError("Not enough items available for the specified time range.")
             # Logic to create a reservation
             reservation = await ReservationRepo.create(name=reservation_data.name,
@@ -71,11 +70,11 @@ class ReservationService:
                                         reservation_importance=reservation_data.importance,
                                         reservation_type=reservation_data.type,
                                         borrowed=None)
-            for item_group_id, quantity in reservation_data.item_groups.items():
+            for item_id, quantity in reservation_data.items.items():
                 if quantity <= 0:
-                    raise ValueError(f"Quantity for item group {item_group_id} must be greater than 0.")
+                    raise ValueError(f"Quantity for item {item_id} must be greater than 0.")
                 await ReservationRepoLink.create(reservation_id=reservation.id,
-                                                item_group_id=item_group_id,
+                                                item_id=item_id,
                                                 amount=quantity,
                                                 borrowed=False)
             for item_composite_id, quantity in reservation_data.composite_items.items():
@@ -122,11 +121,11 @@ class ReservationService:
         raise NotImplementedError("This method is not yet implemented.")
 
     @classmethod
-    async def are_items_available(cls, item_groups: dict[UUID, int], item_composites: dict[UUID, int], start_time: datetime, end_time: datetime) -> bool:
-        for item_group_id, quantity in item_groups.items():
-            total_amount = await ItemGroupService.get_total_amount(item_group_id)
-            reserved_group_amount = await cls.get_reserved_group_amount(item_group_id, start_time, end_time)
-            if total_amount - reserved_group_amount < quantity:
+    async def are_items_available(cls, items: dict[UUID, int], item_composites: dict[UUID, int], start_time: datetime, end_time: datetime) -> bool:
+        for item_id, quantity in items.items():
+            total_amount = await ItemService.get_total_amount(item_id)
+            reserved_item_amount = await cls.get_reserved_item_amount(item_id, start_time, end_time)
+            if total_amount - reserved_item_amount < quantity:
                 return False
             
         for composite_item_id, quantity in item_composites.items():

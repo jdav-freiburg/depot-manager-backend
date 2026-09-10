@@ -41,10 +41,10 @@ async def get_reservations_by_user(user_id: UUID) -> list[Reservation]:
 @router.get("/reservations/item/{item_id}")
 async def get_reservations_by_item(item_id: UUID) -> list[Reservation]:
     """
-    Get reservations for a specific item in chronoligical order. This endpoint is intended for itemgroups that contain only one item.
+    Get reservations for a specific item in chronological order.
     
     Parameters:
-    - item_id: The ID of an itemgroup that contains only one item.
+    - item_id: The ID of an item, not an item instance.
     """
     reservations = await ReservationService.get_reservations_by_item(item_id)
     return reservations

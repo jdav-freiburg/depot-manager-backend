@@ -31,15 +31,15 @@ async def init(path):
     await Tortoise.generate_schemas()
     
 
-    schraubkarabiner =await ItemGroup.create(name="Schraubkarabiner", description="Schraubkarabiner", lendable=True)
-    attache = await ItemGroup.create(name="Petzl attache", description="toller Karabiner", lendable=False, parent=schraubkarabiner)
-    hawk = await ItemGroup.create(name="Ocun Hawk", description="toller Karabiner", lendable=False, parent=schraubkarabiner)
-    attacheitem = await Item.create(group_id=attache.id, name="Petzl attache", description="toller Karabiner", psa_category=PsaCategory.CAT_1)
-    hawkitem = await Item.create(group_id=hawk.id, name="Ocun Hawk", description="toller Karabiner", psa_category=PsaCategory.CAT_1)
+    schraubkarabiner = await ItemGroup.create(name="Schraubkarabiner", description="Schraubkarabiner")
+    attache = await ItemGroup.create(name="Petzl attache", description="toller Karabiner", parent=schraubkarabiner)
+    hawk = await ItemGroup.create(name="Ocun Hawk", description="toller Karabiner", parent=schraubkarabiner)
+    attacheitem = await Item.create(group_id=attache.id, name="Petzl attache", description="toller Karabiner", lendable=False, psa_category=PsaCategory.CAT_1)
+    hawkitem = await Item.create(group_id=hawk.id, name="Ocun Hawk", description="toller Karabiner", lendable=False, psa_category=PsaCategory.CAT_1)
     for i in range(5):
-        await ItemInstance.create(item=hawkitem, serial_number=f"SN{i}", manufacture_date="2023-01-01", purchase_date="2023-01-02", first_use_date="2023-01-03", condition=Condition.GOOD, created_by=UUID("00000000-0000-0000-0000-000000000001"))
-    schnapperinstance = await ItemInstance.create(item=attacheitem,serial_number="SN123", manufacture_date="2023-01-01", purchase_date="2023-01-02", first_use_date="2023-01-03", condition=Condition.GOOD, created_by=UUID("00000000-0000-0000-0000-000000000001"))
-    myitems = await ItemGroupRepo.create(name="My Item", description="My Item Description", lendable=True)
+        await ItemInstance.create(item=hawkitem, serial_number=f"SN{i}", manufacture_date="2023-01-01", purchase_date="2023-01-02", first_use_date="2023-01-03", condition=Condition.GOOD)
+    schnapperinstance = await ItemInstance.create(item=attacheitem,serial_number="SN123", manufacture_date="2023-01-01", purchase_date="2023-01-02", first_use_date="2023-01-03", condition=Condition.GOOD)
+    myitems = await ItemGroupRepo.create(name="My Item", description="My Item Description")
     composite = await ItemCompositeService.create(ItemCompositeBase(name="My Composite Item",
                                                    description="My Composite Item Description",
                                                    lendable=True,

@@ -16,7 +16,6 @@ class ItemGroup(Model):
 
     name = fields.TextField(null=False)
     description = fields.TextField()
-    lendable = fields.BooleanField(description="Shows if the item can actually be lent or not. ")
 
     @property
     def is_root(self) -> bool:

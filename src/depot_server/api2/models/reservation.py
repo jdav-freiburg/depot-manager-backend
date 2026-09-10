@@ -18,7 +18,7 @@ class ReservationMeta(BaseModel):
     user_notes: Optional[str] = None
 
 class ReservationContent(BaseModel):
-    item_groups: dict[UUID, int] = {}
+    items: dict[UUID, int] = {}
     composite_items: dict[UUID, int] = {}
 
 class ReservationPending(ReservationMeta, ReservationContent):

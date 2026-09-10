@@ -28,6 +28,7 @@ class Item(Model):
                                  related_name="item")
     name = fields.TextField(null=False)
     description = fields.TextField(null=True)
+    lendable = fields.BooleanField(description="Shows if the item can actually be lent or not. ")
     manufacturer = fields.TextField(null=True)
     model = fields.TextField(null=True)
     report_profile = fields.ForeignKeyField(ReportProfile, on_delete=fields.RESTRICT, null=True, related_name="items")

@@ -13,7 +13,6 @@ def item_group_from_orm(item_group: DbItemGroup) -> ItemGroup:
         id=item_group.id,
         name=item_group.name,
         description=item_group.description,
-        lendable=item_group.lendable,
         parent=item_group.parent_id
     )
 

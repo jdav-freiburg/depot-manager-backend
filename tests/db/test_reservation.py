@@ -5,7 +5,8 @@ import pytest
 import pytest_asyncio
 from tortoise import Tortoise
 
-from depot_server.db2.models import ItemGroup, Reservation, ReservationGroupLink
+from depot_server.db2.models import Item, ItemGroup, Reservation, ReservationItemLink
+from depot_server.db2.models.item.item import PsaCategory
 from depot_server.db2.models.common import ReservationImportance
 from depot_server.logic.reservation import ReservationService
 
@@ -23,7 +24,12 @@ async def test_get_reserved_amount_returns_peak_overlap(init_db):
     item_group = await ItemGroup.create(
         name="Test Group",
         description="Group description",
+    )
+    item = await Item.create(
+        group=item_group,
+        name="Test Item",
         lendable=True,
+        psa_category=PsaCategory.NONE,
     )
 
     reservations = [
@@ -41,14 +47,14 @@ async def test_get_reserved_amount_returns_peak_overlap(init_db):
             contact="test@example.com",
             reservation_importance=ReservationImportance.PRIVATE,
         )
-        await ReservationGroupLink.create(
-            item_group=item_group,
+        await ReservationItemLink.create(
+            item=item,
             reservation=reservation,
             amount=amount,
         )
 
-    assert await ReservationService.get_reserved_amount(
-        item_group.id,
+    assert await ReservationService.get_reserved_item_amount(
+        item.id,
         datetime(2025, 12, 31, tzinfo=timezone.utc),
         datetime(2026, 1, 3, tzinfo=timezone.utc),
     ) == 5

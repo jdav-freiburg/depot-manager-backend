@@ -24,7 +24,6 @@ async def item_data(init_db):
     group = await ItemGroupRepo.create(
         name="Test Group",
         description="Group description",
-        lendable=True,
         parent=None,
     )
     return {
@@ -33,6 +32,7 @@ async def item_data(init_db):
             group=group,
             name="Test Item",
             description="Item description",
+            lendable=True,
             manufacturer="Manufacturer",
             model="Model X",
             psa_category=PsaCategory.NONE,
