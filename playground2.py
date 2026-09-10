@@ -3,6 +3,7 @@ from os import path
 from uuid import UUID
 
 from tortoise import Tortoise
+from tortoise.expressions import Q
 
 from depot_server.api2.models.item_composite import ItemCompositeBase
 from depot_server.db2.models import Item, ItemInstance, ItemGroup
@@ -11,6 +12,7 @@ from depot_server.db2.models.common import Condition
 from depot_server.db2.repository.item.repo_item import ItemRepo
 from depot_server.db2.repository.item.repo_item_group import ItemGroupRepo
 from depot_server.db2.repository.item.repo_item_composite import ItemCompositeRepo
+from depot_server.db2.repository.item.repo_item_instance import ItemInstanceRepo
 from depot_server.logic.item_composite import ItemCompositeService
 
 
@@ -34,6 +36,8 @@ async def init(path):
     hawk = await ItemGroup.create(name="Ocun Hawk", description="toller Karabiner", lendable=False, parent=schraubkarabiner)
     attacheitem = await Item.create(group_id=attache.id, name="Petzl attache", description="toller Karabiner", psa_category=PsaCategory.CAT_1)
     hawkitem = await Item.create(group_id=hawk.id, name="Ocun Hawk", description="toller Karabiner", psa_category=PsaCategory.CAT_1)
+    for i in range(5):
+        await ItemInstance.create(item=hawkitem, serial_number=f"SN{i}", manufacture_date="2023-01-01", purchase_date="2023-01-02", first_use_date="2023-01-03", condition=Condition.GOOD, created_by=UUID("00000000-0000-0000-0000-000000000001"))
     schnapperinstance = await ItemInstance.create(item=attacheitem,serial_number="SN123", manufacture_date="2023-01-01", purchase_date="2023-01-02", first_use_date="2023-01-03", condition=Condition.GOOD, created_by=UUID("00000000-0000-0000-0000-000000000001"))
     myitems = await ItemGroupRepo.create(name="My Item", description="My Item Description", lendable=True)
     composite = await ItemCompositeService.create(ItemCompositeBase(name="My Composite Item",
@@ -42,7 +46,9 @@ async def init(path):
                                                    elements={attache.id: 2, hawk.id: 3}))
     all_composites = await ItemCompositeService.get_all()
     print("Init done")
-    
+    #count = await ItemGroupRepo.Db_type.filter(id=attache.id).select_related("item").all().select_related("item_instances").count()
+    count = await ItemInstanceRepo.Db_type.filter(item__group_id=hawk.id, condition__in=[Condition.GOOD, Condition.MONITOR]).count()
+    print(f"Count: {count}")
 
 if __name__ == "__main__":
     a = "hallo"

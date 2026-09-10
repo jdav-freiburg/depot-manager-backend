@@ -2,6 +2,7 @@ from uuid import UUID
 from depot_server.db2.models import ItemInstance
 from depot_server.db2.repository.audit import AuditableRepo
 from depot_server.db2.repository.base import ItemNotFound
+from depot_server.db2.models.common import Condition
 
 class ItemInstanceRepo(AuditableRepo):
     Db_type = ItemInstance
@@ -48,3 +49,8 @@ class ItemInstanceRepo(AuditableRepo):
     async def get_item_instances_by_item_id(cls, item_id: UUID) -> list[ItemInstance]:
         item_instances = await cls.Db_type.filter(item_id=item_id)
         return item_instances
+
+    @classmethod
+    async def get_instance_amount(cls, item_group_id: UUID) -> int:
+        count = await cls.Db_type.filter(item__group_id=item_group_id, condition__in=[Condition.GOOD, Condition.MONITOR]).count()
+        return count

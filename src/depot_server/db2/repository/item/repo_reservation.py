@@ -21,3 +21,11 @@ class ReservationRepoLink(AuditableRepo):
 
 class ReservationRepoCompositeLink(AuditableRepo):
     Db_type = ReservationCompositeLink
+
+    @classmethod
+    async def get_links_for_composite_item(cls, composite_item_id, start_time, end_time):
+        return await cls.Db_type.filter(
+            composite_item_id=composite_item_id,
+            reservation__start__lt=end_time,
+            reservation__end__gt=start_time,
+        ).select_related("reservation")

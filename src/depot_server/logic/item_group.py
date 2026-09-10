@@ -31,5 +31,5 @@ class ItemGroupService:
 
     @staticmethod
     async def get_total_amount(item_group_id: UUID, only_lendable=True) -> int:
-        # TODO implement actual logic based on reservations and item instances
-        return 5
+        count = await ItemGroupRepo.Db_type.filter(id=item_group_id).select_related("item").select_related("item_instances").count()
+        return count

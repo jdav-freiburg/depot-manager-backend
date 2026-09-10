@@ -1,3 +1,4 @@
+from uuid import UUID
 
 from depot_server.api2.models.item_composite import ItemCompositeBase, ItemComposite as ApiItemComposite
 from depot_server.db2.models.item.item_composite import ItemComposite as DbItemComposite, ItemCompositeLink
@@ -72,3 +73,8 @@ class ItemCompositeService:
                 await ItemCompositeLinkRepo.delete_by_id(link.id)
             await ItemCompositeRepo.delete_by_id(item_composite_id)
         return
+
+    @staticmethod
+    async def get_total_amount(item_composite_id: UUID) -> int:
+        #TODO Implement logic
+        return 5

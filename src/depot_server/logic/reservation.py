@@ -9,13 +9,14 @@ from depot_server.api2.models.reservation import Reservation, ReservationPending
 from depot_server.db2.repository.item.repo_reservation import ReservationRepo, ReservationRepoLink, ReservationRepoCompositeLink
 from depot_server.db2.repository.item.repo_item_group import ItemGroupRepo
 from depot_server.logic.item_group import ItemGroupService
+from depot_server.logic.item_composite import ItemCompositeService
 from depot_server.db2.repository.base import ItemNotFound
 
 
 
 class ReservationService:
     @staticmethod
-    def calculate_max_reserved_amount(links, start_time: datetime, end_time: datetime) -> int:
+    def _calculate_max_reserved_amount(links, start_time: datetime, end_time: datetime) -> int:
         if start_time >= end_time:
             return 0
 
@@ -35,13 +36,22 @@ class ReservationService:
         return maximum_reserved_amount
 
     @classmethod
-    async def get_reserved_amount(cls, item_group_id, start_time: datetime, end_time: datetime) -> int:
+    async def get_reserved_group_amount(cls, item_group_id, start_time: datetime, end_time: datetime) -> int:
         links = await ReservationRepo.get_links_for_item_group(
             item_group_id,
             start_time,
             end_time,
         )
-        return cls.calculate_max_reserved_amount(links, start_time, end_time)
+        return cls._calculate_max_reserved_amount(links, start_time, end_time)
+
+    @classmethod
+    async def get_reserved_composite_amount(cls, composite_item_id, start_time: datetime, end_time: datetime) -> int:
+        links = await ReservationRepoCompositeLink.get_links_for_composite_item(
+            composite_item_id,
+            start_time,
+            end_time,
+        )
+        return cls._calculate_max_reserved_amount(links, start_time, end_time)
 
     @classmethod
     async def create_reservation(cls, reservation_data: ReservationPending) -> Reservation:
@@ -115,11 +125,13 @@ class ReservationService:
     async def are_items_available(cls, item_groups: dict[UUID, int], item_composites: dict[UUID, int], start_time: datetime, end_time: datetime) -> bool:
         for item_group_id, quantity in item_groups.items():
             total_amount = await ItemGroupService.get_total_amount(item_group_id)
-            reserved_amount = await cls.get_reserved_amount(item_group_id, start_time, end_time)
-            if total_amount < quantity:
+            reserved_group_amount = await cls.get_reserved_group_amount(item_group_id, start_time, end_time)
+            if total_amount - reserved_group_amount < quantity:
                 return False
-        # for composite_item_id, quantity in item_composites.items():
-        #     available_amount = await ItemCompositeService.get_total_amount(composite_item_id)
-        #     if available_amount.available < quantity:
-        #         return False
+            
+        for composite_item_id, quantity in item_composites.items():
+            available_amount = await ItemCompositeService.get_total_amount(composite_item_id)
+            reserved_composite_amount = await cls.get_reserved_composite_amount(composite_item_id, start_time, end_time)
+            if available_amount - reserved_composite_amount < quantity:
+                return False
         return True
