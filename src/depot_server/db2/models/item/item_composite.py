@@ -18,6 +18,6 @@ class ItemCompositeLink(Model):
     id = fields.UUIDField(primary_key=True)
 
     item_composite = fields.ForeignKeyField("depot.ItemComposite", null=False, related_name="item_composite_link")
-    item_group = fields.ForeignKeyField("depot.ItemGroup", null=False, related_name="item_composite_link")
+    item = fields.ForeignKeyField("depot.Item", null=False, related_name="item_link")
 
     amount = fields.IntField(null=False, description="The quantity of the item in the composite")

@@ -10,7 +10,7 @@ from ...db2.models.item.item import PsaCategory
 from .item_group import ItemGroup
 
 
-class ItemRaw(BaseModel):
+class ItemBase(BaseModel):
     name: str = Field(...)
     description: Optional[str] = None
     manufacturer: Optional[str] = None
@@ -20,11 +20,9 @@ class ItemRaw(BaseModel):
     max_usage_lifespan: Optional[timedelta] = None
     psa_category: PsaCategory = Field(...)
     storage_location_id: Optional[UUID] = None
-    
-class ItemBase(ItemRaw):
-    group_id: UUID
+    group_id: Optional[UUID] = None
     lendable: bool = Field(...)
-
+    
 class Item(ItemBase):
     id: UUID = Field(...)
     #total_report_state: Optional[TotalReportState] = Field(...)
@@ -46,18 +44,18 @@ class ItemInstanceRaw(BaseModel):
 class ItemInstanceBase(ItemInstanceRaw):
     item_id: UUID
 
-class ItemInstancePending(ItemInstanceBase):
-    change_comment: str = Field(...)
-
 class ItemInstance(ItemInstanceBase):
     id: UUID = Field(...)
     created_at: datetime = Field(...)
 
+class ItemInstancePending(ItemInstanceBase):
+    change_comment: str = Field(...)
 
-class FullItemRaw(ItemRaw, ItemInstanceRaw):
-    lendable: bool = Field(...)
+
+class FullItemRaw(ItemBase, ItemInstanceRaw):
+    pass
 
 class FullItem(FullItemRaw):
     id: UUID = Field(description="The unique identifier of the item type")
-    group_id: UUID = Field(description="ID of the group that contains only this item type")
+    group_id: Optional[UUID] = None
     instance_id: UUID = Field(description="ID of the instance of this item")

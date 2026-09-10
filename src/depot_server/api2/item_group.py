@@ -42,7 +42,7 @@ async def create_item_group(item_group: ItemGroupBase) -> ItemGroup:
 async def update_item_group(item_group_id: UUID, item_group: ItemGroupBase) -> ItemGroup:
     """Update an existing item_group"""
     try:
-        db_item_group = await item_group_service.update_item_group(item_group_id, item_group)
+        db_item_group = await ItemGroupRepo.update_item_group(item_group_id, **item_group.model_dump())
     except ItemNotFound as ex:
         raise HTTPException(status_code=404, detail=str(ex))
     if not db_item_group:

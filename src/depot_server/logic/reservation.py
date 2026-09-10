@@ -36,7 +36,7 @@ class ReservationService:
 
     @classmethod
     async def get_reserved_item_amount(cls, item_id, start_time: datetime, end_time: datetime) -> int:
-        links = await ReservationRepo.get_links_for_item(
+        links = await ReservationRepoLink.get_links_for_item(
             item_id,
             start_time,
             end_time,

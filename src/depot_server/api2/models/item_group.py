@@ -11,15 +11,10 @@ class ItemGroupBase(BaseModel):
     name: str
     description: str
     #data: Optional[dict[Any, Any]] = Field(default=None)
-    parent: Optional[UUID] = Field(default=None)
+    parent_id: Optional[UUID] = Field(default=None)
 
 
 class ItemGroup(ItemGroupBase):
     id: UUID
     #group_children: list[UUID] | Literal["NotRequested"] = Field(default="NotRequested")
 
-
-class ItemGroupAmount(BaseModel):
-    item_group_id: UUID
-    total: int
-    available: int

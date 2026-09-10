@@ -7,7 +7,7 @@ class ItemCompositeBase(BaseModel):
     name: str
     description: Optional[str] = None
     lendable: bool
-    elements: dict[UUID, int] = {}  # Mapping of item_group_id to amount of items in the composite
+    elements: dict[UUID, int] = {}  # Mapping of item_id to amount of items in the composite
 
 class ItemComposite(ItemCompositeBase):
     id: UUID

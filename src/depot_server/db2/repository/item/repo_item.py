@@ -23,10 +23,6 @@ class ItemRepo(AuditableRepo):
         return item
 
     @classmethod
-    async def update_by_item_group(cls, group_id: UUID, **kwargs) -> int:
-        return await cls.Db_type.filter(group_id=group_id).update(**kwargs)
-
-    @classmethod
     async def delete_item(cls, item_id: UUID) -> None:
         await cls.delete_by_id(item_id)
 

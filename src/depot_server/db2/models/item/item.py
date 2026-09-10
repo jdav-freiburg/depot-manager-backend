@@ -24,8 +24,7 @@ class Item(Model):
         table: str = "depot_item"
 
     id = fields.UUIDField(primary_key=True)
-    group = fields.OneToOneField(ItemGroup, source_field="group_id", to_field="id", on_delete=fields.RESTRICT,
-                                 related_name="item")
+    group = fields.ForeignKeyField(ItemGroup, on_delete=fields.RESTRICT, related_name="item", null=True)
     name = fields.TextField(null=False)
     description = fields.TextField(null=True)
     lendable = fields.BooleanField(description="Shows if the item can actually be lent or not. ")

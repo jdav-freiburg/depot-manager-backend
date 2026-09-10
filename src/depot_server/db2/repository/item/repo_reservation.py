@@ -5,18 +5,18 @@ from depot_server.db2.repository.audit import AuditableRepo
 class ReservationRepo(AuditableRepo):
     Db_type = Reservation
 
-    @classmethod
-    async def get_links_for_item(cls, item_id, start_time, end_time):
-        return await ReservationItemLink.filter(
-            item_id=item_id,
-            reservation__start__lt=end_time,
-            reservation__end__gt=start_time,
-        ).select_related("reservation")
-
 
 
 class ReservationRepoLink(AuditableRepo):
     Db_type = ReservationItemLink
+
+    @classmethod
+    async def get_links_for_item(cls, item_id, start_time, end_time):
+        return await cls.Db_type.filter(
+            item_id=item_id,
+            reservation__start__lt=end_time,
+            reservation__end__gt=start_time,
+        ).select_related("reservation")
 
 
 class ReservationRepoCompositeLink(AuditableRepo):

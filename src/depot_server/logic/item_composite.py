@@ -16,7 +16,7 @@ class ItemCompositeService:
                                  name=composite.name,
                                  description=composite.description,
                                  lendable=composite.lendable,
-                                 elements={link.item_group_id: link.amount
+                                 elements={link.item_id: link.amount
                                            for link in composite.item_composite_link})
                 for composite in composites]
 
@@ -30,13 +30,13 @@ class ItemCompositeService:
                                 name=composite.name,
                                 description=composite.description,
                                 lendable=composite.lendable,
-                                elements={element.item_group_id: element.amount for element in elements})
+                                elements={element.item_id: element.amount for element in elements})
 
     @staticmethod
     async def create(item_composite: ItemCompositeBase) -> ApiItemComposite:
         composite_db = await ItemCompositeRepo.create(name=item_composite.name, description=item_composite.description, lendable=item_composite.lendable)
-        for group_id, amount in item_composite.elements.items():
-            await ItemCompositeLinkRepo.create(item_composite=composite_db, item_group_id=group_id, amount=amount)
+        for item_id, amount in item_composite.elements.items():
+            await ItemCompositeLinkRepo.create(item_composite=composite_db, item_id=item_id, amount=amount)
         return ApiItemComposite(id=composite_db.id,
                                 name=composite_db.name,
                                 description=composite_db.description,
@@ -53,15 +53,15 @@ class ItemCompositeService:
         # Update / Delete existing links 
         ids = []
         for link in current_links:
-            if link.id not in item_composite.elements:
+            if link.item_id not in item_composite.elements:
                 await ItemCompositeLinkRepo.delete_by_id(link.id)
             else:
-                await ItemCompositeLinkRepo.update(link.id, amount=item_composite.elements[link.item_group_id])
-                ids.append(link.item_group_id)
+                await ItemCompositeLinkRepo.update(link.id, amount=item_composite.elements[link.item_id])
+                ids.append(link.item_id)
         # Add new links
-        for group_id, amount in item_composite.elements.items():
-            if group_id not in ids:
-                await ItemCompositeLinkRepo.create(item_composite_id=item_composite_id, item_group_id=group_id, amount=amount)
+        for item_id, amount in item_composite.elements.items():
+            if item_id not in ids:
+                await ItemCompositeLinkRepo.create(item_composite_id=item_composite_id, item_id=item_id, amount=amount)
         return await ItemCompositeService.get_by_id(item_composite_id)
 
 
