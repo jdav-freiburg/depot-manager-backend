@@ -2,6 +2,7 @@ import uuid
 from uuid import UUID
 from datetime import datetime
 from datetime import timedelta
+from datetime import timezone
 
 from tortoise.transactions import in_transaction
 
@@ -18,14 +19,22 @@ class ReservationValidationError(ValueError):
 
 class ReservationService:
     @staticmethod
+    def _normalize_datetime(value: datetime) -> datetime:
+        if value.tzinfo is None:
+            return value.replace(tzinfo=timezone.utc)
+        return value.astimezone(timezone.utc)
+
+    @staticmethod
     def _calculate_max_reserved_amount(links, start_time: datetime, end_time: datetime) -> int:
-        if start_time >= end_time:
+        start_time = ReservationService._normalize_datetime(start_time)
+        end_time = ReservationService._normalize_datetime(end_time)
+        if start_time > end_time:
             return 0
 
         changes = {}
         for link in links:
-            reservation_start = max(link.reservation.start, start_time)
-            reservation_end = min(link.reservation.end + timedelta(days=1), end_time)
+            reservation_start = max(ReservationService._normalize_datetime(link.reservation.start), start_time)
+            reservation_end = min(ReservationService._normalize_datetime(link.reservation.end) + timedelta(days=1), end_time)
             changes[reservation_start] = changes.get(reservation_start, 0) + link.amount
             changes[reservation_end] = changes.get(reservation_end, 0) - link.amount
 
@@ -39,7 +48,7 @@ class ReservationService:
 
     @classmethod
     async def get_reserved_item_amount(cls, item_id, start_time: datetime, end_time: datetime) -> int:
-        links = await ReservationRepoLink.get_links_for_item(
+        links = await ReservationRepoLink.get_by_item(
             item_id,
             start_time,
             end_time,
@@ -88,13 +97,20 @@ class ReservationService:
             return Reservation(id=reservation.id, user_id=reservation.user, **reservation_data.model_dump())
 
     @classmethod
-    async def get_reservation(cls, reservation_id):
+    async def get_reservation(cls, reservation_id) -> Reservation:
         reservation = await ReservationRepo.get_by_id(reservation_id)
         if not reservation:
             raise ItemNotFound(f"Reservation with ID {reservation_id} not found.")
+        elements = await ReservationRepoLink.get_by_reservation(reservation_id)
+        composites = await ReservationRepoCompositeLink.get_by_reservation(reservation_id)
+        
+        return Reservation(id=reservation.id, user_id=reservation.user,
+                           items={e.item_id: e.amount for e in elements},
+                           composite_items={c.composite_item_id: c.amount for c in composites},
+                           **reservation.model_dump())
 
     @classmethod
-    async def get_all_reservations(cls):
+    async def get_all_reservations(cls) -> list[Reservation]:
         # Logic to retrieve all reservations
         raise NotImplementedError("This method is not yet implemented.")
 

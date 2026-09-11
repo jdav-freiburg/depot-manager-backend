@@ -11,12 +11,18 @@ class ReservationRepoLink(AuditableRepo):
     Db_type = ReservationItemLink
 
     @classmethod
-    async def get_links_for_item(cls, item_id, start_time, end_time):
+    async def get_by_item(cls, item_id, start_time, end_time):
         return await cls.Db_type.filter(
             item_id=item_id,
             reservation__start__lt=end_time,
             reservation__end__gt=start_time,
         ).select_related("reservation")
+
+    @classmethod
+    async def get_by_reservation(cls, reservation_id):
+        return await cls.Db_type.filter(
+            reservation_id=reservation_id
+        )
 
 
 class ReservationRepoCompositeLink(AuditableRepo):
@@ -29,3 +35,9 @@ class ReservationRepoCompositeLink(AuditableRepo):
             reservation__start__lt=end_time,
             reservation__end__gt=start_time,
         ).select_related("reservation")
+
+    @classmethod
+    async def get_by_reservation(cls, reservation_id):
+        return await cls.Db_type.filter(
+            reservation_id=reservation_id
+        )
