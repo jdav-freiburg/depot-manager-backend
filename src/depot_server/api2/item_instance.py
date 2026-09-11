@@ -3,6 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter, HTTPException
 
 from ..db2.repository.item.repo_item_instance import ItemInstanceRepo
+from ..db2.repository.base import ItemNotFound
 from ..logic.item_instance import ItemInstanceService, ItemInstanceUniqueConflict
 
 from .models.item import ItemInstance, ItemInstanceBase, ItemInstancePending
@@ -43,5 +44,5 @@ async def update_item_instance(item_instance_id: UUID, item_instance: ItemInstan
 async def delete_item_instance(item_instance_id: UUID) -> None:
     try:
         await ItemInstanceRepo.delete_item_instance(item_instance_id)
-    except Exception as e:
-        raise HTTPException(status_code=404, detail=str(e))
+    except ItemNotFound as ex:
+        raise HTTPException(status_code=404, detail=str(ex)) from ex

@@ -3,9 +3,9 @@ from uuid import UUID, uuid4
 from fastapi import APIRouter, HTTPException
 
 from depot_server.db2.repository.item.repo_item_instance import ItemInstanceRepo
-from src.depot_server.db2.models.item.item import Item as DbItem
-from src.depot_server.db2.repository.item.repo_item import ItemRepo
-from src.depot_server.logic.item import ItemService
+from depot_server.db2.repository.base import ItemNotFound
+from depot_server.db2.repository.item.repo_item import ItemRepo
+from depot_server.logic.item import ItemService
 from .models.item import Item, ItemPending, ItemBase, ItemInstance, FullItem, FullItemRaw
 
 itemservice = ItemService()
@@ -40,8 +40,8 @@ async def update_item(item_id: UUID, item: ItemPending) -> Item:
 async def delete_item(item_id: UUID) -> None:
     try:
         await ItemRepo.delete_item(item_id)
-    except Exception as e:
-        raise HTTPException(status_code=404, detail=str(e))
+    except ItemNotFound as ex:
+        raise HTTPException(status_code=404, detail=str(ex)) from ex
 
 @router.get("/item/{item_id}/instances")
 async def get_item_instances(item_id: UUID) -> list[ItemInstance]:

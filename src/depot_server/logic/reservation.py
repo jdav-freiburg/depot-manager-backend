@@ -12,6 +12,9 @@ from depot_server.logic.item_composite import ItemCompositeService
 from depot_server.db2.repository.base import ItemNotFound
 
 
+class ReservationValidationError(ValueError):
+    """Raised when reservation data cannot be fulfilled or is invalid."""
+
 
 class ReservationService:
     @staticmethod
@@ -57,7 +60,7 @@ class ReservationService:
         async with in_transaction():
             # Check if enough items are available in the specified time range
             if not await cls.are_items_available(reservation_data.items, reservation_data.composite_items, reservation_data.start, reservation_data.end):
-                raise ValueError("Not enough items available for the specified time range.")
+                raise ReservationValidationError("Not enough items available for the specified time range.")
             # Logic to create a reservation
             reservation = await ReservationRepo.create(name=reservation_data.name,
                                         start=reservation_data.start,
@@ -72,7 +75,7 @@ class ReservationService:
                                         borrowed=None)
             for item_id, quantity in reservation_data.items.items():
                 if quantity <= 0:
-                    raise ValueError(f"Quantity for item {item_id} must be greater than 0.")
+                    raise ReservationValidationError(f"Quantity for item {item_id} must be greater than 0.")
                 await ReservationRepoLink.create(reservation_id=reservation.id,
                                                 item_id=item_id,
                                                 amount=quantity,

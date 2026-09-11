@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException
 
 from depot_server.db2.repository.item.repo_storage_location import StorageLocationRepo, \
 	StorageLocation as DbStorageLocation
+from depot_server.db2.repository.base import ItemNotFound
 from .models.storage_location import StorageLocation, StorageLocationPending
 
 router = APIRouter()
@@ -61,4 +62,7 @@ async def update_storage_location(location_id: UUID, payload: StorageLocationPen
 
 @router.delete("/storage_location/{location_id}")
 async def delete_storage_location(location_id: UUID) -> None:
-    await StorageLocationRepo.delete_by_id(location_id)
+    try:
+        await StorageLocationRepo.delete_by_id(location_id)
+    except ItemNotFound as ex:
+        raise HTTPException(status_code=404, detail=str(ex)) from ex

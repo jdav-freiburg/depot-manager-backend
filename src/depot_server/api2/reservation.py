@@ -6,6 +6,7 @@ from fastapi import APIRouter, HTTPException
 from depot_server.db2.repository.base import ItemNotFound
 from depot_server.api2.models.reservation import ReservationPending, Reservation
 from depot_server.logic.reservation import ReservationService
+from depot_server.logic.reservation import ReservationService, ReservationValidationError
 
 router = APIRouter()
 
@@ -71,8 +72,8 @@ async def create_reservation(reservation_data: ReservationPending) -> Reservatio
     try:
         reservation = await ReservationService.create_reservation(reservation_data)
         return reservation
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    except ReservationValidationError as ex:
+        raise HTTPException(status_code=422, detail=str(ex)) from ex
 
 
 @router.put("/reservations/{reservation_id}")
@@ -83,10 +84,10 @@ async def update_reservation(reservation_id: UUID, reservation_data: Reservation
     try:
         updated_reservation = await ReservationService.update_reservation(reservation_id, reservation_data)
         return updated_reservation
-    except ItemNotFound as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    except ItemNotFound as ex:
+        raise HTTPException(status_code=404, detail=str(ex)) from ex
+    except ReservationValidationError as ex:
+        raise HTTPException(status_code=422, detail=str(ex)) from ex
 
 
 @router.delete("/reservations/{reservation_id}")
@@ -97,5 +98,5 @@ async def delete_reservation(reservation_id: UUID) -> dict:
     try:
         await ReservationService.delete_reservation(reservation_id)
         return {"message": "Reservation deleted successfully."}
-    except ItemNotFound as e:
-        raise HTTPException(status_code=404, detail=str(e))
+    except ItemNotFound as ex:
+        raise HTTPException(status_code=404, detail=str(ex)) from ex

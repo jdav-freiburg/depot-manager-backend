@@ -35,7 +35,7 @@ async def create_item_group(item_group: ItemGroupBase) -> ItemGroup:
             **item_group.model_dump())
         return item_group_from_orm(db_item_group)
     except ItemNotFound as ex:
-        raise HTTPException(status_code=422, detail=str(ex))
+        raise HTTPException(status_code=404, detail=str(ex)) from ex
 
 
 @router.put("/item_group/{item_group_id}")
@@ -44,7 +44,7 @@ async def update_item_group(item_group_id: UUID, item_group: ItemGroupBase) -> I
     try:
         db_item_group = await ItemGroupRepo.update_item_group(item_group_id, **item_group.model_dump())
     except ItemNotFound as ex:
-        raise HTTPException(status_code=404, detail=str(ex))
+        raise HTTPException(status_code=404, detail=str(ex)) from ex
     if not db_item_group:
         raise HTTPException(status_code=404, detail="ItemGroup not found")
     return item_group_from_orm(db_item_group)
@@ -55,8 +55,8 @@ async def delete_item_group(item_group_id: UUID) -> None:
     """Delete an item_group"""
     try:
         await ItemGroupRepo.delete_by_id(item_group_id)
-    except Exception as e:
-        raise HTTPException(status_code=404, detail=str(e))
+    except ItemNotFound as ex:
+        raise HTTPException(status_code=404, detail=str(ex)) from ex
 
 @router.get("/item_group/{item_group_id}/children")
 async def get_item_group_children(item_group_id: UUID) -> list[ItemGroup]:

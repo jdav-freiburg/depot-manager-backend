@@ -2,8 +2,9 @@ from uuid import UUID, uuid4
 
 from fastapi import APIRouter, HTTPException
 
-from src.depot_server.db2.models.item.tag import Tag as DbTag
-from src.depot_server.db2.repository.item.repo_tag import TagRepo
+from depot_server.db2.models.item.tag import Tag as DbTag
+from depot_server.db2.repository.item.repo_tag import TagRepo
+from depot_server.db2.repository.base import ItemNotFound
 from .models.tag import Tag, TagPending
 
 router = APIRouter()
@@ -31,10 +32,16 @@ async def create_tag(tag: TagPending) -> Tag:
 
 @router.put("/tag/{tag_id}")
 async def update_tag(tag_id: UUID, tag: TagPending) -> Tag:
-    db_tag: DbTag = await TagRepo.update_tag(tag_id, **tag.model_dump())
+    try:
+        db_tag: DbTag = await TagRepo.update_tag(tag_id, **tag.model_dump())
+    except ItemNotFound as ex:
+        raise HTTPException(status_code=404, detail=str(ex)) from ex
     return Tag.model_validate(db_tag, from_attributes=True)
 
 
 @router.delete("/tag/{tag_id}")
 async def delete_tag(tag_id: UUID) -> None:
-    await TagRepo.delete_tag(tag_id)
+    try:
+        await TagRepo.delete_tag(tag_id)
+    except ItemNotFound as ex:
+        raise HTTPException(status_code=404, detail=str(ex)) from ex

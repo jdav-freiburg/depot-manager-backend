@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException
 
 from depot_server.db2.models.news import NewsEntry as DbNewsEntry
 from depot_server.db2.repository.repo_news import NewsRepo
+from depot_server.db2.repository.base import ItemNotFound
 from depot_server.logic.announcement import announcement_from_orm
 from .models.announcement import Announcement, AnnouncementPending
 
@@ -39,11 +40,17 @@ async def create_announcement(announcement: AnnouncementPending) -> Announcement
 @router.put("/announcement/{announcement_id}")
 async def update_announcement(announcement_id: UUID, announcement: AnnouncementPending) -> Announcement:
     """Update an existing announcement"""
-    db_announcement: DbNewsEntry = await NewsRepo.update_announcement(announcement_id, **announcement.model_dump())
+    try:
+        db_announcement: DbNewsEntry = await NewsRepo.update_announcement(announcement_id, **announcement.model_dump())
+    except ItemNotFound as ex:
+        raise HTTPException(status_code=404, detail=str(ex)) from ex
     return announcement_from_orm(db_announcement)
 
 
 @router.delete("/announcement/{announcement_id}")
 async def delete_announcement(announcement_id: UUID) -> None:
     """Delete an announcement"""
-    await NewsRepo.delete_announcement(announcement_id)
+    try:
+        await NewsRepo.delete_announcement(announcement_id)
+    except ItemNotFound as ex:
+        raise HTTPException(status_code=404, detail=str(ex)) from ex
