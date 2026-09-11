@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 
 from depot_server.api2.item_instance import router
 from depot_server.api2.models.item import ItemInstance
+from depot_server.logic.item_instance import ItemInstanceUniqueConflict
 from depot_server.db2.models.common import Condition
 
 
@@ -81,7 +82,8 @@ async def test_create_item_instance_calls_repo(client):
     instance_id = uuid4()
     item_id = uuid4()
     result = instance_model(instance_id, item_id)
-    with patch("depot_server.api2.item_instance.ItemInstanceRepo.create_item_instance", new_callable=AsyncMock) as mock_create:
+    with patch("depot_server.api2.item_instance.ItemInstanceRepo.has_colliding_unique", new_callable=AsyncMock, return_value=False), \
+            patch("depot_server.api2.item_instance.ItemInstanceRepo.create", new_callable=AsyncMock) as mock_create:
         mock_create.return_value = result
 
         response = client.post("/item_instance", json=instance_payload(item_id))
@@ -98,7 +100,8 @@ async def test_update_item_instance_calls_repo(client):
     item_id = uuid4()
     result = instance_model(instance_id, item_id)
     payload = instance_payload(item_id, include_comment=True)
-    with patch("depot_server.api2.item_instance.ItemInstanceRepo.update_item_instance", new_callable=AsyncMock) as mock_update:
+    with patch("depot_server.api2.item_instance.ItemInstanceRepo.has_colliding_unique", new_callable=AsyncMock, return_value=False), \
+         patch("depot_server.api2.item_instance.ItemInstanceRepo.update", new_callable=AsyncMock) as mock_update:
         mock_update.return_value = result
 
         response = client.put(f"/item_instance/{instance_id}", json=payload)
@@ -108,6 +111,19 @@ async def test_update_item_instance_calls_repo(client):
         assert mock_update.call_args.kwargs["change_comment"] == "Updated instance"
         assert response.status_code == 200
         assert response.json()["id"] == str(instance_id)
+
+
+def test_create_item_instance_returns_conflict_for_duplicate(client):
+    item_id = uuid4()
+    with patch(
+        "depot_server.api2.item_instance.ItemInstanceService.create_item_instance",
+        new_callable=AsyncMock,
+        side_effect=ItemInstanceUniqueConflict("duplicate instance"),
+    ):
+        response = client.post("/item_instance", json=instance_payload(item_id))
+
+    assert response.status_code == 409
+    assert response.json()["detail"] == "duplicate instance"
 
 
 @pytest.mark.asyncio

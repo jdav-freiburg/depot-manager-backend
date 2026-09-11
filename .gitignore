@@ -4,6 +4,7 @@ venv
 .mypy_cache
 .pytest_cache
 .idea
+depot-schema.dbml
 
 build/
 devdepot.sqlite*

@@ -1,4 +1,7 @@
 from uuid import UUID
+
+from tortoise.expressions import Q
+
 from depot_server.db2.models import ItemInstance
 from depot_server.db2.repository.audit import AuditableRepo
 from depot_server.db2.repository.base import ItemNotFound
@@ -54,3 +57,15 @@ class ItemInstanceRepo(AuditableRepo):
     async def get_instance_amount(cls, item_id: UUID) -> int:
         count = await cls.Db_type.filter(item_id=item_id, condition__in=[Condition.GOOD, Condition.MONITOR]).count()
         return count
+
+    @classmethod
+    async def has_colliding_unique(cls, item_id: UUID, serial_number: str,
+                                   external_id: str | None = None, exclude_id: UUID | None = None) -> bool:
+        if external_id is None:
+            query = Q(item_id=item_id) & Q(serial_number=serial_number)
+        else:
+            query = Q(item_id=item_id) & (Q(serial_number=serial_number) | Q(external_id=external_id))
+        if exclude_id is not None:
+            query = query & ~Q(id=exclude_id)
+        existing_instance = await cls.Db_type.filter(query).first()
+        return existing_instance is not None

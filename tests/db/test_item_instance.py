@@ -60,7 +60,7 @@ async def test_item_instance_repo_crud(item):
     assert (await ItemInstanceRepo.get_item_instance_by_id(instance.id)).id == instance.id
     assert (await ItemInstanceRepo.get_all_item_instances())[0].id == instance.id
 
-    updated = await ItemInstanceRepo.update_item_instance(
+    updated = await ItemInstanceRepo.update(
         instance.id,
         serial_number="SN002",
         condition=Condition.MONITOR,
@@ -75,4 +75,4 @@ async def test_item_instance_repo_crud(item):
 @pytest.mark.asyncio
 async def test_item_instance_repo_update_missing_instance_raises(item):
     with pytest.raises(ItemNotFound):
-        await ItemInstanceRepo.update_item_instance(uuid4(), serial_number="Missing")
+        await ItemInstanceRepo.update(uuid4(), serial_number="Missing")
