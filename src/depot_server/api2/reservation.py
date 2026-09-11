@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException
@@ -51,16 +51,17 @@ async def get_reservations_by_item(item_id: UUID) -> list[Reservation]:
     return reservations
 
 
-@router.get("/reservations/time-range/{start_time}/{end_time}")
-async def get_reservations_in_time_range(start_time: datetime, end_time: datetime) -> list[Reservation]:
+
+@router.get("/reservations/time-range/{start_date}/{end_date}")
+async def get_reservations_in_time_range(start_date: date, end_date: date) -> list[Reservation]:
     """
     Get reservations within a specific time range.
     
     Parameters:
-    - start_time: The start of the time range (ISO 8601 format).
-    - end_time: The end of the time range (ISO 8601 format).
+    - start_date: The start of the date range (ISO 8601 format).
+    - end_date: The end of the date range (ISO 8601 format).
     """
-    reservations = await ReservationService.get_reservations_in_time_range(start_time, end_time)
+    reservations = await ReservationService.get_reservations_in_time_range(start_date, end_date)
     return reservations
 
 

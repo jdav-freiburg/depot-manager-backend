@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from unittest.mock import AsyncMock, patch, MagicMock
 from uuid import uuid4
 
@@ -31,7 +31,7 @@ async def test_get_announcements_calls_repo(client):
     mock_db_announcement.title = "Test Announcement"
     mock_db_announcement.text = "This is a test announcement"
     mock_db_announcement.timestamp = now
-    mock_db_announcement.expires = now + timedelta(days=7)
+    mock_db_announcement.expires = date.today() + timedelta(days=7)
     mock_db_announcement.is_visible = True
     mock_db_announcement.is_pinned = False
 
@@ -63,7 +63,7 @@ async def test_get_announcement_by_id_calls_repo(client):
     mock_db_announcement.title = "Single Announcement"
     mock_db_announcement.text = "Single test text"
     mock_db_announcement.timestamp = now
-    mock_db_announcement.expires = now + timedelta(days=7)
+    mock_db_announcement.expires = date.today() + timedelta(days=7)
     mock_db_announcement.is_visible = True
     mock_db_announcement.is_pinned = False
 
@@ -99,7 +99,7 @@ async def test_create_announcement_calls_repo(client):
     announcement_id = uuid4()
     author = "<user who made the request>"
     now = datetime.now()
-    expires = now + timedelta(days=7)
+    expires = date.today() + timedelta(days=7)
 
     mock_db_announcement = MagicMock()
     mock_db_announcement.pk = announcement_id
@@ -143,7 +143,7 @@ async def test_update_announcement_calls_repo(client):
     announcement_id = uuid4()
     author = "<user who made the request>"
     now = datetime.now()
-    expires = now + timedelta(days=14)
+    expires = date.today() + timedelta(days=14)
 
     mock_db_announcement = MagicMock()
     mock_db_announcement.pk = announcement_id
@@ -209,7 +209,7 @@ async def test_announcement_from_orm_mocked(client):
     mock_db_announcement.title = "Test Announcement"
     mock_db_announcement.text = "Test text"
     mock_db_announcement.timestamp = now
-    mock_db_announcement.expires = now + timedelta(days=7)
+    mock_db_announcement.expires = date.today() + timedelta(days=7)
     mock_db_announcement.is_visible = True
     mock_db_announcement.is_pinned = False
 

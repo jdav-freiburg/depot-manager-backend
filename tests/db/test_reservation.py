@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import date
 from uuid import uuid4
 
 import pytest
@@ -33,9 +33,9 @@ async def test_get_reserved_amount_returns_peak_overlap(init_db):
     )
 
     reservations = [
-        (datetime(2026, 1, 1, tzinfo=timezone.utc), datetime(2026, 1, 1, tzinfo=timezone.utc), 2),
-        (datetime(2026, 1, 1, tzinfo=timezone.utc), datetime(2026, 1, 1, tzinfo=timezone.utc), 3),
-        (datetime(2026, 1, 2, tzinfo=timezone.utc), datetime(2026, 1, 2, tzinfo=timezone.utc), 4),
+        (date(2026, 1, 1), date(2026, 1, 1), 2),
+        (date(2026, 1, 1), date(2026, 1, 1), 3),
+        (date(2026, 1, 2), date(2026, 1, 2), 4),
     ]
     for start, end, amount in reservations:
         reservation = await Reservation.create(
@@ -55,6 +55,6 @@ async def test_get_reserved_amount_returns_peak_overlap(init_db):
 
     assert await ReservationService.get_reserved_item_amount(
         item.id,
-        datetime(2025, 12, 31, tzinfo=timezone.utc),
-        datetime(2026, 1, 3, tzinfo=timezone.utc),
+        date(2025, 12, 31),
+        date(2026, 1, 3),
     ) == 5

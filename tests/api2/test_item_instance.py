@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from unittest.mock import AsyncMock, patch
 from uuid import uuid4
 
@@ -25,9 +25,9 @@ def instance_model(instance_id, item_id):
         item_id=item_id,
         external_id="EXT-001",
         serial_number="SN001",
-        manufacture_date=datetime(2024, 1, 1),
-        purchase_date=datetime(2024, 2, 1),
-        first_use_date=datetime(2024, 3, 1),
+        manufacture_date=date(2024, 1, 1),
+        purchase_date=date(2024, 2, 1),
+        first_use_date=date(2024, 3, 1),
         condition=Condition.GOOD,
         created_at=datetime(2024, 1, 1),
     )
@@ -38,9 +38,9 @@ def instance_payload(item_id, include_comment=False):
         "item_id": str(item_id),
         "external_id": "EXT-001",
         "serial_number": "SN001",
-        "manufacture_date": "2024-01-01T00:00:00",
-        "purchase_date": "2024-02-01T00:00:00",
-        "first_use_date": "2024-03-01T00:00:00",
+        "manufacture_date": "2024-01-01",
+        "purchase_date": "2024-02-01",
+        "first_use_date": "2024-03-01",
         "condition": "good",
         "condition_comment": None,
     }

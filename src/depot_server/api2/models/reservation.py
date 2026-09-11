@@ -1,6 +1,6 @@
 from typing import Optional
 from uuid import UUID
-from datetime import datetime
+from datetime import date
 
 from pydantic import BaseModel, Field
 
@@ -8,8 +8,8 @@ from depot_server.db2.models.common import ReservationImportance, ReservationTyp
 
 class ReservationMeta(BaseModel):
     name: Optional[str]
-    start: datetime
-    end: datetime
+    start: date
+    end: date
     type: ReservationType = Field(default=ReservationType.BORROW)
     importance: ReservationImportance = Field(default=ReservationImportance.TEAM)
     team_id: Optional[UUID] = None

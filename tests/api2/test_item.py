@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
@@ -45,9 +45,9 @@ def full_item_model(item_id, group_id, instance_id):
         psa_category=PsaCategory.NONE,
         external_id="EXT-001",
         serial_number="SN001",
-        manufacture_date=datetime(2024, 1, 1),
-        purchase_date=datetime(2024, 2, 1),
-        first_use_date=datetime(2024, 3, 1),
+        manufacture_date=date(2024, 1, 1),
+        purchase_date=date(2024, 2, 1),
+        first_use_date=date(2024, 3, 1),
         condition=Condition.GOOD,
     )
 
@@ -61,9 +61,9 @@ def full_item_payload(group_id):
         "psa_category": "none",
         "external_id": "EXT-001",
         "serial_number": "SN001",
-        "manufacture_date": "2024-01-01T00:00:00",
-        "purchase_date": "2024-02-01T00:00:00",
-        "first_use_date": "2024-03-01T00:00:00",
+        "manufacture_date": "2024-01-01",
+        "purchase_date": "2024-02-01",
+        "first_use_date": "2024-03-01",
         "condition": "good",
         "condition_comment": None,
         "lendable": True,

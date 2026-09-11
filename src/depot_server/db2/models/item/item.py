@@ -1,4 +1,3 @@
-from datetime import datetime
 from enum import StrEnum
 
 from tortoise import fields

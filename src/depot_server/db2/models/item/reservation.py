@@ -13,8 +13,8 @@ class Reservation(Model):
     id = fields.UUIDField(primary_key=True)
 
     name = fields.TextField()
-    start = fields.DatetimeField(null=False)
-    end = fields.DatetimeField(null=False)
+    start = fields.DateField(null=False)
+    end = fields.DateField(null=False)
     user = fields.UUIDField(null=False)
     team = fields.UUIDField(null=True)
     contact = fields.TextField()
@@ -31,9 +31,9 @@ class ReservationLinkBase(Model):
 
     id = fields.UUIDField(primary_key=True)
     amount = fields.IntField(null=False)
-    borrowed = fields.DatetimeField(null=True)
+    borrowed = fields.DateField(null=True)
     borrowed_message = fields.TextField(null=True)
-    returned = fields.DatetimeField(null=True)
+    returned = fields.DateField(null=True)
     returned_message = fields.TextField(null=True)
     collector = fields.TextField(description="The person who picked up the item", null=True)
 

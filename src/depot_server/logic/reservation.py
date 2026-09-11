@@ -1,8 +1,7 @@
 import uuid
 from uuid import UUID
-from datetime import datetime
+from datetime import date
 from datetime import timedelta
-from datetime import timezone
 
 from tortoise.transactions import in_transaction
 
@@ -19,22 +18,14 @@ class ReservationValidationError(ValueError):
 
 class ReservationService:
     @staticmethod
-    def _normalize_datetime(value: datetime) -> datetime:
-        if value.tzinfo is None:
-            return value.replace(tzinfo=timezone.utc)
-        return value.astimezone(timezone.utc)
-
-    @staticmethod
-    def _calculate_max_reserved_amount(links, start_time: datetime, end_time: datetime) -> int:
-        start_time = ReservationService._normalize_datetime(start_time)
-        end_time = ReservationService._normalize_datetime(end_time)
+    def _calculate_max_reserved_amount(links, start_time: date, end_time: date) -> int:
         if start_time > end_time:
             return 0
 
         changes = {}
         for link in links:
-            reservation_start = max(ReservationService._normalize_datetime(link.reservation.start), start_time)
-            reservation_end = min(ReservationService._normalize_datetime(link.reservation.end) + timedelta(days=1), end_time)
+            reservation_start = max(link.reservation.start, start_time)
+            reservation_end = min(link.reservation.end + timedelta(days=1), end_time)
             changes[reservation_start] = changes.get(reservation_start, 0) + link.amount
             changes[reservation_end] = changes.get(reservation_end, 0) - link.amount
 
@@ -47,7 +38,7 @@ class ReservationService:
         return maximum_reserved_amount
 
     @classmethod
-    async def get_reserved_item_amount(cls, item_id, start_time: datetime, end_time: datetime) -> int:
+    async def get_reserved_item_amount(cls, item_id, start_time: date, end_time: date) -> int:
         links = await ReservationRepoLink.get_by_item(
             item_id,
             start_time,
@@ -56,7 +47,7 @@ class ReservationService:
         return cls._calculate_max_reserved_amount(links, start_time, end_time)
 
     @classmethod
-    async def get_reserved_composite_amount(cls, composite_item_id, start_time: datetime, end_time: datetime) -> int:
+    async def get_reserved_composite_amount(cls, composite_item_id, start_time: date, end_time: date) -> int:
         links = await ReservationRepoCompositeLink.get_links_for_composite_item(
             composite_item_id,
             start_time,
@@ -140,7 +131,7 @@ class ReservationService:
         raise NotImplementedError("This method is not yet implemented.")
 
     @classmethod
-    async def are_items_available(cls, items: dict[UUID, int], item_composites: dict[UUID, int], start_time: datetime, end_time: datetime) -> bool:
+    async def are_items_available(cls, items: dict[UUID, int], item_composites: dict[UUID, int], start_time: date, end_time: date) -> bool:
         for item_id, quantity in items.items():
             total_amount = await ItemService.get_total_amount(item_id)
             reserved_item_amount = await cls.get_reserved_item_amount(item_id, start_time, end_time)

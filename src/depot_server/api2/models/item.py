@@ -3,7 +3,7 @@ from typing import Optional, List
 from uuid import UUID
 
 from pydantic import BaseModel, Field
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 from ...db2.models.common import Condition, TotalReportState
 from ...db2.models.item.item import PsaCategory
@@ -34,9 +34,9 @@ class ItemPending(ItemBase):
 class ItemInstanceRaw(BaseModel):
     external_id: Optional[str] = None
     serial_number: str = Field(...)
-    manufacture_date: datetime = Field(...)
-    purchase_date: datetime = Field(...)
-    first_use_date: datetime = Field(...)
+    manufacture_date: date = Field(...)
+    purchase_date: date = Field(...)
+    first_use_date: date = Field(...)
     condition: Condition = Field(...)
     condition_comment: Optional[str] = None
     # created_by: UUID

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 from uuid import uuid4
 
 import pytest
@@ -43,9 +43,9 @@ def instance_fields(item):
         "item": item,
         "external_id": "EXT-001",
         "serial_number": "SN001",
-        "manufacture_date": datetime(2024, 1, 1),
-        "purchase_date": datetime(2024, 2, 1),
-        "first_use_date": datetime(2024, 3, 1),
+        "manufacture_date": date(2024, 1, 1),
+        "purchase_date": date(2024, 2, 1),
+        "first_use_date": date(2024, 3, 1),
         "condition": Condition.GOOD,
         "condition_comment": None,
     }

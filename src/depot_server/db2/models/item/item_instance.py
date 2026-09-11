@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 
 from tortoise import fields
 from tortoise.models import Model
@@ -16,15 +16,15 @@ class ItemInstance(Model):
     serial_number = fields.TextField(null=False)
     created_at = fields.DatetimeField(auto_now_add=True)
     #created_by = fields.UUIDField(null=False)
-    manufacture_date = fields.DatetimeField(null=False)
-    purchase_date = fields.DatetimeField(null=False)
-    first_use_date = fields.DatetimeField(null=False)
+    manufacture_date = fields.DateField(null=False)
+    purchase_date = fields.DateField(null=False)
+    first_use_date = fields.DateField(null=False)
     condition = fields.CharEnumField(Condition)
     condition_comment = fields.TextField(null=True)
 
 
     @property
-    def last_inspection(self) -> datetime:
+    def last_inspection(self) -> date:
         """
         Fetches the date of the last inspection of this item instance
         """
