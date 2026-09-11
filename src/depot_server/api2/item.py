@@ -10,7 +10,7 @@ from .models.item import Item, ItemPending, ItemBase, ItemInstance, FullItem, Fu
 
 itemservice = ItemService()
 
-router = APIRouter()
+router = APIRouter(tags=["V2_Item"])
 
 @router.get("/item")
 async def get_items() -> list[Item]:

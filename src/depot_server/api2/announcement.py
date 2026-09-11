@@ -8,7 +8,7 @@ from depot_server.db2.repository.base import ItemNotFound
 from depot_server.logic.announcement import announcement_from_orm
 from .models.announcement import Announcement, AnnouncementPending
 
-router = APIRouter()
+router = APIRouter(tags=["V2_Announcement"])
 
 
 @router.get("/announcement")

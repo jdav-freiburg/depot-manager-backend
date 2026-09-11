@@ -7,7 +7,7 @@ from depot_server.db2.repository.item.repo_storage_location import StorageLocati
 from depot_server.db2.repository.base import ItemNotFound
 from .models.storage_location import StorageLocation, StorageLocationPending
 
-router = APIRouter()
+router = APIRouter(tags=["V2_StorageLocation"])
 
 
 def storage_location_from_orm(entry: DbStorageLocation) -> StorageLocation:

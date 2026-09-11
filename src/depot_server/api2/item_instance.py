@@ -8,7 +8,7 @@ from ..logic.item_instance import ItemInstanceService, ItemInstanceUniqueConflic
 
 from .models.item import ItemInstance, ItemInstanceBase, ItemInstancePending
 
-router = APIRouter()
+router = APIRouter(tags=["V2_ItemInstance"])
 
 @router.get("/item_instance")
 async def get_item_instances() -> list[ItemInstance]:

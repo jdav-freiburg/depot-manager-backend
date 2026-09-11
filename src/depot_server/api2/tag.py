@@ -7,7 +7,7 @@ from depot_server.db2.repository.item.repo_tag import TagRepo
 from depot_server.db2.repository.base import ItemNotFound
 from .models.tag import Tag, TagPending
 
-router = APIRouter()
+router = APIRouter(tags=["V2_Tag"])
 
 
 @router.get("/tag")

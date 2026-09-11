@@ -8,7 +8,7 @@ from depot_server.api2.models.reservation import ReservationPending, Reservation
 from depot_server.logic.reservation import ReservationService
 from depot_server.logic.reservation import ReservationService, ReservationValidationError
 
-router = APIRouter()
+router = APIRouter(tags=["V2_Reservation"])
 
 @router.get("/reservations")
 async def get_all_reservations() -> list[Reservation]:

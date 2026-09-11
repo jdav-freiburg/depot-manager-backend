@@ -8,7 +8,7 @@ from depot_server.logic.item_group import item_group_from_orm, ItemGroupService
 from .models.item_group import ItemGroup, ItemGroupBase
 from ..db2.repository.base import ItemNotFound
 
-router = APIRouter()
+router = APIRouter(tags=["V2_ItemGroup"])
 item_group_service = ItemGroupService()
 
 @router.get("/item_group")

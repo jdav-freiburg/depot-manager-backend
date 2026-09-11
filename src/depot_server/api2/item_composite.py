@@ -6,7 +6,7 @@ from depot_server.api2.models.item_composite import ItemComposite, ItemComposite
 from depot_server.logic.item_composite import ItemCompositeService
 from depot_server.db2.repository.base import ItemNotFound
 
-router = APIRouter()
+router = APIRouter(tags=["V2_ItemComposite"])
 
 @router.get("/item_composite")
 async def get_item_composites() -> list[ItemComposite]:
