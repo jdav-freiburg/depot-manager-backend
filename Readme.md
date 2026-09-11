@@ -22,6 +22,7 @@ async def main():
         modules={"depot": ["depot_server.db2.models"]},
         )
     await Tortoise.generate_schemas()
+    await Tortoise.close_connections()
     print("Init done")
 
 asyncio.run(main())'
