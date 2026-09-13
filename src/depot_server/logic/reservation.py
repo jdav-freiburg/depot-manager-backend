@@ -18,6 +18,36 @@ class ReservationValidationError(ValueError):
 
 class ReservationService:
     @staticmethod
+    def _calculate_max_overlap(links) -> int:
+        print(len(links))
+        if not links:
+            return 0
+        pickups = {}
+        bringbacks = {}
+        for link in links:
+            pickups[link.reservation.start] = pickups.get(link.reservation.start, 0) + link.amount
+            bringbacks[link.reservation.end] = bringbacks.get(link.reservation.end, 0) + link.amount
+
+        pickup_keys = sorted(pickups.keys())
+        bringback_keys = sorted(bringbacks.keys())
+
+        amount = 0
+        max_amount = 0
+        bringback_index = 0
+        bringback_max_index = len(bringback_keys) - 1
+        next_bringback_time = bringback_keys[0]
+        for i, pickup_time in enumerate(pickup_keys):
+            while bringback_index <= bringback_max_index and next_bringback_time < pickup_time:
+                amount -= bringbacks[next_bringback_time]
+                bringback_index += 1
+                if bringback_index <= bringback_max_index:
+                    next_bringback_time = bringback_keys[bringback_index]
+            amount += pickups[pickup_time]
+            max_amount = max(max_amount, amount)
+        return max_amount
+
+
+    @staticmethod
     def _calculate_max_reserved_amount(links, start_time: date, end_time: date) -> int:
         if start_time > end_time:
             return 0
@@ -39,21 +69,21 @@ class ReservationService:
 
     @classmethod
     async def get_reserved_item_amount(cls, item_id, start_time: date, end_time: date) -> int:
-        links = await ReservationRepoLink.get_by_item(
+        links = await ReservationRepoLink.get_item_links_in_timespan(
             item_id,
             start_time,
             end_time,
         )
-        return cls._calculate_max_reserved_amount(links, start_time, end_time)
+        return cls._calculate_max_overlap(links)
 
     @classmethod
     async def get_reserved_composite_amount(cls, composite_item_id, start_time: date, end_time: date) -> int:
-        links = await ReservationRepoCompositeLink.get_links_for_composite_item(
+        links = await ReservationRepoCompositeLink.get_composite_links_in_timespan(
             composite_item_id,
             start_time,
             end_time,
         )
-        return cls._calculate_max_reserved_amount(links, start_time, end_time)
+        return cls._calculate_max_overlap(links)
 
     @classmethod
     async def create_reservation(cls, reservation_data: ReservationPending) -> Reservation:
