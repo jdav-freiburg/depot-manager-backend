@@ -7,6 +7,13 @@ from depot_server.db2.repository.audit import AuditableRepo
 class ReservationRepo(AuditableRepo):
     Db_type = Reservation
 
+    @classmethod
+    async def get_all_with_links(cls):
+        return await cls.Db_type.all().prefetch_related(
+            "reservation_items",
+            "reservation_composites",
+        )
+
 
 
 class ReservationRepoLink(AuditableRepo):

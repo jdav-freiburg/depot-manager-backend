@@ -5,7 +5,14 @@ import pytest
 import pytest_asyncio
 from tortoise import Tortoise
 
-from depot_server.db2.models import Item, ItemGroup, Reservation, ReservationItemLink
+from depot_server.db2.models import (
+    Item,
+    ItemComposite,
+    ItemGroup,
+    Reservation,
+    ReservationCompositeLink,
+    ReservationItemLink,
+)
 from depot_server.db2.models.item.item import PsaCategory
 from depot_server.db2.models.common import ReservationImportance
 from depot_server.logic.reservation import ReservationService
@@ -85,4 +92,43 @@ async def test_get_reserved_amount_returns_peak_overlap(init_db):
         date(2026, 1, 8),
         date(2026, 1, 8)
     ) == 8
+
+
+@pytest.mark.asyncio
+async def test_get_all_reservations_prefetches_links(init_db):
+    item = await Item.create(
+        name="Test Item",
+        lendable=True,
+        psa_category=PsaCategory.NONE,
+    )
+    composite = await ItemComposite.create(
+        name="Test Composite",
+        lendable=True,
+    )
+    reservation = await Reservation.create(
+        id=uuid4(),
+        name="Test Reservation",
+        start=date(2026, 1, 1),
+        end=date(2026, 1, 3),
+        user=uuid4(),
+        contact="test@example.com",
+        reservation_importance=ReservationImportance.PRIVATE,
+    )
+    await ReservationItemLink.create(
+        item=item,
+        reservation=reservation,
+        amount=2,
+    )
+    await ReservationCompositeLink.create(
+        composite_item=composite,
+        reservation=reservation,
+        amount=1,
+    )
+
+    reservations = await ReservationService.get_all_reservations()
+
+    assert len(reservations) == 1
+    assert reservations[0].id == reservation.id
+    assert reservations[0].items == {item.id: 2}
+    assert reservations[0].composite_items == {composite.id: 1}
     

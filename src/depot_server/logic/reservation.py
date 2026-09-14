@@ -18,8 +18,37 @@ class ReservationValidationError(ValueError):
 
 class ReservationService:
     @staticmethod
+    def _to_api_reservation(reservation, elements=None, composites=None) -> Reservation:
+        elements = (
+            reservation.reservation_items
+            if elements is None
+            else elements
+        )
+        composites = (
+            reservation.reservation_composites
+            if composites is None
+            else composites
+        )
+        return Reservation(
+            id=reservation.id,
+            user_id=reservation.user,
+            name=reservation.name,
+            start=reservation.start,
+            end=reservation.end,
+            type=reservation.reservation_type,
+            importance=reservation.reservation_importance,
+            team_id=reservation.team,
+            contact=reservation.contact,
+            user_notes=reservation.user_notes,
+            items={link.item_id: link.amount for link in elements},
+            composite_items={
+                link.composite_item_id: link.amount
+                for link in composites
+            },
+        )
+
+    @staticmethod
     def _calculate_max_overlap(links) -> int:
-        print(len(links))
         if not links:
             return 0
         pickups = {}
@@ -124,16 +153,13 @@ class ReservationService:
             raise ItemNotFound(f"Reservation with ID {reservation_id} not found.")
         elements = await ReservationRepoLink.get_by_reservation(reservation_id)
         composites = await ReservationRepoCompositeLink.get_by_reservation(reservation_id)
-        
-        return Reservation(id=reservation.id, user_id=reservation.user,
-                           items={e.item_id: e.amount for e in elements},
-                           composite_items={c.composite_item_id: c.amount for c in composites},
-                           **reservation.model_dump())
+
+        return cls._to_api_reservation(reservation, elements, composites)
 
     @classmethod
     async def get_all_reservations(cls) -> list[Reservation]:
-        # Logic to retrieve all reservations
-        raise NotImplementedError("This method is not yet implemented.")
+        reservations = await ReservationRepo.get_all_with_links()
+        return [cls._to_api_reservation(reservation) for reservation in reservations]
 
     @classmethod
     async def get_reservations_by_user(cls, user_id):

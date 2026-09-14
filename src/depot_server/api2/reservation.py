@@ -16,7 +16,7 @@ async def get_all_reservations() -> list[Reservation]:
     Get all reservations.
     """
     reservations = await ReservationService.get_all_reservations()
-    return reservations
+    return [Reservation.model_validate(r) for r in reservations]
 
 
 @router.get("/reservations/{reservation_id}")
@@ -26,7 +26,7 @@ async def get_reservation(reservation_id: UUID) -> Reservation:
     """
     try:
         reservation = await ReservationService.get_reservation(reservation_id)
-        return reservation
+        return Reservation.model_validate(reservation)
     except ItemNotFound as e:
         raise HTTPException(status_code=404, detail=str(e))
 
@@ -37,7 +37,7 @@ async def get_reservations_by_user(user_id: UUID) -> list[Reservation]:
     Get reservations for a specific user.
     """
     reservations = await ReservationService.get_reservations_by_user(user_id)
-    return reservations
+    return [Reservation.model_validate(r) for r in reservations]
 
 @router.get("/reservations/item/{item_id}")
 async def get_reservations_by_item(item_id: UUID) -> list[Reservation]:
@@ -48,7 +48,7 @@ async def get_reservations_by_item(item_id: UUID) -> list[Reservation]:
     - item_id: The ID of an item, not an item instance.
     """
     reservations = await ReservationService.get_reservations_by_item(item_id)
-    return reservations
+    return [Reservation.model_validate(r) for r in reservations]
 
 
 
@@ -62,7 +62,7 @@ async def get_reservations_in_time_range(start_date: date, end_date: date) -> li
     - end_date: The end of the date range (ISO 8601 format).
     """
     reservations = await ReservationService.get_reservations_in_time_range(start_date, end_date)
-    return reservations
+    return [Reservation.model_validate(r) for r in reservations]
 
 
 @router.post("/reservations")
@@ -72,7 +72,7 @@ async def create_reservation(reservation_data: ReservationPending) -> Reservatio
     """
     try:
         reservation = await ReservationService.create_reservation(reservation_data)
-        return reservation
+        return Reservation.model_validate(reservation)
     except ReservationValidationError as ex:
         raise HTTPException(status_code=422, detail=str(ex)) from ex
 
@@ -84,7 +84,7 @@ async def update_reservation(reservation_id: UUID, reservation_data: Reservation
     """
     try:
         updated_reservation = await ReservationService.update_reservation(reservation_id, reservation_data)
-        return updated_reservation
+        return Reservation.model_validate(updated_reservation)
     except ItemNotFound as ex:
         raise HTTPException(status_code=404, detail=str(ex)) from ex
     except ReservationValidationError as ex:
