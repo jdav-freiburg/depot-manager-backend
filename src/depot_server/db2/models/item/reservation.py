@@ -2,6 +2,7 @@ from enum import StrEnum
 
 from tortoise import fields
 from tortoise.models import Model
+from tortoise.validators import MinValueValidator
 
 from ..common import ReservationImportance, ReservationType
 
@@ -30,7 +31,7 @@ class ReservationLinkBase(Model):
         abstract = True
 
     id = fields.UUIDField(primary_key=True)
-    amount = fields.IntField(null=False)
+    amount = fields.IntField(null=False, validators=[MinValueValidator(0)])
     borrowed = fields.DateField(null=True)
     borrowed_message = fields.TextField(null=True)
     returned = fields.DateField(null=True)
@@ -42,13 +43,13 @@ class ReservationItemLink(ReservationLinkBase):
     class Meta:
         table: str = "depot_link_reservation__item"
 
-    item = fields.ForeignKeyField("depot.Item", null=False, related_name="reservation_items")
-    reservation = fields.ForeignKeyField("depot.Reservation", null=False, related_name="reservation_items")
+    item = fields.ForeignKeyField("depot.Item", null=False, related_name="reservation_itemlinks")
+    reservation = fields.ForeignKeyField("depot.Reservation", null=False, related_name="reservation_itemlinks")
 
 
 class ReservationCompositeLink(ReservationLinkBase):
     class Meta:
         table: str = "depot_link_reservation__composite_item"
 
-    composite_item = fields.ForeignKeyField("depot.ItemComposite", null=False, related_name="composite_item")
-    reservation = fields.ForeignKeyField("depot.Reservation", null=False, related_name="reservation_composites")
+    composite_item = fields.ForeignKeyField("depot.ItemComposite", null=False, related_name="reservation_composite_itemlinks")
+    reservation = fields.ForeignKeyField("depot.Reservation", null=False, related_name="reservation_composite_itemlinks")

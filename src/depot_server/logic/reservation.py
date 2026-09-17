@@ -20,12 +20,12 @@ class ReservationService:
     @staticmethod
     def _to_api_reservation(reservation, elements=None, composites=None) -> Reservation:
         elements = (
-            reservation.reservation_items
+            reservation.reservation_itemlinks
             if elements is None
             else elements
         )
         composites = (
-            reservation.reservation_composites
+            reservation.reservation_composite_itemlinks
             if composites is None
             else composites
         )
@@ -76,41 +76,23 @@ class ReservationService:
         return max_amount
 
 
-    @staticmethod
-    def _calculate_max_reserved_amount(links, start_time: date, end_time: date) -> int:
-        if start_time > end_time:
-            return 0
-
-        changes = {}
-        for link in links:
-            reservation_start = max(link.reservation.start, start_time)
-            reservation_end = min(link.reservation.end + timedelta(days=1), end_time)
-            changes[reservation_start] = changes.get(reservation_start, 0) + link.amount
-            changes[reservation_end] = changes.get(reservation_end, 0) - link.amount
-
-        reserved_amount = 0
-        maximum_reserved_amount = 0
-        for timestamp in sorted(changes):
-            reserved_amount += changes[timestamp]
-            maximum_reserved_amount = max(maximum_reserved_amount, reserved_amount)
-
-        return maximum_reserved_amount
-
     @classmethod
-    async def get_reserved_item_amount(cls, item_id, start_time: date, end_time: date) -> int:
+    async def get_reserved_item_amount(cls, item_id, start_time: date, end_time: date, exclude_reservations: list[UUID] | None = None) -> int:
         links = await ReservationRepoLink.get_item_links_in_timespan(
             item_id,
             start_time,
             end_time,
+            exclude_reservations=exclude_reservations
         )
         return cls._calculate_max_overlap(links)
 
     @classmethod
-    async def get_reserved_composite_amount(cls, composite_item_id, start_time: date, end_time: date) -> int:
+    async def get_reserved_composite_amount(cls, composite_item_id, start_time: date, end_time: date, exclude_reservations: list[UUID] | None = None) -> int:
         links = await ReservationRepoCompositeLink.get_composite_links_in_timespan(
             composite_item_id,
             start_time,
             end_time,
+            exclude_reservations=exclude_reservations
         )
         return cls._calculate_max_overlap(links)
 
@@ -138,23 +120,20 @@ class ReservationService:
                 await ReservationRepoLink.create(reservation_id=reservation.id,
                                                 item_id=item_id,
                                                 amount=quantity,
-                                                borrowed=False)
+                                                borrowed=None)
             for item_composite_id, quantity in reservation_data.composite_items.items():
                 await ReservationRepoCompositeLink.create(reservation_id=reservation.id,
                                                         composite_item_id=item_composite_id,
                                                         amount=quantity,
-                                                        borrowed=False)
+                                                        borrowed=None)
             return Reservation(id=reservation.id, user_id=reservation.user, **reservation_data.model_dump())
 
     @classmethod
     async def get_reservation(cls, reservation_id) -> Reservation:
-        reservation = await ReservationRepo.get_by_id(reservation_id)
+        reservation = await ReservationRepo.get_by_filter_with_links(id=reservation_id)
         if not reservation:
             raise ItemNotFound(f"Reservation with ID {reservation_id} not found.")
-        elements = await ReservationRepoLink.get_by_reservation(reservation_id)
-        composites = await ReservationRepoCompositeLink.get_by_reservation(reservation_id)
-
-        return cls._to_api_reservation(reservation, elements, composites)
+        return cls._to_api_reservation(reservation[0])
 
     @classmethod
     async def get_all_reservations(cls) -> list[Reservation]:
@@ -162,41 +141,97 @@ class ReservationService:
         return [cls._to_api_reservation(reservation) for reservation in reservations]
 
     @classmethod
-    async def get_reservations_by_user(cls, user_id):
-        # Logic to retrieve reservations by user ID
-        raise NotImplementedError("This method is not yet implemented.")
+    async def get_reservations_by_user(cls, user_id: UUID) -> list[Reservation]:
+        reservation = await ReservationRepo.get_by_filter_with_links(user=user_id)
+        if not reservation:
+            return []
+        return [cls._to_api_reservation(res) for res in reservation]
 
     @classmethod
-    async def get_reservations_by_item(cls, item_id):
-        # Logic to retrieve reservations by item ID
-        raise NotImplementedError("This method is not yet implemented.")
+    async def get_reservations_by_item(cls, item_id: UUID) -> list[Reservation]:
+        reservations = await ReservationRepo.get_by_filter_with_links(
+            reservation_itemlinks__item_id=item_id,
+        )
+        return [cls._to_api_reservation(reservation) for reservation in reservations]
 
     @classmethod
-    async def get_reservations_in_time_range(cls, start_time, end_time):
-        # Logic to retrieve reservations in a specific time range
-        raise NotImplementedError("This method is not yet implemented.")
+    async def get_reservations_in_time_range(cls, start_time: date, end_time: date) -> list[Reservation]:
+        reservation = await ReservationRepo.get_by_filter_with_links(start__lt=end_time + timedelta(days=1),
+                                                                     end__gt=start_time - timedelta(days=1))
+        if not reservation:
+            return []
+        return [cls._to_api_reservation(res) for res in reservation]
 
     @classmethod
-    async def update_reservation(cls, reservation_id, update_data):
-        # Logic to update a reservation
-        raise NotImplementedError("This method is not yet implemented.")
+    async def update_reservation(cls, reservation_id: UUID, update_data: ReservationPending) -> Reservation:
+        async with in_transaction():
+            # Check if enough items are available in the specified time range
+            if not await cls.are_items_available(update_data.items, update_data.composite_items, update_data.start, update_data.end, exclude_reservations=[reservation_id]):
+                raise ReservationValidationError("Not enough items available for the specified time range.")
+            
+            reservation = await ReservationRepo.update(id=reservation_id, name=update_data.name,
+                                                       start=update_data.start,
+                                                       end=update_data.end,
+                                                       user=uuid.uuid4(),  # TODO get actual user
+                                                       team=update_data.team_id,
+                                                       contact=update_data.contact,
+                                                       user_notes=update_data.user_notes,
+                                                       reservation_importance=update_data.importance,
+                                                       reservation_type=update_data.type)
+            if not reservation:
+                raise ItemNotFound(f"Reservation with ID {reservation_id} not found.")
+            # Update item links
+            current_item_links = await ReservationRepoLink.get_by_reservation(reservation_id)
+            item_ids = []
+            for link in current_item_links:
+                if link.item_id not in update_data.items:
+                    await ReservationRepoLink.delete_by_id(link.id)
+                else:
+                    await ReservationRepoLink.update(link.id, amount=update_data.items[link.item_id])
+                    item_ids.append(link.item_id)
+            # Add new item links
+            for item_id, amount in update_data.items.items():
+                if item_id not in item_ids:
+                    await ReservationRepoLink.create(reservation_id=reservation.id, item_id=item_id, amount=amount)
+            # Update composite item links
+            current_composite_links = await ReservationRepoCompositeLink.get_by_reservation(reservation_id)
+            composite_ids = []
+            for link in current_composite_links:
+                if link.composite_item_id not in update_data.composite_items:
+                    await ReservationRepoCompositeLink.delete_by_id(link.id)
+                else:
+                    await ReservationRepoCompositeLink.update(link.id, amount=update_data.composite_items[link.composite_item_id])
+                    composite_ids.append(link.composite_item_id)
+            # Add new composite item links
+            for composite_item_id, amount in update_data.composite_items.items():
+                if composite_item_id not in composite_ids:
+                    await ReservationRepoCompositeLink.create(reservation_id=reservation.id, composite_item_id=composite_item_id, amount=amount)
+        return await cls.get_reservation(reservation_id)
+
+
+
 
     @classmethod
     async def delete_reservation(cls, reservation_id):
-        # Logic to delete a reservation
-        raise NotImplementedError("This method is not yet implemented.")
+        async with in_transaction():
+            reservation = await ReservationRepo.get_by_filter_with_links(id=reservation_id)
+            if not reservation:
+                raise ItemNotFound(f"Reservation with ID {reservation_id} not found.")
+            await ReservationRepoLink.bulk_delete(reservation_id.reservation_links.values_list('id', flat=True))
+            await ReservationRepoCompositeLink.bulk_delete(reservation_id.reservation_composite_links.values_list('id', flat=True))
+            await ReservationRepo.delete_by_id(id=reservation_id)
 
     @classmethod
-    async def are_items_available(cls, items: dict[UUID, int], item_composites: dict[UUID, int], start_time: date, end_time: date) -> bool:
+    async def are_items_available(cls, items: dict[UUID, int], item_composites: dict[UUID, int], start_time: date, end_time: date, exclude_reservations: list[UUID] | None = None) -> bool:
         for item_id, quantity in items.items():
             total_amount = await ItemService.get_total_amount(item_id)
-            reserved_item_amount = await cls.get_reserved_item_amount(item_id, start_time, end_time)
+            reserved_item_amount = await cls.get_reserved_item_amount(item_id, start_time, end_time, exclude_reservations=exclude_reservations)
             if total_amount - reserved_item_amount < quantity:
                 return False
             
         for composite_item_id, quantity in item_composites.items():
             available_amount = await ItemCompositeService.get_total_amount(composite_item_id)
-            reserved_composite_amount = await cls.get_reserved_composite_amount(composite_item_id, start_time, end_time)
+            reserved_composite_amount = await cls.get_reserved_composite_amount(composite_item_id, start_time, end_time, exclude_reservations=exclude_reservations)
             if available_amount - reserved_composite_amount < quantity:
                 return False
         return True

@@ -131,4 +131,51 @@ async def test_get_all_reservations_prefetches_links(init_db):
     assert reservations[0].id == reservation.id
     assert reservations[0].items == {item.id: 2}
     assert reservations[0].composite_items == {composite.id: 1}
+
+
+@pytest.mark.asyncio
+async def test_get_reservations_by_item_filters_through_item_links(init_db):
+    item = await Item.create(
+        name="Requested Item",
+        lendable=True,
+        psa_category=PsaCategory.NONE,
+    )
+    other_item = await Item.create(
+        name="Other Item",
+        lendable=True,
+        psa_category=PsaCategory.NONE,
+    )
+    matching_reservation = await Reservation.create(
+        id=uuid4(),
+        name="Matching Reservation",
+        start=date(2026, 1, 1),
+        end=date(2026, 1, 3),
+        user=uuid4(),
+        contact="test@example.com",
+        reservation_importance=ReservationImportance.PRIVATE,
+    )
+    other_reservation = await Reservation.create(
+        id=uuid4(),
+        name="Other Reservation",
+        start=date(2026, 1, 4),
+        end=date(2026, 1, 6),
+        user=uuid4(),
+        contact="test@example.com",
+        reservation_importance=ReservationImportance.PRIVATE,
+    )
+    await ReservationItemLink.create(
+        item=item,
+        reservation=matching_reservation,
+        amount=2,
+    )
+    await ReservationItemLink.create(
+        item=other_item,
+        reservation=other_reservation,
+        amount=1,
+    )
+
+    reservations = await ReservationService.get_reservations_by_item(item.id)
+
+    assert [reservation.id for reservation in reservations] == [matching_reservation.id]
+    assert reservations[0].items == {item.id: 2}
     

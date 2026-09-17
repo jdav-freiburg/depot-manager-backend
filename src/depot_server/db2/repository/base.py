@@ -98,3 +98,8 @@ class BaseRepo(RepoInterface[T]):
         if not item:
             raise ItemNotFound(f"Item {id} not found")
         await item.delete()
+
+    @classmethod
+    async def bulk_delete(cls, ids: list[UUID]) -> None:
+        await cls.Db_type.filter(pk__in=ids).delete()
+

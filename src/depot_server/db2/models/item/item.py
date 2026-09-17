@@ -2,6 +2,7 @@ from enum import StrEnum
 
 from tortoise import fields
 from tortoise.models import Model
+from tortoise.validators import MinValueValidator
 
 from depot_server.db2.models.asset.asset import Asset
 from depot_server.db2.models.item.item_group import ItemGroup
@@ -38,6 +39,8 @@ class Item(Model):
                                               related_name="items")
     assets = fields.ManyToManyField(Asset, on_delete=fields.RESTRICT, related_name="items")
     created_at = fields.DatetimeField(auto_now_add=True)
+    in_limbus = fields.IntField(null=False, default=0, validators=[MinValueValidator(0)],
+                                description="The amount of this items where it is unsure if they are lost or if they return.")
     #tags = fields.ManyToManyField(Tag, null=True, on_delete=fields.SET_NULL, related_name="items")
     # reservations = fields.ManyToManyField(
     #     Reservation,
