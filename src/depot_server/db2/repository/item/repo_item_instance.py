@@ -6,6 +6,7 @@ from depot_server.db2.models import ItemInstance
 from depot_server.db2.repository.audit import AuditableRepo
 from depot_server.db2.repository.base import ItemNotFound
 from depot_server.db2.models.common import Condition
+from depot_server.db2.models.item.item import Item, PsaCategory
 
 class ItemInstanceRepo(AuditableRepo):
     Db_type = ItemInstance
@@ -21,9 +22,37 @@ class ItemInstanceRepo(AuditableRepo):
         return item_instance
 
     @classmethod
+    async def get_item_instances_by_item_id(cls, item_id: UUID) -> list[ItemInstance]:
+        item_instances = await cls.Db_type.filter(item_id=item_id)
+        return item_instances
+
+    @classmethod
+    async def get_instance_amount(cls, item_id: UUID) -> int:
+        count = await cls.Db_type.filter(item_id=item_id, condition__in=[Condition.GOOD, Condition.MONITOR]).count()
+        return count
+
+    @classmethod
     async def create_item_instance(cls, **kwargs) -> ItemInstance:
         item_instance = await cls.create(**kwargs)
         return item_instance
+
+    @classmethod
+    async def get_item_instances_needing_inspection(cls, psa_category: PsaCategory) -> list[ItemInstance]:
+        raise NotImplementedError("This method is not yet implemented")
+        item_instances = await cls.Db_type.filter(psa_category=psa_category).prefetch_related("reports").filter(reports__isnull=True).all()
+        return item_instances
+
+    @classmethod
+    async def get_full_items(cls, **kwargs):
+        item_instances = await cls.Db_type.filter(**kwargs).prefetch_related("item").all()
+        return item_instances
+
+    @classmethod
+    async def get_full_item(cls, item_instance_id: UUID) -> ItemInstance | None:
+        item_instances = await cls.get_full_items(id=item_instance_id)
+        if not item_instances:
+            raise ItemNotFound(f"Item instance with id {item_instance_id} not found")
+        return item_instances[0]
 
     @classmethod
     async def delete_item_instance(cls, item_instance_id: UUID) -> None:
@@ -47,16 +76,6 @@ class ItemInstanceRepo(AuditableRepo):
         # save the instance
         await item_instance.save()
         return item_instance
-
-    @classmethod
-    async def get_item_instances_by_item_id(cls, item_id: UUID) -> list[ItemInstance]:
-        item_instances = await cls.Db_type.filter(item_id=item_id)
-        return item_instances
-
-    @classmethod
-    async def get_instance_amount(cls, item_id: UUID) -> int:
-        count = await cls.Db_type.filter(item_id=item_id, condition__in=[Condition.GOOD, Condition.MONITOR]).count()
-        return count
 
     @classmethod
     async def has_colliding_unique(cls, item_id: UUID, serial_number: str,

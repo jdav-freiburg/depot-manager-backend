@@ -2,11 +2,13 @@ from uuid import UUID
 
 from fastapi import APIRouter, HTTPException
 
+from depot_server.db2.repository.report.repo_inspection_report import InspectionReportRepo
+
 from ..db2.repository.item.repo_item_instance import ItemInstanceRepo
 from ..db2.repository.base import ItemNotFound
 from ..logic.item_instance import ItemInstanceService, ItemInstanceUniqueConflict
 
-from .models.item import ItemInstance, ItemInstanceBase, ItemInstancePending
+from .models.item import FullItem, ItemInstance, ItemInstanceBase, ItemInstancePending
 
 router = APIRouter(tags=["V2_ItemInstance"])
 
@@ -46,3 +48,15 @@ async def delete_item_instance(item_instance_id: UUID) -> None:
         await ItemInstanceRepo.delete_item_instance(item_instance_id)
     except ItemNotFound as ex:
         raise HTTPException(status_code=404, detail=str(ex)) from ex
+
+@router.get("/item_instance/{item_instance_id}/inspection_report")
+async def get_inspection_reports(item_instance_id: UUID):
+    inspection_reports = await InspectionReportRepo.get_by_item_instance_id(item_instance_id)
+    if not inspection_reports:
+        raise HTTPException(status_code=404, detail="Inspection reports not found")
+    return inspection_reports  # TODO: Create Pydantic model for InspectionReport and enforce type
+
+@router.get("/item_instance/expired")
+async def get_expired_item_instances():
+    expired_item_instances = await ItemInstanceService.get_expired_item_instances()
+    return [FullItem.model_validate(item_instance, from_attributes=True) for item_instance in expired_item_instances]

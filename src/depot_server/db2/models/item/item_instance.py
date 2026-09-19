@@ -24,15 +24,16 @@ class ItemInstance(Model):
 
 
     @property
-    def last_inspection(self) -> date:
-        """
-        Fetches the date of the last inspection of this item instance
-        """
-        raise NotImplementedError
-
-    @property
     def is_too_old(self) -> bool:
-        """
-        Checks if the item instance is too old to be used
-        """
-        raise NotImplementedError
+        return self._is_too_old_at(datetime.now().date())
+
+    def _is_too_old_at(self, date: date) -> bool:
+        manufacture_expired = (
+            self.item.max_lifespan is not None
+            and date - self.manufacture_date > self.item.max_lifespan
+        )
+        usage_expired = (
+            self.item.max_usage_lifespan is not None
+            and date - self.first_use_date > self.item.max_usage_lifespan
+        )
+        return manufacture_expired or usage_expired

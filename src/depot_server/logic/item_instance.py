@@ -29,3 +29,12 @@ class ItemInstanceService:
         db_instance = await ItemInstanceRepo.update(item_instance_id, **item_instance.model_dump())
         return db_instance
 
+    @classmethod
+    async def get_full_item(cls, item_instance_id: UUID) -> ItemInstanceDB | None:
+        return await ItemInstanceRepo.get_full_item(item_instance_id)
+
+    @classmethod
+    async def get_expired_item_instances(cls) -> list[ItemInstanceDB]:
+        expired_item_instances = await ItemInstanceRepo.get_all()
+        return [inst for inst in expired_item_instances if inst.is_expired]
+

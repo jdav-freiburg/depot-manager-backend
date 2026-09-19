@@ -12,7 +12,7 @@ class InspectionReport(Model):
     id = fields.UUIDField(primary_key=True)
 
     report_profile = fields.ForeignKeyField(ReportProfile, on_delete=fields.RESTRICT, related_name="reports")
-    item = fields.ForeignKeyField("depot.Item", on_delete=fields.RESTRICT, related_name="reports")
+    item_instance = fields.ForeignKeyField("depot.ItemInstance", on_delete=fields.RESTRICT, related_name="reports")
 
     created_at = fields.DatetimeField(auto_now_add=True)
     created_by = fields.UUIDField()
