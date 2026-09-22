@@ -71,7 +71,7 @@ class ItemService:
                                              max_lifespan=item.max_lifespan,
                                              max_usage_lifespan=item.max_usage_lifespan,
                                              psa_category=item.psa_category)
-        db_instance = await ItemInstanceRepo.create_item_instance(item_id=db_item.id,
+        db_instance = await ItemInstanceRepo.create(item_id=db_item.id,
                                                  external_id=item.external_id,
                                                  serial_number=item.serial_number,
                                                  manufacture_date=item.manufacture_date,

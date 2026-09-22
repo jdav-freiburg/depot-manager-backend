@@ -1,4 +1,5 @@
 from .item import Item, PsaCategory
+from .item_purpose import ItemPurpose
 from .item_group import ItemGroup
 from .item_instance import ItemInstance
 from .item_composite import ItemComposite, ItemCompositeLink

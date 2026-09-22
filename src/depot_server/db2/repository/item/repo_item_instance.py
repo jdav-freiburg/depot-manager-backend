@@ -32,11 +32,6 @@ class ItemInstanceRepo(AuditableRepo):
         return count
 
     @classmethod
-    async def create_item_instance(cls, **kwargs) -> ItemInstance:
-        item_instance = await cls.create(**kwargs)
-        return item_instance
-
-    @classmethod
     async def get_item_instances_needing_inspection(cls, psa_category: PsaCategory) -> list[ItemInstance]:
         raise NotImplementedError("This method is not yet implemented")
         item_instances = await cls.Db_type.filter(psa_category=psa_category).prefetch_related("reports").filter(reports__isnull=True).all()
