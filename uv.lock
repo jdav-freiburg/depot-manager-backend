@@ -428,9 +428,10 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "flake8" },
     { name = "mongomock" },
     { name = "pytest" },
-    { name = "pytest-flake8" },
+    { name = "pytest-asyncio" },
     { name = "pytest-mypy" },
     { name = "requests" },
     { name = "types-pytz" },
@@ -450,15 +451,16 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2,<3" },
     { name = "python-multipart", specifier = ">=0.0,<0.1" },
     { name = "pytz", specifier = "~=2025.2" },
-    { name = "tortoise-orm", extras = ["asyncpg", "accel"], specifier = "==1.1.3" },
+    { name = "tortoise-orm", extras = ["asyncpg", "accel"], specifier = "==1.1.7" },
     { name = "uvicorn", specifier = ">=0.34,<0.35" },
 ]
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "flake8", specifier = ">=7,<8" },
     { name = "mongomock", specifier = ">=4,<5" },
     { name = "pytest", specifier = ">=9,<10" },
-    { name = "pytest-flake8", specifier = ">=1,<2" },
+    { name = "pytest-asyncio", specifier = ">=1,<2" },
     { name = "pytest-mypy", specifier = ">=1,<2" },
     { name = "requests", specifier = ">=2,<3" },
     { name = "types-pytz", specifier = ">=2025,<2026" },
@@ -1429,16 +1431,16 @@ wheels = [
 ]
 
 [[package]]
-name = "pytest-flake8"
-version = "1.3.0"
+name = "pytest-asyncio"
+version = "1.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "flake8" },
     { name = "pytest" },
+    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/4f/83/3b0154ccd60191e24b75c99c5e7c6dcfb1d2fd81dd47528523b38fed6ac6/pytest_flake8-1.3.0.tar.gz", hash = "sha256:88fb35562ce32d915c6ba41ef0d5e1cfcdd8ff884a32b7d46aa99fc77a3d1fe6", size = 13340, upload-time = "2024-11-09T00:09:09.249Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/43/7c/d36d04db312ecf4298932ef77e6e4a9e8ad017906e24e34f0b0c361a2473/pytest_asyncio-1.4.0.tar.gz", hash = "sha256:c6c0d2259945122819f171a32ecea2c349ead889ee28176caaf492143424be42", size = 58514, upload-time = "2026-05-26T09:56:04.083Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7d/ca/163e24b6d92ba3e92245a6a23e88b946c29ff5294b2f4bc24c7a6171a13d/pytest_flake8-1.3.0-py3-none-any.whl", hash = "sha256:de10517c59fce25c0a7abb2a2b2a9d0b0ceb59ff0add7fa8e654d613bb25e218", size = 5966, upload-time = "2024-11-09T00:09:08.227Z" },
+    { url = "https://files.pythonhosted.org/packages/03/e2/08a497ef684b88559c9cc5f4ad53a37e7b99e727094a86d6ea32536d5d3c/pytest_asyncio-1.4.0-py3-none-any.whl", hash = "sha256:933ca923a23075a87fb7070c0ec272a6848489824d887c85c812670932835aa1", size = 16930, upload-time = "2026-05-26T09:56:02.576Z" },
 ]
 
 [[package]]
@@ -1684,7 +1686,7 @@ wheels = [
 
 [[package]]
 name = "tortoise-orm"
-version = "1.1.3"
+version = "1.1.7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiosqlite" },
@@ -1692,9 +1694,9 @@ dependencies = [
     { name = "iso8601", marker = "python_full_version < '4'" },
     { name = "pypika-tortoise" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f0/cd/705fc281b8ed295a1aa09417c6c2f76614e10e7a7bf0ef8d89a33281f087/tortoise_orm-1.1.3.tar.gz", hash = "sha256:7ac905e45e88fe461230c4f327ecd702b4f0a829994560421f21bff186287eda", size = 364073, upload-time = "2026-02-16T09:18:10.199Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/1d/55/e75d3ae0dd2c96cf961bf068f465fb62ec481d802beb65f406620bfd40a0/tortoise_orm-1.1.7.tar.gz", hash = "sha256:a0f0f27f9c92547739f0a3f0862c257ab64d8baadbc0e548cbcfa2d70bcbe275", size = 387489, upload-time = "2026-03-21T20:03:29.087Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/90/74/e97f69aca343ebff04b9234e7b280ae284d4f40c1c5cb184a9adb0acaf6f/tortoise_orm-1.1.3-py3-none-any.whl", hash = "sha256:db3fefaa6fc44f2a8827c774c8f12de3683c10d529169981edf6a289a6504eb0", size = 261776, upload-time = "2026-02-16T09:18:08.789Z" },
+    { url = "https://files.pythonhosted.org/packages/bf/9b/e7e5b4f4e9433b9d9c389afc62ea0ed2597626842dc0f76dd7b54eb32cdd/tortoise_orm-1.1.7-py3-none-any.whl", hash = "sha256:b640b786905891cc120aa16d1a7af18cd54b111a812f9b1c1d1c7b294d62949d", size = 272437, upload-time = "2026-03-21T20:03:27.539Z" },
 ]
 
 [package.optional-dependencies]
