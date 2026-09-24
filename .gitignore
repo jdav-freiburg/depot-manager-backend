@@ -7,5 +7,4 @@ venv
 depot-schema.dbml
 
 build/
-devdepot.sqlite*
-playground.sqlite*
+*.sqlite*

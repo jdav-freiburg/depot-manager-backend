@@ -7,10 +7,10 @@ from tortoise import Tortoise
 
 from depot_server.db2.models import (
     Item,
-    ItemComposite,
-    ItemGroup,
+    Lendable,
+    LendableGroup,
     Reservation,
-    ReservationCompositeLink,
+    LinkReservationLendable,
     ReservationItemLink,
 )
 from depot_server.db2.models.item.item import PsaCategory
@@ -101,7 +101,7 @@ async def test_get_all_reservations_prefetches_links(init_db):
         lendable=True,
         psa_category=PsaCategory.NONE,
     )
-    composite = await ItemComposite.create(
+    composite = await Lendable.create(
         name="Test Composite",
         lendable=True,
     )
@@ -119,7 +119,7 @@ async def test_get_all_reservations_prefetches_links(init_db):
         reservation=reservation,
         amount=2,
     )
-    await ReservationCompositeLink.create(
+    await LinkReservationLendable.create(
         composite_item=composite,
         reservation=reservation,
         amount=1,

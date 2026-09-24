@@ -4,7 +4,7 @@ from uuid import UUID
 
 from depot_server.db2.models.item.item import Item
 
-from depot_server.db2.repository.item.repo_item_group import ItemGroupRepo
+from depot_server.db2.repository.item.repo_item_group import LendableGroup
 from depot_server.db2.repository.item.repo_item import ItemRepo
 from depot_server.db2.repository.item.repo_item_instance import ItemInstanceRepo
 from depot_server.api2.models.item import FullItem, FullItemRaw, Item, ItemPending
@@ -16,7 +16,7 @@ class ItemService:
         item = await ItemRepo.get_item_by_id(item_id)
         if not item or (only_lendable and not item.lendable):
             return 0
-        return await ItemInstanceRepo.get_instance_amount(item_id)
+        return await ItemInstanceRepo.get_amount_by_item(item_id)
 
     @staticmethod
     async def get_all_items() -> list[Item]:
@@ -58,7 +58,7 @@ class ItemService:
 
     @staticmethod
     async def create_item(item: FullItemRaw) -> FullItem:
-        db_group = await ItemGroupRepo.create(name=item.name,
+        db_group = await LendableGroup.create(name=item.name,
                                               description=item.description,
                                               lendable=item.lendable)
         db_item = await ItemRepo.create_item(group_id=db_group.id,

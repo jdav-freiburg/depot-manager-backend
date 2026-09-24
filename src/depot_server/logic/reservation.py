@@ -8,7 +8,7 @@ from tortoise.transactions import in_transaction
 from depot_server.api2.models.reservation import Reservation, ReservationPending
 from depot_server.db2.repository.item.repo_reservation import ReservationRepo, ReservationRepoLink, ReservationRepoCompositeLink
 from depot_server.logic.item import ItemService
-from depot_server.logic.item_composite import ItemCompositeService
+from depot_server.logic.lendable import LendableService
 from depot_server.db2.repository.base import ItemNotFound
 
 
@@ -230,7 +230,7 @@ class ReservationService:
                 return False
             
         for composite_item_id, quantity in item_composites.items():
-            available_amount = await ItemCompositeService.get_total_amount(composite_item_id)
+            available_amount = await LendableService.get_total_amount(composite_item_id)
             reserved_composite_amount = await cls.get_reserved_composite_amount(composite_item_id, start_time, end_time, exclude_reservations=exclude_reservations)
             if available_amount - reserved_composite_amount < quantity:
                 return False

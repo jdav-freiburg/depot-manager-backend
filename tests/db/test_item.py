@@ -8,7 +8,6 @@ from depot_server.db2.models import Item as ItemModel
 from depot_server.db2.models.item.item import PsaCategory
 from depot_server.db2.repository.base import ItemNotFound
 from depot_server.db2.repository.item.repo_item import ItemRepo
-from depot_server.db2.repository.item.repo_item_group import ItemGroupRepo
 
 
 @pytest_asyncio.fixture
@@ -21,40 +20,29 @@ async def init_db():
 
 @pytest_asyncio.fixture
 async def item_data(init_db):
-    group = await ItemGroupRepo.create(
-        name="Test Group",
-        description="Group description",
-        parent=None,
-    )
-    return {
-        "group": group,
-        "item": await ItemRepo.create_item(
-            group=group,
+    return await ItemRepo.create(
             name="Test Item",
             description="Item description",
             lendable=True,
             manufacturer="Manufacturer",
             model="Model X",
             psa_category=PsaCategory.NONE,
-        ),
-    }
+        )
 
 
 @pytest.mark.asyncio
 async def test_item_repo_crud(item_data):
-    item = item_data["item"]
+    assert isinstance(item_data, ItemModel)
+    assert item_data.name == "Test Item"
+    assert (await ItemRepo.get_by_id(item_data.id)).id == item_data.id
+    assert (await ItemRepo.get_all())[0].id == item_data.id
 
-    assert isinstance(item, ItemModel)
-    assert item.name == "Test Item"
-    assert (await ItemRepo.get_item_by_id(item.id)).id == item.id
-    assert (await ItemRepo.get_all_items())[0].id == item.id
-
-    updated = await ItemRepo.update_item(item.id, name="Updated Item", model="Model Y")
+    updated = await ItemRepo.update_item(item_data.id, name="Updated Item", model="Model Y")
     assert updated.name == "Updated Item"
     assert updated.model == "Model Y"
 
-    await ItemRepo.delete_item(item.id)
-    assert await ItemRepo.get_item_by_id(item.id) is None
+    await ItemRepo.delete_by_id(item_data.id)
+    assert await ItemRepo.get_by_id(item_data.id) is None
 
 
 @pytest.mark.asyncio

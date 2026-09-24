@@ -9,15 +9,15 @@ from tortoise.expressions import Q
 from depot_server.api2.models.item_composite import ItemCompositeBase
 from depot_server.api2.models.item import ItemInstanceBase, FullItemRaw
 from depot_server.api2.models.reservation import ReservationPending
-from depot_server.db2.models import Item, ItemInstance, ItemGroup
+from depot_server.db2.models import Item, ItemInstance, LendableGroup
 from depot_server.db2.models.item.item import PsaCategory
 from depot_server.db2.models.common import Condition
 from depot_server.db2.repository.item.repo_item import ItemRepo
-from depot_server.db2.repository.item.repo_item_group import ItemGroupRepo
-from depot_server.db2.repository.item.repo_item_composite import ItemCompositeRepo
+from depot_server.db2.repository.item.repo_item_group import LendableGroup
+from depot_server.db2.repository.item.repo_lendable import LendableRepo
 from depot_server.db2.repository.item.repo_item_instance import ItemInstanceRepo
 from depot_server.logic.item import ItemService
-from depot_server.logic.item_composite import ItemCompositeService
+from depot_server.logic.lendable import LendableService
 from depot_server.logic.item_instance import ItemInstanceService, ItemInstanceUniqueConflict
 from depot_server.logic.reservation import ReservationService
 
@@ -37,9 +37,9 @@ async def init(path):
     await Tortoise.generate_schemas()
     
 
-    karabiner_group = await ItemGroup.create(name="Karabiner", description="Karabiner")
-    schraubkarabiner_group = await ItemGroup.create(name="Schraubkarabiner", description="Schraubkarabiner", parent=karabiner_group)
-    schnapper_group = await ItemGroup.create(name="Schnapper", description="Schnapper", parent=karabiner_group)
+    karabiner_group = await LendableGroup.create(name="Karabiner", description="Karabiner")
+    schraubkarabiner_group = await LendableGroup.create(name="Schraubkarabiner", description="Schraubkarabiner", parent=karabiner_group)
+    schnapper_group = await LendableGroup.create(name="Schnapper", description="Schnapper", parent=karabiner_group)
     
     attacheitem = await ItemService.create_item(FullItemRaw(group_id=schraubkarabiner_group.id, name="Petzl attache", description="toller Karabiner", lendable=True,
                                                             psa_category=PsaCategory.CAT_1, serial_number="SN123", manufacture_date="2023-01-01", purchase_date="2023-01-02", first_use_date="2023-01-03", condition=Condition.GOOD))
@@ -55,7 +55,7 @@ async def init(path):
         await ItemInstanceService.create_item_instance(ItemInstanceBase(item_id=seil.id, serial_number=f"SN{i}", manufacture_date="2023-01-01", purchase_date="2023-01-02", first_use_date="2023-01-03", condition=Condition.GOOD))
     for i in range(5):
         await ItemInstanceService.create_item_instance(ItemInstanceBase(item_id=schnapper.id, serial_number=f"SN{i}", manufacture_date="2023-01-01", purchase_date="2023-01-02", first_use_date="2023-01-03", condition=Condition.GOOD))
-    alpinexe = await ItemCompositeService.create(ItemCompositeBase(name="Alpinexe",
+    alpinexe = await LendableService.create(ItemCompositeBase(name="Alpinexe",
                                                    description="My Composite Item Description",
                                                    lendable=True,
                                                    elements={schlinge.id: 1, schnapper.id: 2}))

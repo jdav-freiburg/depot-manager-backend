@@ -1,23 +1,23 @@
 from uuid import UUID
 
-from depot_server.db2.models import ItemGroup
+from depot_server.db2.models import LendableGroup
 from depot_server.db2.repository.base import BaseRepo, ItemNotFound, T
 
 
-class ItemGroupRepo(BaseRepo):
-    Db_type = ItemGroup
+class LendableGroup(BaseRepo):
+    Db_type = LendableGroup
 
     @classmethod
     async def create(cls, **kwargs) -> T:
         if "parent" in kwargs and kwargs["parent"] is not None:
-            parent = await ItemGroupRepo.get_by_id(kwargs["parent"])
+            parent = await LendableGroup.get_by_id(kwargs["parent"])
             if parent is None:
                 raise ItemNotFound(f"Parent item with id {kwargs['parent']} not found")
             kwargs['parent'] = parent
         return await super().create(**kwargs)
 
     @classmethod
-    async def update_item_group(cls, item_group_id: UUID, **kwargs) -> ItemGroup:
+    async def update_lendable_group(cls, item_group_id: UUID, **kwargs) -> LendableGroup:
         group = await cls.get_by_id(item_group_id)
         if not group:
             raise ItemNotFound(f"ItemGroup with id {item_group_id} not found")
@@ -36,18 +36,18 @@ class ItemGroupRepo(BaseRepo):
         return group
 
     @classmethod
-    async def get_children_by_parent_id(cls, parent_id: UUID) -> list[ItemGroup]:
+    async def get_children_by_parent_id(cls, parent_id: UUID) -> list[LendableGroup]:
         children = await cls.Db_type.filter(parent_id=parent_id)
         return children
 
     @classmethod
-    async def is_single_item_group(cls, item_group_id: UUID) -> bool:
+    async def is_single_lendable_group(cls, lendable_group_id: UUID) -> bool:
         """
         Check if the given item group contains only one item.
         """
-        item_group = await cls.get_by_id(item_group_id)
-        if not item_group:
-            raise ItemNotFound(f"ItemGroup with id {item_group_id} not found")
-        if await item_group.children:
+        lendable_group = await cls.get_by_id(lendable_group_id)
+        if not lendable_group:
+            raise ItemNotFound(f"LendableGroup with id {lendable_group_id} not found")
+        if await lendable_group.children:
             return False
-        return await item_group.item.count() == 1
+        return await lendable_group.lendable.count() == 1

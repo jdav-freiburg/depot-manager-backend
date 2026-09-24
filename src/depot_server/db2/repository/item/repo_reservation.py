@@ -1,7 +1,7 @@
 from uuid import UUID
 from datetime import timedelta
 
-from depot_server.db2.models.item.reservation import Reservation, ReservationItemLink, ReservationCompositeLink
+from depot_server.db2.models.item.reservation import Reservation, ReservationItemLink, LinkReservationLendable
 from depot_server.db2.repository.audit import AuditableRepo
 
 
@@ -43,7 +43,7 @@ class ReservationRepoLink(AuditableRepo):
 
 
 class ReservationRepoCompositeLink(AuditableRepo):
-    Db_type = ReservationCompositeLink
+    Db_type = LinkReservationLendable
 
     @classmethod
     async def get_composite_links_in_timespan(cls, composite_item_id, start_time, end_time, exclude_reservations: list[UUID] | None = None):

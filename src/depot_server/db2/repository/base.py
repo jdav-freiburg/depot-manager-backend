@@ -76,6 +76,10 @@ class BaseRepo(RepoInterface[T]):
         return await cls.Db_type.filter(pk__in=ids).all()
 
     @classmethod
+    async def get_by_filter(cls, **kwargs) -> list[T]:
+        return await cls.Db_type.filter(**kwargs).all()
+
+    @classmethod
     async def save(cls, obj: T) -> T:
         await obj.save()
         return obj

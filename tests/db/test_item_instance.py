@@ -25,7 +25,7 @@ async def init_db():
 
 @pytest_asyncio.fixture
 async def item(init_db):
-    return await ItemRepo.create_item(
+    return await ItemRepo.create(
         name="Test Item",
         description="Item description",
         lendable=True,
@@ -57,13 +57,13 @@ async def test_item_instance_repo_crud(init_db):
         name="Test Purpose 2",
         description="Purpose description 2",
     )
-    item = await ItemRepo.create_item(
+    item = await ItemRepo.create(
         name="Test Item",
         description="Item description",
         lendable=True,
         psa_category=PsaCategory.NONE,
     )
-    item2 = await ItemRepo.create_item(
+    item2 = await ItemRepo.create(
         name="Test Item 2",
         description="Item description 2",
         lendable=True,
@@ -98,6 +98,9 @@ async def test_item_instance_repo_crud(init_db):
     assert (await ItemInstanceRepo.get_by_id(instance.id)).id == instance.id
     assert (await ItemInstanceRepo.get_all())[0].id == instance.id
     assert len(await ItemInstanceRepo.get_all()) == 4
+    assert await ItemInstanceRepo.get_amount_by_item(item.id) == 4
+    assert await ItemInstanceRepo.get_amount_by_purpose(purpose.id) == 2
+
     updated = await ItemInstanceRepo.update(
         instance.id,
         serial_number="SN002",
@@ -114,3 +117,112 @@ async def test_item_instance_repo_crud(init_db):
 async def test_item_instance_repo_update_missing_instance_raises(item):
     with pytest.raises(ItemNotFound):
         await ItemInstanceRepo.update(uuid4(), serial_number="Missing")
+
+@pytest.mark.asyncio
+async def test_amounts(init_db):
+    # Create an item purpose
+    purpose = await ItemPurposeRepo.create(
+        name="Test Purpose",
+        description="Purpose description",
+    )
+    purpose2 = await ItemPurposeRepo.create(
+        name="Test Purpose 2",
+        description="Purpose description 2",
+    )
+    purpose3 = await ItemPurposeRepo.create(
+        name="Test Purpose 3",
+        description="Purpose description 3",
+    )
+
+    # Create an item
+    item = await ItemRepo.create(
+        name="Test Item",
+        description="Item description",
+        lendable=True,
+        psa_category=PsaCategory.NONE,
+    )
+    item2 = await ItemRepo.create(
+        name="Test Item 2",
+        description="Item description 2",
+        lendable=True,
+        psa_category=PsaCategory.NONE,
+    )
+
+    # Create item instances with different conditions
+    await ItemInstanceRepo.create(
+        item=item,
+        purpose=purpose,
+        serial_number="SN001",
+        external_id="EXT001",
+        manufacture_date=date(2024, 1, 1),
+        purchase_date=date(2024, 2, 1),
+        first_use_date=date(2024, 3, 1),
+        condition=Condition.GOOD,
+    )
+    await ItemInstanceRepo.create(
+        item=item,
+        purpose=purpose,
+        serial_number="SN002",
+        external_id="EXT002",
+        manufacture_date=date(2024, 1, 1),
+        purchase_date=date(2024, 2, 1),
+        first_use_date=date(2024, 3, 1),
+        condition=Condition.MONITOR,
+    )
+    await ItemInstanceRepo.create(
+        item=item,
+        purpose=purpose,
+        serial_number="SN003",
+        external_id="EXT003",
+        manufacture_date=date(2024, 1, 1),
+        purchase_date=date(2024, 2, 1),
+        first_use_date=date(2024, 3, 1),
+        condition=Condition.REPAIR,
+    )
+    await ItemInstanceRepo.create(
+        item=item,
+        purpose=purpose,
+        serial_number="SN004",
+        external_id="EXT004",
+        manufacture_date=date(2024, 1, 1),
+        purchase_date=date(2024, 2, 1),
+        first_use_date=date(2024, 3, 1),
+        condition=Condition.REPAIR,
+    )
+    # item2
+    await ItemInstanceRepo.create(
+        item=item2,
+        purpose=purpose2,
+        serial_number="SN005",
+        external_id="EXT005",
+        manufacture_date=date(2024, 1, 1),
+        purchase_date=date(2024, 2, 1),
+        first_use_date=date(2024, 3, 1),
+        condition=Condition.GOOD,
+    )
+    await ItemInstanceRepo.create(
+        item=item2,
+        purpose=purpose2,
+        serial_number="SN006",
+        external_id="EXT006",
+        manufacture_date=date(2024, 1, 1),
+        purchase_date=date(2024, 2, 1),
+        first_use_date=date(2024, 3, 1),
+        condition=Condition.GOOD,
+    )
+    await ItemInstanceRepo.create(
+        item=item2,
+        purpose=purpose3,
+        serial_number="SN007",
+        external_id="EXT007",
+        manufacture_date=date(2024, 1, 1),
+        purchase_date=date(2024, 2, 1),
+        first_use_date=date(2024, 3, 1),
+        condition=Condition.GOOD,
+    )
+    # Check if only conditions GOOD and MONITOR are counted as available
+    assert await ItemInstanceRepo.get_amount_by_item(item.id) == 2
+    # Check if Purposes and Items are counted correctly
+    assert await ItemInstanceRepo.get_amount_by_item(item2.id) == 3
+    assert await ItemInstanceRepo.get_amount_by_purpose(purpose2.id) == 2
+    assert await ItemInstanceRepo.get_amount_by_purpose(purpose3.id) == 1

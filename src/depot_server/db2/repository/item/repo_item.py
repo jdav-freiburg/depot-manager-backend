@@ -8,27 +8,8 @@ class ItemRepo(AuditableRepo):
     Db_type = Item
 
     @classmethod
-    async def get_all_items(cls) -> list[Item]:
-        items = await cls.Db_type.all().select_related("group")
-        return items
-
-    @classmethod
-    async def get_item_by_id(cls, item_id: UUID) -> Item | None:
-        item = await cls.Db_type.filter(id=item_id).select_related("group").get_or_none()
-        return item
-
-    @classmethod
-    async def create_item(cls, **kwargs) -> Item:
-        item = await cls.create(**kwargs)
-        return item
-
-    @classmethod
-    async def delete_item(cls, item_id: UUID) -> None:
-        await cls.delete_by_id(item_id)
-
-    @classmethod
     async def update_item(cls, item_id: UUID, **kwargs) -> Item:
-        item = await cls.get_item_by_id(item_id)
+        item = await cls.get_by_id(item_id)
         if not item:
             raise ItemNotFound(f"Item with id {item_id} not found")
 

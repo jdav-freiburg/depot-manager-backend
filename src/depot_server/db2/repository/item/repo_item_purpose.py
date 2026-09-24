@@ -1,4 +1,6 @@
 
+from uuid import UUID
+
 from depot_server.db2.repository.audit import AuditableRepo
 from depot_server.db2.models.item.item_purpose import ItemPurpose
 
