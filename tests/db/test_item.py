@@ -37,7 +37,7 @@ async def test_item_repo_crud(item_data):
     assert (await ItemRepo.get_by_id(item_data.id)).id == item_data.id
     assert (await ItemRepo.get_all())[0].id == item_data.id
 
-    updated = await ItemRepo.update_item(item_data.id, name="Updated Item", model="Model Y")
+    updated = await ItemRepo.update(item_data.id, name="Updated Item", model="Model Y")
     assert updated.name == "Updated Item"
     assert updated.model == "Model Y"
 
@@ -48,4 +48,4 @@ async def test_item_repo_crud(item_data):
 @pytest.mark.asyncio
 async def test_item_repo_update_missing_item_raises(item_data):
     with pytest.raises(ItemNotFound):
-        await ItemRepo.update_item(uuid4(), name="Missing")
+        await ItemRepo.update(uuid4(), name="Missing")

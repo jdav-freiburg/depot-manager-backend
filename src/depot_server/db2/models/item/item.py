@@ -36,13 +36,6 @@ class Item(Model):
     created_at = fields.DatetimeField(auto_now_add=True)
 
     #tags = fields.ManyToManyField(Tag, null=True, on_delete=fields.SET_NULL, related_name="items")
-    # reservations = fields.ManyToManyField(
-    #     Reservation,
-    #     through="models.item.reservation.ReservationLink",
-    #     forward_key="reservation_id",
-    #     backward_key="item_id",
-    #     related_name="items"
-    # )
 
 
     #created_by = fields.UUIDField(null=False)

@@ -6,7 +6,7 @@ from tortoise.models import Model
 
 class LendableGroup(Model):
     class Meta:
-        table: str = "depot_item_group"
+        table: str = "depot_lendable_group"
 
     id = fields.UUIDField(primary_key=True)
 

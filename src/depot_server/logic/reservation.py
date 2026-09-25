@@ -6,7 +6,7 @@ from datetime import timedelta
 from tortoise.transactions import in_transaction
 
 from depot_server.api2.models.reservation import Reservation, ReservationPending
-from depot_server.db2.repository.item.repo_reservation import ReservationRepo, ReservationRepoLink, ReservationRepoCompositeLink
+from depot_server.db2.repository.item.repo_reservation import ReservationRepo, ReservationRepoLinkLendable
 from depot_server.logic.item import ItemService
 from depot_server.logic.lendable import LendableService
 from depot_server.db2.repository.base import ItemNotFound
@@ -78,7 +78,7 @@ class ReservationService:
 
     @classmethod
     async def get_reserved_item_amount(cls, item_id, start_time: date, end_time: date, exclude_reservations: list[UUID] | None = None) -> int:
-        links = await ReservationRepoLink.get_item_links_in_timespan(
+        links = await ReservationRepoLinkLendable.get_lendable_links_in_timespan(
             item_id,
             start_time,
             end_time,
@@ -117,7 +117,7 @@ class ReservationService:
             for item_id, quantity in reservation_data.items.items():
                 if quantity <= 0:
                     raise ReservationValidationError(f"Quantity for item {item_id} must be greater than 0.")
-                await ReservationRepoLink.create(reservation_id=reservation.id,
+                await ReservationRepoLinkLendable.create(reservation_id=reservation.id,
                                                 item_id=item_id,
                                                 amount=quantity,
                                                 borrowed=None)
@@ -181,18 +181,18 @@ class ReservationService:
             if not reservation:
                 raise ItemNotFound(f"Reservation with ID {reservation_id} not found.")
             # Update item links
-            current_item_links = await ReservationRepoLink.get_by_reservation(reservation_id)
+            current_item_links = await ReservationRepoLinkLendable.get_by_reservation(reservation_id)
             item_ids = []
             for link in current_item_links:
                 if link.item_id not in update_data.items:
-                    await ReservationRepoLink.delete_by_id(link.id)
+                    await ReservationRepoLinkLendable.delete_by_id(link.id)
                 else:
-                    await ReservationRepoLink.update(link.id, amount=update_data.items[link.item_id])
+                    await ReservationRepoLinkLendable.update(link.id, amount=update_data.items[link.item_id])
                     item_ids.append(link.item_id)
             # Add new item links
             for item_id, amount in update_data.items.items():
                 if item_id not in item_ids:
-                    await ReservationRepoLink.create(reservation_id=reservation.id, item_id=item_id, amount=amount)
+                    await ReservationRepoLinkLendable.create(reservation_id=reservation.id, item_id=item_id, amount=amount)
             # Update composite item links
             current_composite_links = await ReservationRepoCompositeLink.get_by_reservation(reservation_id)
             composite_ids = []
@@ -217,7 +217,7 @@ class ReservationService:
             reservation = await ReservationRepo.get_by_filter_with_links(id=reservation_id)
             if not reservation:
                 raise ItemNotFound(f"Reservation with ID {reservation_id} not found.")
-            await ReservationRepoLink.bulk_delete(reservation_id.reservation_links.values_list('id', flat=True))
+            await ReservationRepoLinkLendable.bulk_delete(reservation_id.reservation_links.values_list('id', flat=True))
             await ReservationRepoCompositeLink.bulk_delete(reservation_id.reservation_composite_links.values_list('id', flat=True))
             await ReservationRepo.delete_by_id(id=reservation_id)
 

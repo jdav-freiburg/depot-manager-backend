@@ -105,7 +105,7 @@ class ItemService:
 
     @staticmethod
     async def update_item(item_id: UUID, item: ItemPending) -> Item|None:
-        db_item = await ItemRepo.update_item(item_id=item_id,
+        db_item = await ItemRepo.update(item_id=item_id,
                                              group_id=item.group_id,
                                              name=item.name,
                                              description=item.description,

@@ -6,7 +6,7 @@ from depot_server.db2.models import ItemInstance
 from depot_server.db2.repository.audit import AuditableRepo
 from depot_server.db2.repository.base import ItemNotFound
 from depot_server.db2.models.common import Condition
-from depot_server.db2.models.item.item import Item, PsaCategory
+from depot_server.db2.models.item.item import PsaCategory
 
 class ItemInstanceRepo(AuditableRepo):
     Db_type = ItemInstance

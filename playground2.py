@@ -9,7 +9,7 @@ from tortoise.expressions import Q
 from depot_server.api2.models.item_composite import ItemCompositeBase
 from depot_server.api2.models.item import ItemInstanceBase, FullItemRaw
 from depot_server.api2.models.reservation import ReservationPending
-from depot_server.db2.models import Item, ItemInstance, LendableGroup
+from depot_server.db2.models import Lendable, ItemInstance, LendableGroup
 from depot_server.db2.models.item.item import PsaCategory
 from depot_server.db2.models.common import Condition
 from depot_server.db2.repository.item.repo_item import ItemRepo
@@ -50,7 +50,7 @@ async def init(path):
     schnapper = await ItemService.create_item(FullItemRaw(group_id=schnapper_group.id, name="Ocun Schnapper", description="toller Schnapper", lendable=False, psa_category=PsaCategory.CAT_1,
                                                           serial_number="SN000", manufacture_date="2023-01-01", purchase_date="2023-01-02", first_use_date="2023-01-03", condition=Condition.GOOD))
     await ItemInstanceService.create_item_instance(ItemInstanceBase(item_id=attacheitem.id, serial_number="SN1", manufacture_date="2023-01-01", purchase_date="2023-01-02", first_use_date="2023-01-03", condition=Condition.GOOD))
-    seil = await Item.create(name="Ocun Seil", description="80 m", lendable=True, psa_category=PsaCategory.CAT_1)
+    seil = await Lendable.create(name="Ocun Seil", description="80 m", lendable=True, psa_category=PsaCategory.CAT_1)
     for i in range(3):
         await ItemInstanceService.create_item_instance(ItemInstanceBase(item_id=seil.id, serial_number=f"SN{i}", manufacture_date="2023-01-01", purchase_date="2023-01-02", first_use_date="2023-01-03", condition=Condition.GOOD))
     for i in range(5):

@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from tortoise import Tortoise
 
-from depot_server.db2.models import Item
+from depot_server.db2.models import Lendable
 from depot_server.db2.models.common import Condition
 from depot_server.db2.repository.item.repo_item import ItemRepo
 from depot_server.db2.repository.item.repo_item_group import LendableGroup
@@ -48,7 +48,7 @@ async def init():
     )
 
     # Now create the Item with FKs set
-    item: Item = await ItemRepo.create(
+    item: Lendable = await ItemRepo.create(
         group=group,  # Required FK
         storage_location=storage_location,  # Optional FK
         report_profile=report_profile,  # Optional FK

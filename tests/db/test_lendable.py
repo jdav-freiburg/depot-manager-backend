@@ -13,7 +13,6 @@ from depot_server.logic.lendable import LendableService
 
 from depot_server.db2.models.common import Condition
 from depot_server.db2.models.item.item import PsaCategory
-from depot_server.logic import item
 
 
 @pytest_asyncio.fixture

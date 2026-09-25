@@ -26,10 +26,9 @@ class Reservation(Model):
     reservation_type = fields.CharEnumField(ReservationType, null=False, default=ReservationType.BORROW)
 
 
-
 class LinkReservationLendable(Model):
     class Meta:
-        abstract = True
+        table: str = "depot_link_reservation__lendable"
         constraints = [
             CheckConstraint("amount > 0", name="check_amount_positive")
         ]
@@ -42,17 +41,16 @@ class LinkReservationLendable(Model):
     borrowed_message = fields.TextField(null=True)
     returned = fields.DateField(null=True)
     returned_message = fields.TextField(null=True)
-    
     lendable = fields.ForeignKeyField("depot.Lendable", null=False, on_delete=fields.RESTRICT, related_name="reservation_lendable_links")
     reservation = fields.ForeignKeyField("depot.Reservation", null=False, related_name="reservation_lendable_links")
 
 
-class LinkReservation__item_instance(Model):
+class LinkReservationLinkItemInstance(Model):
     class Meta:
         table: str = "depot_link_reservation__item_instance"
         description = "This table links reservations to specific item instances. This table should be filled at pickup if we want to track which specific item instance was given to the user." \
         " e.g. the user reserved an arbitrary LVS lendable. He then gets the one with numer 5."
 
     id = fields.UUIDField(primary_key=True)
-    reservation = fields.ForeignKeyField("depot.Reservation", null=False, related_name="reservation_item_instance_links")
+    link_reservation_lendable = fields.ForeignKeyField("depot.LinkReservationLendable", null=False, related_name="reservation_item_instance_links")
     item_instance = fields.ForeignKeyField("depot.ItemInstance", null=False, on_delete=fields.RESTRICT, related_name="reservation_item_instance_links")

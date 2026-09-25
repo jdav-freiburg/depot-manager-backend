@@ -6,14 +6,13 @@ from tortoise.signals import pre_save
 from tortoise.exceptions import ValidationError
 
 from depot_server.db2.models.common import Condition
-from depot_server.db2.models.item.item import Item
 
 class ItemInstance(Model):
     class Meta:
         table: str = "depot_item_instance"
 
     id = fields.UUIDField(primary_key=True)
-    item = fields.ForeignKeyField(Item, on_delete=fields.RESTRICT, null=False, related_name="item_instances")
+    item = fields.ForeignKeyField("depot.Item", on_delete=fields.RESTRICT, null=False, related_name="item_instances")
     purpose = fields.ForeignKeyField("depot.ItemPurpose", on_delete=fields.RESTRICT, null=False, related_name="item_instances")
     external_id = fields.CharField(null=True, max_length=100)
     serial_number = fields.TextField(null=False)
@@ -24,6 +23,7 @@ class ItemInstance(Model):
     first_use_date = fields.DateField(null=False)
     condition = fields.CharEnumField(Condition)
     condition_comment = fields.TextField(null=True)
+    assets = fields.ManyToManyField("depot.Asset", on_delete=fields.RESTRICT, related_name="item_instances")
 
 
     @property

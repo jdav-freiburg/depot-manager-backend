@@ -6,7 +6,7 @@ from uuid import UUID
 from tortoise.fields import Field
 from tortoise.transactions import in_transaction
 
-from depot_server.db2.models import Item
+from depot_server.db2.models import Lendable
 from depot_server.db2.repository.base import BaseRepo, T as BASE_T
 from depot_server.db2.repository.repo_auditlog import AuditLogRepo
 
@@ -47,7 +47,7 @@ class AuditableRepo(BaseRepo[BASE_T]):
 
     @classmethod
     async def save(cls, obj: BASE_T, info: AuditInfo) -> BASE_T:
-        old: Item = await obj.get(pk=obj.pk)
+        old: Lendable = await obj.get(pk=obj.pk)
         diff_old, diff_new = await cls.model_diff(old, obj)
         if diff_old == {} and diff_new == {}:
             # we have nothing to do here, as the objects are identical

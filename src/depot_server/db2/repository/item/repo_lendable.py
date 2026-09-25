@@ -31,7 +31,7 @@ class LendableRepo(BaseRepo):
         return await cls.Db_type.filter(id=id).prefetch_related(
             Prefetch("lendable_purpose_link_archive",
                      queryset=LinkLendablePurpose.filter(created_at__lt=timestamp, change_date__gt=timestamp))
-                ).first()
+                     ).prefetch_related("lendable_purpose_link").first()
 
 
 

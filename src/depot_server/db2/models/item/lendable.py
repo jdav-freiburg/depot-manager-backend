@@ -6,7 +6,7 @@ from tortoise.migrations.constraints import CheckConstraint
 
 class Lendable(Model):
     class Meta:
-        table: str = "depot_item_composite"
+        table: str = "depot_lendable"
         constraints = [
             CheckConstraint("in_limbus >= 0", name="check_in_limbus_non_negative")
         ]
@@ -20,8 +20,9 @@ class Lendable(Model):
                                      description="The group this lendable belongs to. This is used to build a tree like structure.")
     storage_location = fields.ForeignKeyField("depot.StorageLocation", on_delete=fields.RESTRICT, null=True,
                                               related_name="lendable")
+    ausgabepflichtig = fields.BooleanField(default=False, null=False, description="Must be handed out by a member of the depot team.")
+    assets = fields.ManyToManyField("depot.Asset", on_delete=fields.RESTRICT, related_name="lendable")
     changed_at = fields.DatetimeField(auto_now_add=True)
-
     lendable_purpose_link: fields.ReverseRelation["LinkLendablePurpose"]
 
     @property
@@ -42,6 +43,7 @@ class LinkLendablePurpose(Model):
     lendable = fields.ForeignKeyField("depot.Lendable", null=False, related_name="lendable_purpose_link")
     purpose = fields.ForeignKeyField("depot.ItemPurpose", null=False, related_name="lendable_purpose_link", unique=True)
     amount = fields.IntField(null=False, validators=[MinValueValidator(1)], description="The quantity of the item in the lendable group")
+    ausgabepflichtig = fields.BooleanField(default=False, null=False, description="Must be handed out by a member of the depot team.")
     created_at = fields.DatetimeField(auto_now_add=True)
 
 

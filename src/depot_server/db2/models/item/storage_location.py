@@ -14,4 +14,4 @@ class StorageLocation(Model):
 
     name = fields.CharField(max_length=255)
     description = fields.TextField(null=True)
-    is_ausgabepflichtig = fields.BooleanField(default=False, null=False)
+    restricted_access = fields.BooleanField(default=False, null=False)

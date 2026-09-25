@@ -60,13 +60,11 @@ async def test_item_instance_repo_crud(init_db):
     item = await ItemRepo.create(
         name="Test Item",
         description="Item description",
-        lendable=True,
         psa_category=PsaCategory.NONE,
     )
     item2 = await ItemRepo.create(
         name="Test Item 2",
         description="Item description 2",
-        lendable=True,
         psa_category=PsaCategory.NONE,
     )
     instance = await ItemInstanceRepo.create(**instance_fields(item, purpose, serial_number="SN001",
