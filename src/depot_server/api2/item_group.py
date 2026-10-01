@@ -3,13 +3,13 @@ from uuid import UUID
 from fastapi import APIRouter, HTTPException
 
 from depot_server.db2.models.item.lendable_group import LendableGroup as DbItemGroup
-from depot_server.db2.repository.item.repo_item_group import LendableGroup
-from depot_server.logic.lendable_group import item_group_from_orm, ItemGroupService
+from depot_server.db2.repository.item.repo_lendable_group import LendableGroup
+from depot_server.logic.lendable_group import LendableGroupService
 from .models.item_group import ItemGroup, ItemGroupBase
 from ..db2.repository.base import ItemNotFound
 
 router = APIRouter(tags=["V2_ItemGroup"])
-item_group_service = ItemGroupService()
+item_group_service = LendableGroupService()
 
 @router.get("/item_group")
 async def get_item_groups() -> list[ItemGroup]:

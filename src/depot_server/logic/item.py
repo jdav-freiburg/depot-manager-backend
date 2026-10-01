@@ -3,131 +3,85 @@
 from uuid import UUID
 
 from depot_server.db2.models.item.item import Item
+from depot_server.db2.models.item.item_instance import ItemInstance
 
-from depot_server.db2.repository.item.repo_item_group import LendableGroup
 from depot_server.db2.repository.item.repo_item import ItemRepo
 from depot_server.db2.repository.item.repo_item_instance import ItemInstanceRepo
-from depot_server.api2.models.item import FullItem, FullItemRaw, Item, ItemPending
-
+from depot_server.logic.contracts.item import CreateItem, CreateItemInstance, UpdateItemData, UpdateItemInstanceData
+from depot_server.logic.results.item import LogicItem, LogicItemInstance
 
 class ItemService:
+    @classmethod
+    def _to_logic_item(cls, db_item: Item) -> LogicItem:
+        return LogicItem(
+            id=db_item.id,
+            name=db_item.name,
+            description=db_item.description,
+            manufacturer=db_item.manufacturer,
+            model=db_item.model,
+            report_profile_id=db_item.report_profile_id,
+            max_lifespan=db_item.max_lifespan,
+            max_usage_lifespan=db_item.max_usage_lifespan,
+            psa_category=db_item.psa_category
+        )
+
+    @classmethod
+    def _to_logic__item_instance(cls, db_instance: ItemInstance) -> LogicItemInstance:
+       return LogicItemInstance(
+            id=db_instance.id,
+            item_id=db_instance.item_id,
+            external_id=db_instance.external_id,
+            serial_number=db_instance.serial_number,
+            manufacture_date=db_instance.manufacture_date,
+            purchase_date=db_instance.purchase_date,
+            first_use_date=db_instance.first_use_date,
+            condition=db_instance.condition,
+            condition_comment=db_instance.condition_comment,
+            purpose=db_instance.purpose_id,
+       )
+ 
     @staticmethod
-    async def get_total_amount(item_id: UUID, only_lendable=True) -> int:
-        item = await ItemRepo.get_item_by_id(item_id)
-        if not item or (only_lendable and not item.lendable):
-            return 0
+    async def get_total_amount(item_id: UUID) -> int:
         return await ItemInstanceRepo.get_amount_by_item(item_id)
 
-    @staticmethod
-    async def get_all_items() -> list[Item]:
-        db_items = await ItemRepo.get_all_items()
-        return [Item.model_validate({
-            "id": item.id,
-            "group_id": item.group_id,
-            "lendable": item.lendable,
-            "name": item.name,
-            "description": item.description,
-            "manufacturer": item.manufacturer,
-            "model": item.model,
-            "report_profile_id": item.report_profile_id,
-            "max_lifespan": item.max_lifespan,
-            "max_usage_lifespan": item.max_usage_lifespan,
-            "psa_category": item.psa_category,
-            "storage_location_id": item.storage_location_id,
-        }) for item in db_items]
+    @classmethod
+    async def get_all_items(cls) -> list[LogicItem]:
+        db_items = await ItemRepo.get_all()
+        return [cls._to_logic_item(item) for item in db_items]
 
-    @staticmethod
-    async def get_item(item_id: UUID) -> Item|None:
-        db_item = await ItemRepo.get_item_by_id(item_id)
-        if not db_item:
+    @classmethod
+    async def get_item(cls,item_id: UUID) -> LogicItem|None:
+        item = await ItemRepo.get_by_id(item_id)
+        if not item:
             return None
-        return Item.model_validate({
-            "id": db_item.id,
-            "group_id": db_item.group_id,
-            "lendable": db_item.lendable,
-            "name": db_item.name,
-            "description": db_item.description,
-            "manufacturer": db_item.manufacturer,
-            "model": db_item.model,
-            "report_profile_id": db_item.report_profile_id,
-            "max_lifespan": db_item.max_lifespan,
-            "max_usage_lifespan": db_item.max_usage_lifespan,
-            "psa_category": db_item.psa_category,
-            "storage_location_id": db_item.storage_location_id,
-        }, from_attributes=True)
+        return cls._to_logic_item(item)
 
-    @staticmethod
-    async def create_item(item: FullItemRaw) -> FullItem:
-        db_group = await LendableGroup.create(name=item.name,
-                                              description=item.description,
-                                              lendable=item.lendable)
-        db_item = await ItemRepo.create_item(group_id=db_group.id,
-                                             name=item.name,
-                                             description=item.description,
-                                             lendable=item.lendable,
-                                             manufacturer=item.manufacturer,
-                                             model=item.model,
-                                             report_profile_id=item.report_profile_id,
-                                             max_lifespan=item.max_lifespan,
-                                             max_usage_lifespan=item.max_usage_lifespan,
-                                             psa_category=item.psa_category)
-        db_instance = await ItemInstanceRepo.create(item_id=db_item.id,
-                                                 external_id=item.external_id,
-                                                 serial_number=item.serial_number,
-                                                 manufacture_date=item.manufacture_date,
-                                                 purchase_date=item.purchase_date,
-                                                 first_use_date=item.first_use_date,
-                                                 condition=item.condition,
-                                                 condition_comment=item.condition_comment)
-        
+    @classmethod
+    async def create_item(cls, contract: CreateItem) -> LogicItem:
+        db_item = await ItemRepo.create(**contract.to_kwargs("name", "description", "manufacturer",
+                                                    "model", "report_profile_id", "max_lifespan",
+                                                    "max_usage_lifespan", "psa_category"))
+        return cls._to_logic_item(db_item)
 
-        return FullItem.model_validate({
-            "group_id": db_group.id,
-            "lendable": db_item.lendable,
-            "id": db_item.id,
-            "name": db_item.name,
-            "description": db_item.description,
-            "manufacturer": db_item.manufacturer,
-            "model": db_item.model,
-            "report_profile_id": db_item.report_profile_id,
-            "max_lifespan": db_item.max_lifespan,
-            "max_usage_lifespan": db_item.max_usage_lifespan,
-            "psa_category": db_item.psa_category,
-            "instance_id": db_instance.id,
-            "external_id": db_instance.external_id,
-            "serial_number": db_instance.serial_number,
-            "manufacture_date": db_instance.manufacture_date,
-            "purchase_date": db_instance.purchase_date,
-            "first_use_date": db_instance.first_use_date,
-            "condition": db_instance.condition,
-            "condition_comment": db_instance.condition_comment,
-            })
+    @classmethod
+    async def create_item_instance(cls, contract: CreateItemInstance) -> LogicItemInstance:
+        db_instance = await ItemInstanceRepo.create(**contract.to_kwargs("item_id", "external_id",
+                                                    "serial_number", "manufacture_date", "purchase_date",
+                                                    "first_use_date", "condition", "condition_comment",
+                                                    "external_id", "purpose"))
+        return cls._to_logic__item_instance(db_instance)
 
-    @staticmethod
-    async def update_item(item_id: UUID, item: ItemPending) -> Item|None:
-        db_item = await ItemRepo.update(item_id=item_id,
-                                             group_id=item.group_id,
-                                             name=item.name,
-                                             description=item.description,
-                                             lendable=item.lendable,
-                                             manufacturer=item.manufacturer,
-                                             model=item.model,
-                                             report_profile_id=item.report_profile_id,
-                                             max_lifespan=item.max_lifespan,
-                                             max_usage_lifespan=item.max_usage_lifespan,
-                                             psa_category=item.psa_category,
-                                             storage_location_id=item.storage_location_id)
-        if not db_item:
-            return None
-        return Item.model_validate({"id": db_item.id,
-                                   "group_id": db_item.group_id,
-                                   "lendable": db_item.lendable,
-                                   "name": db_item.name,
-                                   "description": db_item.description,
-                                   "manufacturer": db_item.manufacturer,
-                                   "model": db_item.model,
-                                   "report_profile_id": db_item.report_profile_id,
-                                   "max_lifespan": db_item.max_lifespan,
-                                   "max_usage_lifespan": db_item.max_usage_lifespan,
-                                   "psa_category": db_item.psa_category,
-                                   "storage_location_id": db_item.storage_location_id})
+    @classmethod
+    async def update_item(cls, id: UUID, contract: UpdateItemData) -> LogicItem:
+        db_item = await ItemRepo.update(id, **contract.to_kwargs("name", "description", "manufacturer",
+                                                    "model", "report_profile_id", "max_lifespan",
+                                                    "max_usage_lifespan", "psa_category"))
+
+        return cls._to_logic_item(db_item)
+
+    @classmethod
+    async def update_item_instance(cls, id: UUID, contract: UpdateItemInstanceData) -> LogicItemInstance:
+        db_instance = await ItemInstanceRepo.update(id, **contract.to_kwargs("serial_number", "manufacture_date",
+                                                    "purchase_date", "first_use_date", "condition",
+                                                    "condition_comment", "external_id", "purpose"))
+        return cls._to_logic__item_instance(db_instance)

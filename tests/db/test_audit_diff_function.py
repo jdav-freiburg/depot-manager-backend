@@ -10,7 +10,7 @@ from depot_server.db2.models.common import Condition
 from depot_server.db2.models.item.item import PsaCategory
 from depot_server.db2.repository.audit import AuditInfo
 from depot_server.db2.repository.item.repo_item import ItemRepo
-from depot_server.db2.repository.item.repo_item_group import LendableGroup
+from depot_server.db2.repository.item.repo_lendable_group import LendableGroup
 from depot_server.db2.repository.item.repo_storage_location import StorageLocationRepo
 from depot_server.db2.repository.item.repo_tag import TagRepo
 from depot_server.db2.repository.report.repo_report_profile import ReportProfileRepo

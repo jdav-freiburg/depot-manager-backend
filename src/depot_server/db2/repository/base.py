@@ -85,7 +85,7 @@ class BaseRepo(RepoInterface[T]):
         return obj
 
     @classmethod
-    async def update(cls, id: UUID, **kwargs) -> Optional[T]:
+    async def update(cls, id: UUID, **kwargs) -> T:
         obj = await cls.get_by_id(id)
         if not obj:
             raise ItemNotFound(f"Item {id} not found")

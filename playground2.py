@@ -13,7 +13,7 @@ from depot_server.db2.models import Lendable, ItemInstance, LendableGroup
 from depot_server.db2.models.item.item import PsaCategory
 from depot_server.db2.models.common import Condition
 from depot_server.db2.repository.item.repo_item import ItemRepo
-from depot_server.db2.repository.item.repo_item_group import LendableGroup
+from depot_server.db2.repository.item.repo_lendable_group import LendableGroup
 from depot_server.db2.repository.item.repo_lendable import LendableRepo
 from depot_server.db2.repository.item.repo_item_instance import ItemInstanceRepo
 from depot_server.logic.item import ItemService

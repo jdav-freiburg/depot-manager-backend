@@ -98,37 +98,37 @@ async def test_get_reserved_amount_returns_peak_overlap(init_db):
             amount=amount,
         )
 
-    assert await ReservationService.get_reserved_item_amount(
+    assert await ReservationService.get_reserved_lendable_amount(
         lendable.id,
         date(2025, 12, 30),
         date(2025, 12, 31),
     ) == 0
-    assert await ReservationService.get_reserved_item_amount(
+    assert await ReservationService.get_reserved_lendable_amount(
         lendable.id,
         date(2026, 1, 1),
         date(2026, 1, 3)
     ) == 9
-    assert await ReservationService.get_reserved_item_amount(
+    assert await ReservationService.get_reserved_lendable_amount(
         lendable.id,
         date(2025, 12, 31),
         date(2026, 1, 2)
     ) == 5
-    assert await ReservationService.get_reserved_item_amount(
+    assert await ReservationService.get_reserved_lendable_amount(
         lendable.id,
         date(2026, 1, 3),
         date(2026, 1, 4)
     ) == 9
-    assert await ReservationService.get_reserved_item_amount(
+    assert await ReservationService.get_reserved_lendable_amount(
         lendable.id,
         date(2026, 1, 4),
         date(2026, 1, 5)
     ) == 5
-    assert await ReservationService.get_reserved_item_amount(
+    assert await ReservationService.get_reserved_lendable_amount(
         lendable.id,
         date(2026, 1, 6),
         date(2026, 1, 6)
     ) == 0
-    assert await ReservationService.get_reserved_item_amount(
+    assert await ReservationService.get_reserved_lendable_amount(
         lendable.id,
         date(2026, 1, 8),
         date(2026, 1, 8)

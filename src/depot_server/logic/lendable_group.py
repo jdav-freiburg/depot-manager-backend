@@ -2,28 +2,30 @@ from datetime import datetime
 from uuid import UUID
 
 from depot_server.api2.models.item_group import ItemGroup, ItemGroupBase
-from depot_server.db2.models.item.lendable_group import LendableGroup as DbItemGroup
 from depot_server.db2.repository.base import ItemNotFound
-from depot_server.db2.repository.item.repo_item_group import LendableGroup
+from depot_server.db2.repository.item.repo_lendable_group import LendableGroupRepo
+from depot_server.db2.models import LendableGroup as DBLendableGroup
 from depot_server.db2.repository.item.repo_item import ItemRepo
+from depot_server.logic.contracts.lendable import UpdateLendableGroupData
+from depot_server.logic.results.lendable import LogicLendableGroup
 
 
-def item_group_from_orm(item_group: DbItemGroup) -> ItemGroup:
-    return ItemGroup(
-        id=item_group.id,
-        name=item_group.name,
-        description=item_group.description,
-        parent_id=item_group.parent_id
-    )
+class LendableGroupService:
+    @classmethod
+    def _to_logic_dataclass(cls, db_item_group: DBLendableGroup) -> LogicLendableGroup:
+        return LogicLendableGroup(
+            id=db_item_group.id,
+            name=db_item_group.name,
+            description=db_item_group.description,
+            parent=db_item_group.parent
+        )
 
-class ItemGroupService:
-    @staticmethod
-    async def update_item_group(item_group_id: UUID, item_group: ItemGroupBase) -> DbItemGroup | None:
-        db_item_group = await LendableGroup.update_lendable_group(item_group_id, **item_group.model_dump())
-        return db_item_group
+    @classmethod
+    async def update_lendable_group(cls, id: UUID, contract: UpdateLendableGroupData) -> LogicLendableGroup:
+        db_item_group = await LendableGroupRepo.update(id, **contract.to_kwargs("name", "description", "parent"))
+        return cls._to_logic_dataclass(db_item_group)
 
-
-    @staticmethod
-    async def get_total_amount(item_group_id: UUID, only_lendable=True) -> int:
-        count = await LendableGroup.Db_type.filter(id=item_group_id).select_related("item").select_related("item_instances").count()
+    @classmethod
+    async def get_total_amount(cls, item_group_id: UUID) -> int:
+        count = await LendableGroupRepo.Db_type.filter(id=item_group_id).select_related("item").select_related("item_instances").count()
         return count

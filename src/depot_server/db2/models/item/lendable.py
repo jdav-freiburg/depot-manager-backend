@@ -43,7 +43,6 @@ class LinkLendablePurpose(Model):
     lendable = fields.ForeignKeyField("depot.Lendable", null=False, related_name="lendable_purpose_link")
     purpose = fields.ForeignKeyField("depot.ItemPurpose", null=False, related_name="lendable_purpose_link", unique=True)
     amount = fields.IntField(null=False, validators=[MinValueValidator(1)], description="The quantity of the item in the lendable group")
-    ausgabepflichtig = fields.BooleanField(default=False, null=False, description="Must be handed out by a member of the depot team.")
     created_at = fields.DatetimeField(auto_now_add=True)
 
 

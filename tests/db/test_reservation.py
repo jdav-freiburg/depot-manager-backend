@@ -143,3 +143,12 @@ async def test_get_lendable_links_in_timespan(init_db):
         date(2026, 1, 6)
     )
     assert len(links) == 2
+
+    links = await ReservationRepoLinkLendable.get_lendable_links_in_timespan(
+        lendable.id,
+        date(2026, 1, 1),
+        date(2026, 1, 6),
+        exclude_reservations=[reservation1.id]
+    )
+    assert len(links) == 1
+    assert links[0].id == link2.id

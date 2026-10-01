@@ -6,7 +6,7 @@ from tortoise import Tortoise
 from depot_server.db2.models import Lendable
 from depot_server.db2.models.common import Condition
 from depot_server.db2.repository.item.repo_item import ItemRepo
-from depot_server.db2.repository.item.repo_item_group import LendableGroup
+from depot_server.db2.repository.item.repo_lendable_group import LendableGroup
 from depot_server.db2.repository.item.repo_storage_location import StorageLocationRepo
 from depot_server.db2.repository.report.repo_report_profile import ReportProfileRepo
 

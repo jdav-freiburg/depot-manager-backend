@@ -25,6 +25,7 @@ class Reservation(Model):
     reservation_importance = fields.CharEnumField(ReservationImportance, null=False)
     reservation_type = fields.CharEnumField(ReservationType, null=False, default=ReservationType.BORROW)
 
+    reservation_lendable_links: fields.ReverseRelation["LinkReservationLendable"]
 
 class LinkReservationLendable(Model):
     class Meta:
