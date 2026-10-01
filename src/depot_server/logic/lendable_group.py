@@ -1,8 +1,6 @@
 from datetime import datetime
 from uuid import UUID
 
-from depot_server.api2.models.item_group import ItemGroup, ItemGroupBase
-from depot_server.db2.repository.base import ItemNotFound
 from depot_server.db2.repository.item.repo_lendable_group import LendableGroupRepo
 from depot_server.db2.models import LendableGroup as DBLendableGroup
 from depot_server.db2.repository.item.repo_item import ItemRepo

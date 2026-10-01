@@ -107,8 +107,8 @@ async def test_item_instance_repo_crud(init_db):
     assert updated.serial_number == "SN002"
     assert updated.condition == Condition.MONITOR
 
-    await ItemInstanceRepo.delete_item_instance(instance.id)
-    assert await ItemInstanceRepo.get_item_instance_by_id(instance.id) is None
+    await ItemInstanceRepo.delete_by_id(instance.id)
+    assert await ItemInstanceRepo.get_by_id(instance.id) is None
 
 
 @pytest.mark.asyncio

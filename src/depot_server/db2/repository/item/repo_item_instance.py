@@ -12,16 +12,6 @@ class ItemInstanceRepo(AuditableRepo):
     Db_type = ItemInstance
 
     @classmethod
-    async def get_all_item_instances(cls) -> list[ItemInstance]:
-        item_instances = await cls.Db_type.all()
-        return item_instances
-
-    @classmethod
-    async def get_item_instance_by_id(cls, item_instance_id: UUID) -> ItemInstance | None:
-        item_instance = await cls.Db_type.get_or_none(id=item_instance_id)
-        return item_instance
-
-    @classmethod
     async def get_item_instances_by_item_id(cls, item_id: UUID) -> list[ItemInstance]:
         item_instances = await cls.Db_type.filter(item_id=item_id)
         return item_instances
@@ -55,12 +45,8 @@ class ItemInstanceRepo(AuditableRepo):
         return item_instances[0]
 
     @classmethod
-    async def delete_item_instance(cls, item_instance_id: UUID) -> None:
-        await cls.delete_by_id(item_instance_id)
-
-    @classmethod
     async def update_item_instance(cls, item_instance_id: UUID, **kwargs) -> ItemInstance:
-        item_instance = await cls.get_item_instance_by_id(item_instance_id)
+        item_instance = await cls.get_by_id(item_instance_id)
         if not item_instance:
             raise ItemNotFound(f"Item instance with id {item_instance_id} not found")
 

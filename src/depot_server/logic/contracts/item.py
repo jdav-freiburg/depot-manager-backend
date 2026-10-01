@@ -40,6 +40,7 @@ class UpdateItemData(BaseContract):
 
 @dataclass(frozen=True)
 class UpdateItemInstanceData(BaseContract):
+    item_id: UUID | None | _Unset = _Unset()
     serial_number: str | None | _Unset = _Unset()
     manufacture_date: date | None | _Unset = _Unset()
     purchase_date: date | None | _Unset = _Unset()
