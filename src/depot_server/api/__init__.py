@@ -13,13 +13,13 @@ from depot_server.api.report_profiles import router as report_profiles_router
 from depot_server.api.reservations import router as reservations_router
 from depot_server.api.users import router as users_router
 from depot_server.api.version import router as version_router
-from depot_server.api2.announcement import router as announcement_router
-from depot_server.api2.lendable_group import router as item_group_router
-from depot_server.api2.storage_location import router as storage_location_router
-from depot_server.api2.tag import router as tags_router
+from depot_server.api2.announcement import router as announcement_router_v2
+from depot_server.api2.lendable import router as lendable_router_v2
+from depot_server.api2.lendable_group import router as lendable_group_router_v2
+from depot_server.api2.storage_location import router as storage_location_router_v2
+from depot_server.api2.tag import router as tags_router_v2
 from depot_server.api2.item import router as items_router_v2
-from depot_server.api2.item_instance import router as item_instance_router
-from depot_server.api2.item_composite import router as item_composite_router
+from depot_server.api2.item_instance import router as item_instance_router_v2
 from depot_server.api2.reservation import router as reservations_router_v2
 from depot_server.config import config
 from depot_server.mail.return_reservation_mail import startup as mail_cron_startup, shutdown as mail_cron_shutdown
@@ -42,13 +42,13 @@ router.include_router(pictures_router, prefix=v1_prefix)
 router.include_router(users_router, prefix=v1_prefix)
 router.include_router(version_router, prefix=v1_prefix)
 
-router.include_router(tags_router, prefix=v2_prefix)
-router.include_router(announcement_router, prefix=v2_prefix)
-router.include_router(storage_location_router, prefix=v2_prefix)
-router.include_router(item_group_router, prefix=v2_prefix)
+router.include_router(tags_router_v2, prefix=v2_prefix)
+router.include_router(announcement_router_v2, prefix=v2_prefix)
+router.include_router(storage_location_router_v2, prefix=v2_prefix)
+router.include_router(lendable_group_router_v2, prefix=v2_prefix)
 router.include_router(items_router_v2, prefix=v2_prefix)
-router.include_router(item_instance_router, prefix=v2_prefix)
-router.include_router(item_composite_router, prefix=v2_prefix)
+router.include_router(item_instance_router_v2, prefix=v2_prefix)
+router.include_router(lendable_router_v2, prefix=v2_prefix)
 router.include_router(reservations_router_v2, prefix=v2_prefix)
 
 @asynccontextmanager
