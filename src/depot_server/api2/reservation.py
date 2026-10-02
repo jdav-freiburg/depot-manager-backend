@@ -8,9 +8,9 @@ from depot_server.api2.models.reservation import APIReservationPending, APIReser
 from depot_server.logic.reservation import ReservationService
 from depot_server.logic.reservation import ReservationService, ReservationValidationError
 
-router = APIRouter(tags=["V2_Reservation"])
+router = APIRouter(tags=["V2_Reservation"], prefix="/reservation")
 
-@router.get("/reservations")
+@router.get("/")
 async def get_all_reservations() -> list[APIReservation]:
     """
     Get all reservations.
@@ -19,7 +19,7 @@ async def get_all_reservations() -> list[APIReservation]:
     return [APIReservation.model_validate(r) for r in reservations]
 
 
-@router.get("/reservations/{reservation_id}")
+@router.get("/{reservation_id}")
 async def get_reservation(reservation_id: UUID) -> APIReservation:
     """
     Get a reservation by its ID.
@@ -27,11 +27,11 @@ async def get_reservation(reservation_id: UUID) -> APIReservation:
     try:
         reservation = await ReservationService.get_reservation(reservation_id)
         return APIReservation.model_validate(reservation)
-    except ItemNotFound as e:
-        raise HTTPException(status_code=404, detail=str(e))
+    except ItemNotFound:
+        raise HTTPException(status_code=404, detail="Reservation not found")
 
 
-@router.get("/reservations/user/{user_id}")
+@router.get("/user/{user_id}")
 async def get_reservations_by_user(user_id: UUID) -> list[APIReservation]:
     """
     Get reservations for a specific user.
@@ -39,20 +39,18 @@ async def get_reservations_by_user(user_id: UUID) -> list[APIReservation]:
     reservations = await ReservationService.get_reservations_by_user(user_id)
     return [APIReservation.model_validate(r) for r in reservations]
 
-@router.get("/reservations/item/{item_id}")
-async def get_reservations_by_item(item_id: UUID) -> list[APIReservation]:
+@router.get("/lendable/{lendable_id}")
+async def get_reservations_by_lendable(lendable_id: UUID) -> list[APIReservation]:
     """
     Get reservations for a specific item in chronological order.
     
     Parameters:
-    - item_id: The ID of an item, not an item instance.
+    - lendable_id: The ID of a lendable, not an item instance.
     """
-    reservations = await ReservationService.get_reservations_by_lendable(item_id)
+    reservations = await ReservationService.get_reservations_by_lendable(lendable_id)
     return [APIReservation.model_validate(r) for r in reservations]
 
-
-
-@router.get("/reservations/time-range/{start_date}/{end_date}")
+@router.get("/time-range/{start_date}/{end_date}")
 async def get_reservations_in_time_range(start_date: date, end_date: date) -> list[APIReservation]:
     """
     Get reservations within a specific time range.
@@ -65,7 +63,7 @@ async def get_reservations_in_time_range(start_date: date, end_date: date) -> li
     return [APIReservation.model_validate(r) for r in reservations]
 
 
-@router.post("/reservations")
+@router.post("/")
 async def create_reservation(reservation_data: APIReservationPending) -> APIReservation:
     """
     Create a new reservation.
@@ -77,7 +75,7 @@ async def create_reservation(reservation_data: APIReservationPending) -> APIRese
         raise HTTPException(status_code=422, detail=str(ex)) from ex
 
 
-@router.put("/reservations/{reservation_id}")
+@router.put("/{reservation_id}")
 async def update_reservation(reservation_id: UUID, reservation_data: APIReservationPending) -> APIReservation:
     """
     Update an existing reservation by its ID.
@@ -91,7 +89,7 @@ async def update_reservation(reservation_id: UUID, reservation_data: APIReservat
         raise HTTPException(status_code=422, detail=str(ex)) from ex
 
 
-@router.delete("/reservations/{reservation_id}")
+@router.delete("/{reservation_id}")
 async def delete_reservation(reservation_id: UUID) -> dict:
     """
     Delete a reservation by its ID.

@@ -28,8 +28,8 @@ class APICreateItem(APIItemBase):
     
 class APIItem(APIItemBase):
     id: UUID = Field(...)
-    lendables: List[UUID]
-    storage_locations: List[UUID]
+    lendables: List[UUID] = Field(default_factory=list)
+    storage_locations: List[UUID] = Field(default_factory=list)
 
 # Models for ItemInstance
 
@@ -46,6 +46,15 @@ class APIItemInstanceBase(BaseModel):
 
 class APICreateItemInstance(APIItemInstanceBase):
     lendable: Optional[UUID] = None
+
+class APIAddItemInstance(BaseModel):
+    external_id: Optional[str] = None
+    serial_number: str = Field(...)
+    manufacture_date: date = Field(...)
+    purchase_date: date = Field(...)
+    first_use_date: date = Field(...)
+    condition: Optional[Condition] = None
+    condition_comment: Optional[str] = None
 
 class APIItemInstance(APIItemInstanceBase):
     id: UUID = Field(...)

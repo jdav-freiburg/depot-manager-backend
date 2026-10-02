@@ -47,6 +47,10 @@ class ItemInstanceService:
         expired_item_instances = await ItemInstanceRepo.get_all()
         return [inst for inst in expired_item_instances if inst.is_too_old]
 
+    @classmethod
+    async def get_item_instances_requiring_inspection(cls) -> list[ItemInstanceDB]:
+        item_instances = await ItemInstanceRepo.get_all()
+        return [inst for inst in item_instances if await inst.requires_inspection()]
 
     @classmethod
     async def is_in_lendable(cls, item_id: UUID, lendable_id: UUID) -> bool:
