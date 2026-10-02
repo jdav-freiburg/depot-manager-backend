@@ -103,12 +103,12 @@ class ReservationService:
                 if quantity <= 0:
                     raise ReservationValidationError(f"Quantity for item {lendable_id} must be greater than 0.")
                 link = await ReservationRepoLinkLendable.create(reservation_id=reservation.id,
-                                                                purpose_id=lendable_id,
+                                                                lendable_id=lendable_id,
                                                                 amount=quantity
                                                                 )
                 links.append(LogicReservationLendableLink(
                     id=link.id,
-                    lendable_id=link.purpose_id,
+                    lendable_id=link.lendable_id,
                     amount=link.amount,
                     missing_amount=None,
                     returned_amount=None,
@@ -209,10 +209,11 @@ class ReservationService:
     @classmethod
     async def delete_reservation(cls, reservation_id: UUID):
         async with in_transaction():
-            reservation = await ReservationRepo.get_by_filter_with_links(id=reservation_id)
-            if not reservation:
+            reservations = await ReservationRepo.get_by_filter_with_links(id=reservation_id)
+            if not reservations:
                 raise ItemNotFound(f"Reservation with ID {reservation_id} not found.")
-            await ReservationRepoLinkLendable.bulk_delete(reservation.reservation_lendable_links.values_list('id', flat=True))
+            link_ids = await ReservationRepoLinkLendable.get_by_reservation(reservation_id)
+            await ReservationRepoLinkLendable.bulk_delete([link.id for link in link_ids])
             await ReservationRepo.delete_by_id(id=reservation_id)
 
     @classmethod
