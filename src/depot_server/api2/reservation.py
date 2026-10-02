@@ -47,7 +47,7 @@ async def get_reservations_by_item(item_id: UUID) -> list[APIReservation]:
     Parameters:
     - item_id: The ID of an item, not an item instance.
     """
-    reservations = await ReservationService.get_reservations_by_item(item_id)
+    reservations = await ReservationService.get_reservations_by_lendable(item_id)
     return [APIReservation.model_validate(r) for r in reservations]
 
 

@@ -152,9 +152,9 @@ class ReservationService:
         return [cls._to_dataclass_reservation(res) for res in reservation]
 
     @classmethod
-    async def get_reservations_by_item(cls, item_id: UUID) -> list[LogicFullReservation]:
+    async def get_reservations_by_lendable(cls, lendable_id: UUID) -> list[LogicFullReservation]:
         reservations = await ReservationRepo.get_by_filter_with_links(
-            reservation_itemlinks__item_id=item_id,
+            reservation_lendable_links__lendable_id=lendable_id,
         )
         return [cls._to_dataclass_reservation(reservation) for reservation in reservations]
 

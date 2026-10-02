@@ -62,10 +62,11 @@ async def test_get_reservations_by_item(init_db):
         amount=1,
     )
 
-    reservations = await ReservationService.get_reservations_by_item(lendable.id)
+    reservations = await ReservationService.get_reservations_by_lendable(lendable.id)
 
     assert [reservation.id for reservation in reservations] == [matching_reservation.id]
-    assert reservations[0].items == {lendable.id: 2}
+    assert reservations[0].links[0].lendable_id == lendable.id
+    assert reservations[0].links[0].amount == 2
 
 @pytest.mark.asyncio
 async def test_get_reserved_amount_returns_peak_overlap(init_db):
