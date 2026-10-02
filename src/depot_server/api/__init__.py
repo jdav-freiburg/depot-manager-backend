@@ -14,7 +14,7 @@ from depot_server.api.reservations import router as reservations_router
 from depot_server.api.users import router as users_router
 from depot_server.api.version import router as version_router
 from depot_server.api2.announcement import router as announcement_router
-from depot_server.api2.item_group import router as item_group_router
+from depot_server.api2.lendable_group import router as item_group_router
 from depot_server.api2.storage_location import router as storage_location_router
 from depot_server.api2.tag import router as tags_router
 from depot_server.api2.item import router as items_router_v2

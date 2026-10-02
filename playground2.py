@@ -6,7 +6,7 @@ from datetime import date
 from tortoise import Tortoise
 from tortoise.expressions import Q
 
-from depot_server.api2.models.item_composite import ItemCompositeBase
+from depot_server.api2.models.lendable import ItemCompositeBase
 from depot_server.api2.models.item import ItemInstanceBase, FullItemRaw
 from depot_server.api2.models.reservation import ReservationPending
 from depot_server.db2.models import Lendable, ItemInstance, LendableGroup
@@ -49,12 +49,12 @@ async def init(path):
                                                          serial_number="SN789", manufacture_date="2023-01-01", purchase_date="2023-01-02", first_use_date="2023-01-03", condition=Condition.GOOD))
     schnapper = await ItemService.create_item(FullItemRaw(group_id=schnapper_group.id, name="Ocun Schnapper", description="toller Schnapper", lendable=False, psa_category=PsaCategory.CAT_1,
                                                           serial_number="SN000", manufacture_date="2023-01-01", purchase_date="2023-01-02", first_use_date="2023-01-03", condition=Condition.GOOD))
-    await ItemInstanceService.create_item_instance(ItemInstanceBase(item_id=attacheitem.id, serial_number="SN1", manufacture_date="2023-01-01", purchase_date="2023-01-02", first_use_date="2023-01-03", condition=Condition.GOOD))
+    await ItemInstanceService.create(ItemInstanceBase(item_id=attacheitem.id, serial_number="SN1", manufacture_date="2023-01-01", purchase_date="2023-01-02", first_use_date="2023-01-03", condition=Condition.GOOD))
     seil = await Lendable.create(name="Ocun Seil", description="80 m", lendable=True, psa_category=PsaCategory.CAT_1)
     for i in range(3):
-        await ItemInstanceService.create_item_instance(ItemInstanceBase(item_id=seil.id, serial_number=f"SN{i}", manufacture_date="2023-01-01", purchase_date="2023-01-02", first_use_date="2023-01-03", condition=Condition.GOOD))
+        await ItemInstanceService.create(ItemInstanceBase(item_id=seil.id, serial_number=f"SN{i}", manufacture_date="2023-01-01", purchase_date="2023-01-02", first_use_date="2023-01-03", condition=Condition.GOOD))
     for i in range(5):
-        await ItemInstanceService.create_item_instance(ItemInstanceBase(item_id=schnapper.id, serial_number=f"SN{i}", manufacture_date="2023-01-01", purchase_date="2023-01-02", first_use_date="2023-01-03", condition=Condition.GOOD))
+        await ItemInstanceService.create(ItemInstanceBase(item_id=schnapper.id, serial_number=f"SN{i}", manufacture_date="2023-01-01", purchase_date="2023-01-02", first_use_date="2023-01-03", condition=Condition.GOOD))
     alpinexe = await LendableService.create(ItemCompositeBase(name="Alpinexe",
                                                    description="My Composite Item Description",
                                                    lendable=True,

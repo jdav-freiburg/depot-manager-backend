@@ -5,45 +5,45 @@ from fastapi import APIRouter, HTTPException
 from depot_server.db2.repository.item.repo_item_instance import ItemInstanceRepo
 from depot_server.db2.repository.base import ItemNotFound
 from depot_server.db2.repository.item.repo_item import ItemRepo
+from depot_server.logic.contracts.item import CreateItem, UpdateItemData
 from depot_server.logic.item import ItemService
-from .models.item import Item, ItemPending, ItemBase, ItemInstance, FullItem, FullItemRaw
+from .models.item import APIItem, APICreateItem, APIItemInstance, APIFullItem, APICreateFullItem
 
-itemservice = ItemService()
 
-router = APIRouter(tags=["V2_Item"])
+router = APIRouter(tags=["V2_Item"], prefix="/item")
 
-@router.get("/item")
-async def get_items() -> list[Item]:
+@router.get("/")
+async def get_items() -> list[APIItem]:
     db_items = await ItemService.get_all_items()
-    return [Item.model_validate(item, from_attributes=True) for item in db_items]
+    return [APIItem.model_validate(item, from_attributes=True) for item in db_items]
 
-@router.get("/item/{item_id}")
-async def get_item(item_id: UUID) -> Item:
+@router.get("/{item_id}")
+async def get_item(item_id: UUID) -> APIItem:
     db_item = await ItemService.get_item(item_id)
     if not db_item:
         raise HTTPException(status_code=404, detail="Item not found")
-    return Item.model_validate(db_item, from_attributes=True)
+    return APIItem.model_validate(db_item, from_attributes=True)
 
-@router.post("/item")
-async def create_item(item: FullItemRaw) -> FullItem:
-    full_item = await itemservice.create_item(item)
-    return FullItem.model_validate(full_item, from_attributes=True)
+@router.post("/")
+async def create_item(item: APICreateFullItem) -> APIFullItem:
+    full_item = await ItemService.create_item(CreateItem(**item.model_dump()))
+    return APIFullItem.model_validate(full_item, from_attributes=True)
 
-@router.put("/item/{item_id}")
-async def update_item(item_id: UUID, item: ItemPending) -> Item:
-    db_item = await ItemService.update_item(item_id, item)
+@router.put("/{item_id}")
+async def update_item(item_id: UUID, item: APICreateItem) -> APIItem:
+    db_item = await ItemService.update_item(item_id, UpdateItemData(**item.model_dump()))
     if not db_item:
         raise HTTPException(status_code=404, detail="Item not found")
-    return Item.model_validate(db_item, from_attributes=True)
+    return APIItem.model_validate(db_item, from_attributes=True)
 
-@router.delete("/item/{item_id}")
+@router.delete("/{item_id}")
 async def delete_item(item_id: UUID) -> None:
     try:
-        await ItemRepo.delete_item(item_id)
+        await ItemRepo.delete_by_id(item_id)
     except ItemNotFound as ex:
         raise HTTPException(status_code=404, detail=str(ex)) from ex
 
-@router.get("/item/{item_id}/instances")
-async def get_item_instances(item_id: UUID) -> list[ItemInstance]:
+@router.get("/{item_id}/instances")
+async def get_item_instances(item_id: UUID) -> list[APIItemInstance]:
     item_instances = await ItemInstanceRepo.get_item_instances_by_item_id(item_id)
-    return [ItemInstance.model_validate(item_instance, from_attributes=True) for item_instance in item_instances]
+    return [APIItemInstance.model_validate(item_instance, from_attributes=True) for item_instance in item_instances]

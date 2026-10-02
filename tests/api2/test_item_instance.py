@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from depot_server.api2.item_instance import router
-from depot_server.api2.models.item import ItemInstance
+from depot_server.api2.models.item import APIItemInstance
 from depot_server.logic.item_instance import ItemInstanceUniqueConflict
 from depot_server.db2.models.common import Condition
 
@@ -20,7 +20,7 @@ def client():
 
 
 def instance_model(instance_id, item_id):
-    return ItemInstance(
+    return APIItemInstance(
         id=instance_id,
         item_id=item_id,
         external_id="EXT-001",

@@ -8,7 +8,7 @@ from tortoise.exceptions import IntegrityError
 from depot_server.db2.repository.item.repo_item_instance import ItemInstanceRepo
 from depot_server.db2.repository.item.repo_item_purpose import ItemPurposeRepo
 from depot_server.db2.repository.item.repo_item import ItemRepo
-from depot_server.db2.repository.item.repo_lendable import LendableRepo, LinkLenablePurposeRepo
+from depot_server.db2.repository.item.repo_lendable import LendableRepo, LinkLendablePurposeRepo
 from depot_server.logic.lendable import LendableService
 
 from depot_server.db2.models.common import Condition
@@ -55,9 +55,9 @@ async def test_lendable_duplicates(init_db):
     lendable2 = await LendableRepo.create(name="Test Lendable 2", description="A test lendable 2", lendable=True)
     
     # Link the lendable to the purpose with a certain amount
-    await LinkLenablePurposeRepo.create(lendable=lendable, amount=1, purpose=purpose)
+    await LinkLendablePurposeRepo.create(lendable=lendable, amount=1, purpose=purpose)
     with pytest.raises(IntegrityError):
-        await LinkLenablePurposeRepo.create(lendable=lendable2, amount=1, purpose=purpose)
+        await LinkLendablePurposeRepo.create(lendable=lendable2, amount=1, purpose=purpose)
 
 @pytest.mark.asyncio
 async def test_lendable_amount(init_db):
@@ -122,9 +122,9 @@ async def test_lendable_amount(init_db):
         )
     lendable_schlinge = await LendableRepo.create(name="Schlinge", description="A test lendable", lendable=True)
     lendable_alpinexe = await LendableRepo.create(name="Alpinexe", description="A test lendable", lendable=True)
-    await LinkLenablePurposeRepo.create(lendable=lendable_schlinge, amount=1, purpose=purpose_einzelschlinge)
-    await LinkLenablePurposeRepo.create(lendable=lendable_alpinexe, amount=1, purpose=purpose_schlinge_alpinexe)
-    await LinkLenablePurposeRepo.create(lendable=lendable_alpinexe, amount=2, purpose=purpose_schnapper_alpinexe)
+    await LinkLendablePurposeRepo.create(lendable=lendable_schlinge, amount=1, purpose=purpose_einzelschlinge)
+    await LinkLendablePurposeRepo.create(lendable=lendable_alpinexe, amount=1, purpose=purpose_schlinge_alpinexe)
+    await LinkLendablePurposeRepo.create(lendable=lendable_alpinexe, amount=2, purpose=purpose_schnapper_alpinexe)
 
     assert (await LendableService().get_total_amount(lendable_schlinge.id)) == 5
     assert (await LendableService().get_total_amount(lendable_alpinexe.id)) == 1

@@ -3,53 +3,92 @@ from uuid import UUID
 from fastapi import APIRouter, HTTPException
 
 from depot_server.db2.repository.report.repo_inspection_report import InspectionReportRepo
+from depot_server.logic.contracts.item import CreateItemInstance, UpdateItemInstanceData
 
 from ..db2.repository.item.repo_item_instance import ItemInstanceRepo
 from ..db2.repository.base import ItemNotFound
 from ..logic.item_instance import ItemInstanceService, ItemInstanceUniqueConflict
 
-from .models.item import FullItem, ItemInstance, ItemInstanceBase, ItemInstancePending
+from .models.item import APICreateItem, APICreateItemInstance, APIFullItem, APIItemInstance, APIItemInstanceBase
 
-router = APIRouter(tags=["V2_ItemInstance"])
+router = APIRouter(tags=["V2_ItemInstance"], prefix="/item_instance")
 
-@router.get("/item_instance")
-async def get_item_instances() -> list[ItemInstance]:
-    db_item_instances = await ItemInstanceRepo.get_all_item_instances()
-    return [ItemInstance.model_validate(item_instance, from_attributes=True) for item_instance in db_item_instances]
 
-@router.get("/item_instance/{item_instance_id}")
-async def get_item_instance(item_instance_id: UUID) -> ItemInstance:
-    db_item_instance = await ItemInstanceRepo.get_item_instance_by_id(item_instance_id)
-    if not db_item_instance:
-        raise HTTPException(status_code=404, detail="ItemInstance not found")
-    return ItemInstance.model_validate(db_item_instance, from_attributes=True)
+# CRUD operations for ItemInstance
 
-@router.post("/item_instance")
-async def create_item_instance(item_instance: ItemInstanceBase) -> ItemInstance:
+@router.post("/")
+async def create_item_instance(item_instance: APICreateItemInstance) -> APIItemInstance:
+    if item_instance.lendable:
+        linking_purpose = await ItemInstanceService.get_linking_purpose(item_instance.item_id, item_instance.lendable)
+        if linking_purpose is None:
+            raise HTTPException(status_code=400, detail=f"Item {item_instance.item_id} is not in lendable {item_instance.lendable}")
+        contract = CreateItemInstance(**item_instance.model_dump(), purpose=linking_purpose)
+    else:
+        contract = CreateItemInstance(**item_instance.model_dump())
     try:
-        db_item_instance = await ItemInstanceService.create_item_instance(item_instance)
+        db_item_instance = await ItemInstanceService.create(contract)
+        return APIItemInstance.model_validate(db_item_instance, from_attributes=True)
     except ItemInstanceUniqueConflict as exception:
         raise HTTPException(status_code=409, detail=str(exception)) from exception
-    return ItemInstance.model_validate(db_item_instance, from_attributes=True)
+    
+@router.get("/")
+async def get_item_instances() -> list[APIItemInstance]:
+    db_item_instances = await ItemInstanceRepo.get_all()
+    return [APIItemInstance.model_validate(item_instance, from_attributes=True) for item_instance in db_item_instances]
 
-@router.put("/item_instance/{item_instance_id}")
-async def update_item_instance(item_instance_id: UUID, item_instance: ItemInstancePending) -> ItemInstance:
+@router.get("/{item_instance_id}")
+async def get_item_instance(item_instance_id: UUID) -> APIFullItem:
     try:
-        db_item_instance = await ItemInstanceService.update_item_instance(item_instance_id, item_instance)
+        db_item_instance = await ItemInstanceRepo.get_full_item(item_instance_id)
+        if not db_item_instance:
+            raise ItemNotFound(f"Item instance with id {item_instance_id} not found")
+        APIFullItem(id=db_item_instance.id,
+                    item_id=db_item_instance.item.id,
+                    name=db_item_instance.item.name,
+                    description=db_item_instance.item.description,
+                    manufacturer=db_item_instance.item.manufacturer,
+                    model=db_item_instance.item.model,
+                    report_profile_id=db_item_instance.item.report_profile_id,
+                    max_lifespan=db_item_instance.item.max_lifespan,
+                    max_usage_lifespan=db_item_instance.item.max_usage_lifespan,
+                    psa_category=db_item_instance.item.psa_category,
+                    # item instance fields
+                    external_id=db_item_instance.external_id,
+                    serial_number=db_item_instance.serial_number,
+                    manufacture_date=db_item_instance.manufacture_date,
+                    purchase_date=db_item_instance.purchase_date,
+                    first_use_date=db_item_instance.first_use_date,
+                    condition=db_item_instance.condition,
+                    condition_comment=db_item_instance.condition_comment,
+                    # infered fields
+                    lendable_id=db_item_instance.purpose.lendable_purpose_link.lendable_id if db_item_instance.purpose else None,
+                    storage_location_id=db_item_instance.purpose.storage_location_id if db_item_instance.purpose else None,
+                    too_old=db_item_instance.is_too_old,
+                    requires_inspection=await db_item_instance.requires_inspection(),
+                )
+        return APIFullItem.model_validate(db_item_instance, from_attributes=True)
+    except ItemNotFound:
+        raise HTTPException(status_code=404, detail="ItemInstance not found")
+    
+
+@router.put("/{item_instance_id}")
+async def update_item_instance(item_instance_id: UUID, item_instance: APIItemInstanceBase) -> APIItemInstance:
+    try:
+        db_item_instance = await ItemInstanceService.update(item_instance_id, UpdateItemInstanceData(**item_instance.model_dump()))
     except ItemInstanceUniqueConflict as exception:
         raise HTTPException(status_code=409, detail=str(exception)) from exception
-    if not db_item_instance:
+    except ItemNotFound:
         raise HTTPException(status_code=404, detail="ItemInstance not found")
-    return ItemInstance.model_validate(db_item_instance, from_attributes=True)
+    return APIItemInstance.model_validate(db_item_instance, from_attributes=True)
 
-@router.delete("/item_instance/{item_instance_id}")
+@router.delete("/{item_instance_id}")
 async def delete_item_instance(item_instance_id: UUID) -> None:
     try:
-        await ItemInstanceRepo.delete_item_instance(item_instance_id)
+        await ItemInstanceRepo.delete_by_id(item_instance_id)
     except ItemNotFound as ex:
         raise HTTPException(status_code=404, detail=str(ex)) from ex
 
-@router.get("/item_instance/{item_instance_id}/inspection_report")
+@router.get("/{item_instance_id}/inspection_report")
 async def get_inspection_reports(item_instance_id: UUID):
     inspection_reports = await InspectionReportRepo.get_by_item_instance_id(item_instance_id)
     if not inspection_reports:
@@ -57,6 +96,6 @@ async def get_inspection_reports(item_instance_id: UUID):
     return inspection_reports  # TODO: Create Pydantic model for InspectionReport and enforce type
 
 @router.get("/item_instance/expired")
-async def get_expired_item_instances():
+async def get_expired_item_instances() -> list[APIItemInstance]:
     expired_item_instances = await ItemInstanceService.get_expired_item_instances()
-    return [FullItem.model_validate(item_instance, from_attributes=True) for item_instance in expired_item_instances]
+    return [APIItemInstance.model_validate(item_instance, from_attributes=True) for item_instance in expired_item_instances]

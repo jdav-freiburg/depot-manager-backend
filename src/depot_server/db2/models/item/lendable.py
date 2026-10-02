@@ -24,6 +24,7 @@ class Lendable(Model):
     assets = fields.ManyToManyField("depot.Asset", on_delete=fields.RESTRICT, related_name="lendable")
     changed_at = fields.DatetimeField(auto_now_add=True)
     lendable_purpose_link: fields.ReverseRelation["LinkLendablePurpose"]
+    lendable_purpose_link_archive: fields.ReverseRelation["LinkLendablePurposeArchive"]
 
     @property
     async def is_lendable(self) -> bool:

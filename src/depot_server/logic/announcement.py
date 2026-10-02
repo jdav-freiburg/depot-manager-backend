@@ -1,9 +1,9 @@
-from depot_server.api2.models.announcement import Announcement
+from depot_server.api2.models.announcement import APIAnnouncement
 from depot_server.db2.models.news import NewsEntry
 
 
-def announcement_from_orm(entry: NewsEntry) -> Announcement:
-    a = Announcement(
+def announcement_from_orm(entry: NewsEntry) -> APIAnnouncement:
+    a = APIAnnouncement(
         id=entry.pk,
         author=entry.author,
         timestamp=entry.timestamp,

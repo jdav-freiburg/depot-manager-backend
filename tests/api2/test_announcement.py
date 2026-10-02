@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from depot_server.api2.announcement import router
-from depot_server.api2.models.announcement import Announcement
+from depot_server.api2.models.announcement import APIAnnouncement
 
 
 @pytest.fixture
@@ -38,7 +38,7 @@ async def test_get_announcements_calls_repo(client):
     with patch("depot_server.api2.announcement.NewsRepo.get_all_announcements", new_callable=AsyncMock) as mock_get_all:
         with patch("depot_server.api2.announcement.announcement_from_orm") as mock_from_orm:
             mock_get_all.return_value = [mock_db_announcement]
-            mock_announcement = MagicMock(spec=Announcement)
+            mock_announcement = MagicMock(spec=APIAnnouncement)
             mock_from_orm.return_value = mock_announcement
 
             response = client.get("/announcement")
@@ -70,7 +70,7 @@ async def test_get_announcement_by_id_calls_repo(client):
     with patch("depot_server.api2.announcement.NewsRepo.get_announcement_by_id", new_callable=AsyncMock) as mock_get:
         with patch("depot_server.api2.announcement.announcement_from_orm") as mock_from_orm:
             mock_get.return_value = mock_db_announcement
-            mock_announcement = MagicMock(spec=Announcement)
+            mock_announcement = MagicMock(spec=APIAnnouncement)
             mock_from_orm.return_value = mock_announcement
 
             response = client.get(f"/announcement/{announcement_id}")
@@ -114,7 +114,7 @@ async def test_create_announcement_calls_repo(client):
     with patch("depot_server.api2.announcement.NewsRepo.create_announcement", new_callable=AsyncMock) as mock_create:
         with patch("depot_server.api2.announcement.announcement_from_orm") as mock_from_orm:
             mock_create.return_value = mock_db_announcement
-            mock_announcement = MagicMock(spec=Announcement)
+            mock_announcement = MagicMock(spec=APIAnnouncement)
             mock_from_orm.return_value = mock_announcement
 
             payload = {
@@ -158,7 +158,7 @@ async def test_update_announcement_calls_repo(client):
     with patch("depot_server.api2.announcement.NewsRepo.update_announcement", new_callable=AsyncMock) as mock_update:
         with patch("depot_server.api2.announcement.announcement_from_orm") as mock_from_orm:
             mock_update.return_value = mock_db_announcement
-            mock_announcement = MagicMock(spec=Announcement)
+            mock_announcement = MagicMock(spec=APIAnnouncement)
             mock_from_orm.return_value = mock_announcement
 
             payload = {
@@ -216,7 +216,7 @@ async def test_announcement_from_orm_mocked(client):
     with patch("depot_server.api2.announcement.NewsRepo.get_announcement_by_id", new_callable=AsyncMock) as mock_get:
         with patch("depot_server.api2.announcement.announcement_from_orm") as mock_from_orm:
             mock_get.return_value = mock_db_announcement
-            mock_announcement = MagicMock(spec=Announcement)
+            mock_announcement = MagicMock(spec=APIAnnouncement)
             mock_from_orm.return_value = mock_announcement
 
             response = client.get(f"/announcement/{announcement_id}")

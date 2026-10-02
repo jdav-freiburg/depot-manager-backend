@@ -6,20 +6,20 @@ from depot_server.db2.models.news import NewsEntry as DbNewsEntry
 from depot_server.db2.repository.repo_news import NewsRepo
 from depot_server.db2.repository.base import ItemNotFound
 from depot_server.logic.announcement import announcement_from_orm
-from .models.announcement import Announcement, AnnouncementPending
+from .models.announcement import APIAnnouncement, APIAnnouncementPending
 
 router = APIRouter(tags=["V2_Announcement"])
 
 
 @router.get("/announcement")
-async def get_announcements() -> list[Announcement]:
+async def get_announcements() -> list[APIAnnouncement]:
     """Retrieve all announcements"""
     db_announcements = await NewsRepo.get_all_announcements()
     return [announcement_from_orm(announcement) for announcement in db_announcements]
 
 
 @router.get("/announcement/{announcement_id}")
-async def get_announcement(announcement_id: UUID) -> Announcement:
+async def get_announcement(announcement_id: UUID) -> APIAnnouncement:
     """Retrieve a single announcement by id"""
     db_announcement = await NewsRepo.get_announcement_by_id(announcement_id)
     if not db_announcement:
@@ -28,7 +28,7 @@ async def get_announcement(announcement_id: UUID) -> Announcement:
 
 
 @router.post("/announcement")
-async def create_announcement(announcement: AnnouncementPending) -> Announcement:
+async def create_announcement(announcement: APIAnnouncementPending) -> APIAnnouncement:
     """Create a new announcement"""
     author = "<user who made the request>"
     db_announcement = await NewsRepo.create_announcement(
@@ -38,7 +38,7 @@ async def create_announcement(announcement: AnnouncementPending) -> Announcement
 
 
 @router.put("/announcement/{announcement_id}")
-async def update_announcement(announcement_id: UUID, announcement: AnnouncementPending) -> Announcement:
+async def update_announcement(announcement_id: UUID, announcement: APIAnnouncementPending) -> APIAnnouncement:
     """Update an existing announcement"""
     try:
         db_announcement: DbNewsEntry = await NewsRepo.update_announcement(announcement_id, **announcement.model_dump())

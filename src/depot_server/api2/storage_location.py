@@ -5,14 +5,14 @@ from fastapi import APIRouter, HTTPException
 from depot_server.db2.repository.item.repo_storage_location import StorageLocationRepo, \
 	StorageLocation as DbStorageLocation
 from depot_server.db2.repository.base import ItemNotFound
-from .models.storage_location import StorageLocation, StorageLocationPending
+from .models.storage_location import APIStorageLocation, APIStorageLocationPending
 
 router = APIRouter(tags=["V2_StorageLocation"])
 
 
-def storage_location_from_orm(entry: DbStorageLocation) -> StorageLocation:
+def storage_location_from_orm(entry: DbStorageLocation) -> APIStorageLocation:
     """Convert a storage location ORM object to API model."""
-    return StorageLocation(
+    return APIStorageLocation(
         id=entry.pk,
         name=entry.name,
         description=entry.description,
@@ -22,13 +22,13 @@ def storage_location_from_orm(entry: DbStorageLocation) -> StorageLocation:
 
 
 @router.get("/storage_location")
-async def get_storage_locations() -> list[StorageLocation]:
+async def get_storage_locations() -> list[APIStorageLocation]:
     db_locations = await StorageLocationRepo.Db_type.all()
     return [storage_location_from_orm(loc) for loc in db_locations]
 
 
 @router.get("/storage_location/{location_id}")
-async def get_storage_location(location_id: UUID) -> StorageLocation:
+async def get_storage_location(location_id: UUID) -> APIStorageLocation:
     db_loc = await StorageLocationRepo.get_by_id(location_id)
     if not db_loc:
         raise HTTPException(status_code=404, detail="Storage location not found")
@@ -36,13 +36,13 @@ async def get_storage_location(location_id: UUID) -> StorageLocation:
 
 
 @router.post("/storage_location")
-async def create_storage_location(loc: StorageLocationPending) -> StorageLocation:
+async def create_storage_location(loc: APIStorageLocationPending) -> APIStorageLocation:
     db_loc = await StorageLocationRepo.create(**loc.model_dump())
     return storage_location_from_orm(db_loc)
 
 
 @router.put("/storage_location/{location_id}")
-async def update_storage_location(location_id: UUID, payload: StorageLocationPending) -> StorageLocation:
+async def update_storage_location(location_id: UUID, payload: APIStorageLocationPending) -> APIStorageLocation:
     # fetch
     db_loc = await StorageLocationRepo.get_by_id(location_id)
     if not db_loc:

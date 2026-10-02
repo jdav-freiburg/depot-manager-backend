@@ -1,4 +1,5 @@
 from datetime import datetime
+from uuid import UUID
 
 from tortoise.query_utils import Prefetch
 from tortoise.transactions import in_transaction
@@ -13,9 +14,13 @@ class LendableRepo(BaseRepo):
     Db_type = Lendable
 
     @classmethod
-    async def get_all_current_with_links(cls) -> list[Lendable]:
-        return await cls.Db_type.all().prefetch_related("depot_link_lendable__purpose").get_related("lendable_group")
-
+    async def get_all_with_links(cls, timestamp: datetime) -> list[Lendable]:
+        return await cls.Db_type.filter(
+            ).prefetch_related(Prefetch("lendable_purpose_link_archive",
+                                queryset=LinkLendablePurpose.filter(created_at__lt=timestamp, change_date__gt=timestamp))
+            ).prefetch_related(Prefetch("lendable_purpose_link",
+                                queryset=LinkLendablePurpose.filter(created_at__lte=timestamp))
+            ).get_related("lendable_group")
     @classmethod
     async def get_by_id_with_links(cls, id, timestamp: datetime | None = None) -> Lendable:
         """
@@ -29,14 +34,16 @@ class LendableRepo(BaseRepo):
             raise ItemNotFound(f"Lendable with id {id} not found")
         if timestamp is None or change_date < timestamp:
             return await cls.Db_type.get_or_none(id=id).prefetch_related("lendable_purpose_link")
-        return await cls.Db_type.filter(id=id).prefetch_related(
-            Prefetch("lendable_purpose_link_archive",
-                     queryset=LinkLendablePurpose.filter(created_at__lt=timestamp, change_date__gt=timestamp))
-                     ).prefetch_related("lendable_purpose_link").get_related("lendable_group").first()
+        return await cls.Db_type.filter(id=id
+            ).prefetch_related(Prefetch("lendable_purpose_link_archive",
+                                queryset=LinkLendablePurpose.filter(created_at__lt=timestamp, change_date__gt=timestamp))
+            ).prefetch_related(Prefetch("lendable_purpose_link",
+                                queryset=LinkLendablePurpose.filter(created_at__lte=timestamp))
+            ).get_related("lendable_group").first()
 
 
 
-class LinkLenablePurposeRepo(BaseRepo):
+class LinkLendablePurposeRepo(BaseRepo):
     Db_type = LinkLendablePurpose
 
     @classmethod
@@ -74,6 +81,9 @@ class LinkLenablePurposeRepo(BaseRepo):
             for id in ids:
                 await cls.delete_by_id(id)
 
+    @classmethod
+    async def has_purpose(cls, lendable_id: UUID, purposes: list[UUID]) -> bool:
+        return await cls.Db_type.filter(lendable_id=lendable_id, purpose_id__in=purposes).exists()
 
 class LinkLenablePurposeArchiveRepo(BaseRepo):
     Db_type = LinkLendablePurpose

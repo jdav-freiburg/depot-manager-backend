@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 from tortoise import fields
 from tortoise.models import Model
@@ -6,6 +6,7 @@ from tortoise.signals import pre_save
 from tortoise.exceptions import ValidationError
 
 from depot_server.db2.models.common import Condition
+from depot_server.db2.models.item.item import PsaCategory
 
 class ItemInstance(Model):
     class Meta:
@@ -40,6 +41,21 @@ class ItemInstance(Model):
             and date - self.first_use_date > self.item.max_usage_lifespan
         )
         return manufacture_expired or usage_expired
+
+
+    async def requires_inspection(self) -> bool:
+        return await self._requires_inspection_at(datetime.now().date())
+
+    async def _requires_inspection_at(self, date: date) -> bool:
+        if self.item.psa_category == PsaCategory.NONE:
+            return False
+        if date - self.first_use_date < timedelta(days=365):
+            return False
+        latest_report = await self.reports.order_by("-updated_at").first()
+        if latest_report is None:
+            return True
+        return date - latest_report.updated_at.date() > timedelta(days=365)
+
 
 @pre_save(ItemInstance)
 async def validate_item_purpose(sender: type[ItemInstance], instance: ItemInstance, using_db, update_fields) -> None:

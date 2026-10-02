@@ -6,13 +6,13 @@ from pydantic import BaseModel, Field, field_validator
 _HEX_COLOR_RE = re.compile(r"^#[0-9a-f]{6}$")
 
 
-class TagPending(BaseModel):
+class APITagPending(BaseModel):
     name: str
     description: str
     color: str = Field(..., description="HTML hex color like #rrggbb")
 
 
-class Tag(BaseModel):
+class APITag(BaseModel):
     id: UUID = Field(default_factory=uuid4)
     name: str
     description: str

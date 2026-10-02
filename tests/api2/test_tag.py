@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
-from depot_server.api2.models.tag import Tag
+from depot_server.api2.models.tag import APITag
 from depot_server.api2.tag import router
 
 
@@ -20,7 +20,7 @@ from depot_server.api2.tag import router
     ],
 )
 def test_color_normalizes_to_lowercase_and_strips(input_color, expected):
-    t = Tag(id=uuid4(), name="tag", description="d", color=input_color)
+    t = APITag(id=uuid4(), name="tag", description="d", color=input_color)
     assert t.color == expected
 
 
@@ -38,7 +38,7 @@ def test_color_normalizes_to_lowercase_and_strips(input_color, expected):
 )
 def test_invalid_colors_raise_validation_error(bad_color):
     with pytest.raises(ValidationError):
-        Tag(id=uuid4(), name="tag", description="d", color=bad_color)
+        APITag(id=uuid4(), name="tag", description="d", color=bad_color)
 
 
 # API endpoint tests with mocked repository

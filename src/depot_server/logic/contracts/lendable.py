@@ -23,7 +23,7 @@ class CreateLendableGroup(BaseContract):
 # Update contracts
 
 @dataclass(frozen=True)
-class UpdateLendable(BaseContract):
+class UpdateLendableData(BaseContract):
     name: str | _Unset = _Unset()
     description: str | None | _Unset = _Unset()
     ausgabepflichtig: bool | _Unset = _Unset() 

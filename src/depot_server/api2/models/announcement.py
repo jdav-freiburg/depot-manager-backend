@@ -5,7 +5,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 
-class AnnouncementPending(BaseModel):
+class APIAnnouncementPending(BaseModel):
     title: str
     text: str
     expires: Optional[date]
@@ -13,7 +13,7 @@ class AnnouncementPending(BaseModel):
     is_pinned: bool = Field(default=False)
 
 
-class Announcement(AnnouncementPending):
+class APIAnnouncement(APIAnnouncementPending):
     id: UUID
     author: str
     timestamp: datetime

@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from depot_server.api2.item import router
-from depot_server.api2.models.item import FullItem, Item
+from depot_server.api2.models.item import APIFullItem, APIItem
 from depot_server.db2.models.common import Condition
 from depot_server.db2.models.item.item import PsaCategory
 
@@ -20,7 +20,7 @@ def client():
 
 
 def item_model(item_id, group_id):
-    return Item(
+    return APIItem(
         id=item_id,
         group_id=group_id,
         lendable=True,
@@ -33,7 +33,7 @@ def item_model(item_id, group_id):
 
 
 def full_item_model(item_id, group_id, instance_id):
-    return FullItem(
+    return APIFullItem(
         id=item_id,
         group_id=group_id,
         instance_id=instance_id,

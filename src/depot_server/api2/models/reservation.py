@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 from depot_server.db2.models.common import ReservationImportance, ReservationType
 
-class ReservationMeta(BaseModel):
+class APIReservationMeta(BaseModel):
     name: Optional[str]
     start: date
     end: date
@@ -17,13 +17,13 @@ class ReservationMeta(BaseModel):
     #active: bool = Field(default=True)
     user_notes: Optional[str] = None
 
-class ReservationContent(BaseModel):
+class APIReservationContent(BaseModel):
     items: dict[UUID, int] = {}
     composite_items: dict[UUID, int] = {}
 
-class ReservationPending(ReservationMeta, ReservationContent):
+class APIReservationPending(APIReservationMeta, APIReservationContent):
     pass
 
-class Reservation(ReservationPending):
+class APIReservation(APIReservationPending):
     id: UUID = Field(...)
     user_id: UUID

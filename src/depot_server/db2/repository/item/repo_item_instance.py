@@ -1,3 +1,4 @@
+from collections import Counter
 from uuid import UUID
 
 from tortoise.expressions import Q
@@ -22,6 +23,11 @@ class ItemInstanceRepo(AuditableRepo):
         return count
 
     @classmethod
+    async def get_purposes_by_item_id(cls, item_id: UUID) -> dict[UUID, int]:
+        item_instances = await cls.Db_type.filter(item_id=item_id).all()
+        return dict(Counter(inst.purpose_id for inst in item_instances if inst.purpose_id is not None))
+
+    @classmethod
     async def get_amount_by_purpose(cls, purpose_id: UUID) -> int:
         count = await cls.Db_type.filter(purpose_id=purpose_id, condition__in=[Condition.GOOD, Condition.MONITOR]).count()
         return count
@@ -34,7 +40,9 @@ class ItemInstanceRepo(AuditableRepo):
 
     @classmethod
     async def get_full_items(cls, **kwargs):
-        item_instances = await cls.Db_type.filter(**kwargs).prefetch_related("item").all()
+        item_instances = await cls.Db_type.filter(**kwargs).prefetch_related(
+            "item", "purpose__lendable_purpose_link"
+        ).all()
         return item_instances
 
     @classmethod
@@ -74,3 +82,11 @@ class ItemInstanceRepo(AuditableRepo):
             query = query & ~Q(id=exclude_id)
         existing_instance = await cls.Db_type.filter(query).first()
         return existing_instance is not None
+
+    @classmethod
+    async def assign_unassigned_to_purpose(cls, item_id: UUID, purpose_id: UUID):
+        entries = await cls.get_item_instances_by_item_id(item_id)
+        for entry in entries:
+            if entry.purpose is None:
+                entry.purpose_id = purpose_id
+                await entry.save()

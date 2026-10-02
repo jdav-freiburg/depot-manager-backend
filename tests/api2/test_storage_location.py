@@ -6,7 +6,7 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from depot_server.api2.models.storage_location import StorageLocation
+from depot_server.api2.models.storage_location import APIStorageLocation
 from depot_server.api2.storage_location import router
 
 
@@ -27,7 +27,7 @@ async def test_get_storage_locations_calls_repo(client):
     mock_db_loc.map_asset_id = None
     mock_db_loc.is_ausgabepflichtig = False
 
-    model_loc = StorageLocation(id=loc_id, name="Loc A", description="Desc A", map_item=None,
+    model_loc = APIStorageLocation(id=loc_id, name="Loc A", description="Desc A", map_item=None,
                                 is_subject_to_issuance=False)
 
     with patch("depot_server.api2.storage_location.StorageLocationRepo.Db_type.all",
@@ -56,7 +56,7 @@ async def test_get_storage_location_by_id_calls_repo(client):
     mock_db_loc.map_asset_id = None
     mock_db_loc.is_ausgabepflichtig = True
 
-    model_loc = StorageLocation(id=loc_id, name="Loc B", description="Desc B", map_item=None,
+    model_loc = APIStorageLocation(id=loc_id, name="Loc B", description="Desc B", map_item=None,
                                 is_subject_to_issuance=True)
 
     with patch("depot_server.api2.storage_location.StorageLocationRepo.get_by_id", new_callable=AsyncMock) as mock_get:
@@ -95,7 +95,7 @@ async def test_create_storage_location_calls_repo(client):
     mock_db_loc.map_asset_id = None
     mock_db_loc.is_ausgabepflichtig = False
 
-    model_loc = StorageLocation(id=loc_id, name="New Loc", description="New Desc", map_item=None,
+    model_loc = APIStorageLocation(id=loc_id, name="New Loc", description="New Desc", map_item=None,
                                 is_subject_to_issuance=False)
 
     with patch("depot_server.api2.storage_location.StorageLocationRepo.create", new_callable=AsyncMock) as mock_create:
@@ -125,7 +125,7 @@ async def test_update_storage_location_calls_repo_and_saves(client):
     mock_db_loc.map_asset_id = None
     mock_db_loc.is_ausgabepflichtig = False
 
-    model_loc = StorageLocation(id=loc_id, name="Updated", description="Updated Desc", map_item=None,
+    model_loc = APIStorageLocation(id=loc_id, name="Updated", description="Updated Desc", map_item=None,
                                 is_subject_to_issuance=True)
 
     with patch("depot_server.api2.storage_location.StorageLocationRepo.get_by_id", new_callable=AsyncMock) as mock_get:
