@@ -22,7 +22,7 @@ class LogicLendable:
     description: str | None
     parent: UUID | None  # UUID of the parent lendable group if it exists
     ausgabepflichtig: bool
-    storage_location: str | None
+    storage_location: UUID | None
     in_limbus: int
     changed_at: datetime
 

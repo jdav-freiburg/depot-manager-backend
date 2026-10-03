@@ -160,8 +160,8 @@ async def test_update_tag_calls_repo(client):
         call_kwargs = call_args[1]
         assert call_kwargs["name"] == "updated_tag"
         assert call_kwargs["description"] == "updated desc"
-        # Note: color is passed as-is (not normalized by TagPending model)
-        assert call_kwargs["color"] == "#AABBCC"
+        # Note: color is normalized to lowercase on model creation.
+        assert call_kwargs["color"] == "#aabbcc"
 
         assert response.status_code == 200
         data = response.json()

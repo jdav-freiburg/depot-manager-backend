@@ -15,7 +15,7 @@ class LendableGroupService:
             id=db_item_group.id,
             name=db_item_group.name,
             description=db_item_group.description,
-            parent=db_item_group.parent
+               parent=db_item_group.parent_id
         )
 
     @classmethod

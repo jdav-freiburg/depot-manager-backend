@@ -7,6 +7,7 @@ from fastapi.testclient import TestClient
 
 from depot_server.api2.lendable_group import router
 from depot_server.db2.repository.base import ItemNotFound
+from depot_server.logic.lendable_group import LendableGroupService
 
 
 @pytest.fixture
@@ -160,3 +161,18 @@ async def test_get_lendable_group_returns_service_result(client):
 
         assert response.json()["id"] == str(ig_id)
         assert response.status_code == 200
+
+
+def test_lendable_group_service_maps_parent_to_uuid():
+    group_id = uuid4()
+    parent_id = uuid4()
+    group = MagicMock()
+    group.id = group_id
+    group.name = "Child"
+    group.description = "Child group"
+    group.parent_id = parent_id
+
+    result = LendableGroupService._to_logic_dataclass(group)
+
+    assert result.parent == parent_id
+    assert isinstance(result.parent, type(parent_id))

@@ -10,6 +10,7 @@ from depot_server.db2.repository.item.repo_item_purpose import ItemPurposeRepo
 from depot_server.db2.repository.item.repo_lendable import LendableRepo
 from depot_server.db2.repository.item.repo_item_instance import ItemInstanceRepo
 from depot_server.db2.repository.item.repo_lendable_group import LendableGroupRepo
+from depot_server.db2.repository.base import ItemNotFound
 
 router = APIRouter(tags=["V2_Lendable"], prefix="/lendable")
 
@@ -31,7 +32,7 @@ async def create_lendable(lendable: APICreateLendable) -> APILendable:
         ausgabepflichtig=lendable.ausgabepflichtig,
         storage_location=lendable.storage_location
     ))
-    return APILendable.model_validate(db_lendable, from_attributes=True)
+    return APILendable.from_logic(db_lendable)
 
 @router.get("/")
 async def get_lendables() -> list[APILendable]:
@@ -45,6 +46,7 @@ async def get_lendable(lendable_id: UUID) -> APILendable:
 
 @router.put("/{lendable_id}")
 async def update_lendable(lendable_id: UUID, lendable: APIUpdateLendable) -> APILendable:
+    update_data = lendable.model_dump(exclude_unset=True, exclude={"items"})
     if lendable.items:
         purposes = {}
         for item, amount in lendable.items.items():
@@ -52,12 +54,15 @@ async def update_lendable(lendable_id: UUID, lendable: APIUpdateLendable) -> API
             purposes[purpose.id] = amount
             await ItemInstanceRepo.assign_unassigned_to_purpose(item, purpose)
         db_lendable = await LendableService.update(lendable_id, UpdateLendableData(
-                **lendable.model_dump(exclude_unset=True), purposes=purposes))
+                **update_data, purposes=purposes))
     else:
         db_lendable = await LendableService.update(lendable_id, UpdateLendableData(
-                **lendable.model_dump(exclude_unset=True)))
+                **update_data))
     return APILendable.model_validate(db_lendable, from_attributes=True)
 
 @router.delete("/{lendable_id}")
 async def delete_lendable(lendable_id: UUID) -> None:
-    await LendableRepo.delete_by_id(lendable_id)
+    try:
+        await LendableRepo.delete_by_id(lendable_id)
+    except ItemNotFound:
+        raise HTTPException(status_code=404, detail="Lendable not found")

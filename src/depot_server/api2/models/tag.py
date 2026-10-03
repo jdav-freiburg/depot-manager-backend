@@ -1,28 +1,27 @@
-import re
 from uuid import UUID, uuid4
+from typing import Annotated
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, StringConstraints
 
-_HEX_COLOR_RE = re.compile(r"^#[0-9a-f]{6}$")
+
+HexColor = Annotated[
+    str,
+    StringConstraints(
+        strip_whitespace=True,
+        to_lower=True,
+        pattern=r"^#[0-9a-fA-F]{6}$",
+    ),
+]
 
 
 class APITagPending(BaseModel):
     name: str
     description: str
-    color: str = Field(..., description="HTML hex color like #rrggbb")
+    color: HexColor = Field(..., description="HTML hex color like #rrggbb")
 
 
 class APITag(BaseModel):
     id: UUID = Field(default_factory=uuid4)
     name: str
     description: str
-    color: str = Field(..., description="HTML hex color like #rrggbb")
-
-    @field_validator("color", mode="before")
-    def _validate_and_normalize_color(cls, v):
-        if v is None:
-            raise ValueError("color is required")
-        s = str(v).strip().lower()
-        if not _HEX_COLOR_RE.fullmatch(s):
-            raise ValueError("color must be a 6-digit hex code, e.g. #ff0000")
-        return s
+    color: HexColor = Field(..., description="HTML hex color like #rrggbb")

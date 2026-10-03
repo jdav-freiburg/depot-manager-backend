@@ -10,6 +10,7 @@ from depot_server.db2.repository.item.repo_item_purpose import ItemPurposeRepo
 from depot_server.db2.repository.item.repo_item import ItemRepo
 from depot_server.db2.repository.item.repo_lendable import LendableRepo, LinkLendablePurposeRepo
 from depot_server.logic.lendable import LendableService
+from depot_server.logic.contracts.lendable import CreateLendable
 
 from depot_server.db2.models.common import Condition
 from depot_server.db2.models.item.item import PsaCategory
@@ -128,3 +129,20 @@ async def test_lendable_amount(init_db):
 
     assert (await LendableService().get_total_amount(lendable_schlinge.id)) == 5
     assert (await LendableService().get_total_amount(lendable_alpinexe.id)) == 1
+
+
+@pytest.mark.asyncio
+async def test_lendable_service_create_returns_first_lendable(init_db):
+    purpose = await ItemPurposeRepo.create(description="Purpose description")
+
+    result = await LendableService.create(
+        CreateLendable(
+            name="First lendable",
+            purposes={purpose.id: 1},
+            description="A test lendable",
+        )
+    )
+
+    assert result.name == "First lendable"
+    assert result.parent is None
+    assert result.purposes[0].purpose_id == purpose.id

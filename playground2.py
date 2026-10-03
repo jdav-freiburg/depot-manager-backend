@@ -6,9 +6,6 @@ from datetime import date
 from tortoise import Tortoise
 from tortoise.expressions import Q
 
-from depot_server.api2.models.lendable import ItemCompositeBase
-from depot_server.api2.models.item import ItemInstanceBase, FullItemRaw
-from depot_server.api2.models.reservation import ReservationPending
 from depot_server.db2.models import Lendable, ItemInstance, LendableGroup
 from depot_server.db2.models.item.item import PsaCategory
 from depot_server.db2.models.common import Condition

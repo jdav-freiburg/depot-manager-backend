@@ -25,8 +25,9 @@ class LendableService:
                                                     amount=link.amount,
                                                     purpose_id=link.purpose_id,
                                                     created_at=link.created_at))
-        if lendable.lendable_purpose_link_archive:
-            for link in lendable.lendable_purpose_link_archive:
+        archive_links = lendable.lendable_purpose_link_archive
+        if archive_links._fetched:
+            for link in archive_links.related_objects:
                 purposes.append(LogicLendableLink(id=link.id,
                                                     lendable_id=link.lendable_id,
                                                     amount=link.amount,
@@ -39,7 +40,7 @@ class LendableService:
                             in_limbus=lendable.in_limbus,
                             ausgabepflichtig=lendable.ausgabepflichtig,
                             parent=lendable.lendable_group.parent_id if lendable.lendable_group else None,
-                            storage_location=lendable.storage_location,
+                            storage_location=lendable.storage_location if lendable.storage_location else None,
                             changed_at=lendable.changed_at)
     
     @classmethod

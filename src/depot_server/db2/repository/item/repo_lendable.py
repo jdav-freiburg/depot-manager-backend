@@ -4,7 +4,7 @@ from uuid import UUID
 from tortoise.query_utils import Prefetch
 from tortoise.transactions import in_transaction
 
-from depot_server.db2.models.item.lendable import Lendable, LinkLendablePurpose
+from depot_server.db2.models.item.lendable import Lendable, LinkLendablePurpose, LinkLendablePurposeArchive
 from depot_server.db2.repository.base import BaseRepo, ItemNotFound
 from depot_server.db2.repository.item.repo_item_instance import ItemInstanceRepo
 
@@ -17,10 +17,11 @@ class LendableRepo(BaseRepo):
     async def get_all_with_links(cls, timestamp: datetime) -> list[Lendable]:
         return await cls.Db_type.filter(
             ).prefetch_related(Prefetch("lendable_purpose_link_archive",
-                                queryset=LinkLendablePurpose.filter(created_at__lt=timestamp, change_date__gt=timestamp))
+                                queryset=LinkLendablePurposeArchive.filter(created_at__lt=timestamp, change_date__gt=timestamp))
             ).prefetch_related(Prefetch("lendable_purpose_link",
                                 queryset=LinkLendablePurpose.filter(created_at__lte=timestamp))
-            ).get_related("lendable_group")
+            ).prefetch_related("lendable_group")
+    
     @classmethod
     async def get_by_id_with_links(cls, id, timestamp: datetime | None = None) -> Lendable:
         """
@@ -33,13 +34,13 @@ class LendableRepo(BaseRepo):
         if not change_date:
             raise ItemNotFound(f"Lendable with id {id} not found")
         if timestamp is None or change_date < timestamp:
-            return await cls.Db_type.get_or_none(id=id).prefetch_related("lendable_purpose_link")
+            return await cls.Db_type.filter(id=id).prefetch_related("lendable_purpose_link").select_related("lendable_group").first()
         return await cls.Db_type.filter(id=id
             ).prefetch_related(Prefetch("lendable_purpose_link_archive",
                                 queryset=LinkLendablePurpose.filter(created_at__lt=timestamp, change_date__gt=timestamp))
             ).prefetch_related(Prefetch("lendable_purpose_link",
                                 queryset=LinkLendablePurpose.filter(created_at__lte=timestamp))
-            ).get_related("lendable_group").first()
+            ).select_related("lendable_group").first()
 
 
 

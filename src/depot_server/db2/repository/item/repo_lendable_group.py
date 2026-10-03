@@ -10,10 +10,10 @@ class LendableGroupRepo(BaseRepo):
     @classmethod
     async def create(cls, **kwargs) -> T:
         if "parent" in kwargs and kwargs["parent"] is not None:
-            parent = await LendableGroup.get_by_id(kwargs["parent"])
+            parent = await LendableGroup.get_or_none(pk=kwargs["parent"])
             if parent is None:
                 raise ItemNotFound(f"Parent item with id {kwargs['parent']} not found")
-            if cls.is_single_lendable_group(parent.id):
+            if await cls.is_single_lendable_group(parent.id):
                 raise ValueError("Cannot create a child group under a single lendable group")
             kwargs['parent'] = parent
         return await super().create(**kwargs)
@@ -29,10 +29,10 @@ class LendableGroupRepo(BaseRepo):
             raise ValueError("Cannot update the id field")
 
         if "parent" in kwargs and kwargs["parent"] is not None:
-            parent = await LendableGroup.get_by_id(kwargs["parent"])
+            parent = await LendableGroup.get_or_none(pk=kwargs["parent"])
             if parent is None:
                 raise ItemNotFound(f"Parent item with id {kwargs['parent']} not found")
-            if cls.is_single_lendable_group(parent.id):
+            if await cls.is_single_lendable_group(parent.id):
                 raise ValueError("Cannot create a child group under a single lendable group")
             kwargs['parent'] = parent
 
@@ -58,6 +58,6 @@ class LendableGroupRepo(BaseRepo):
         lendable_group = await cls.get_by_id(lendable_group_id)
         if not lendable_group:
             raise ItemNotFound(f"LendableGroup with id {lendable_group_id} not found")
-        if await lendable_group.children:
+        if await lendable_group.children.all():
             return False
-        return await lendable_group.lendable.count() == 1
+        return await lendable_group.lendable.all().count() == 1

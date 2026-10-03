@@ -14,7 +14,7 @@ router = APIRouter(tags=["V2_LendableGroup"], prefix="/lendable_group")
 # CRUD operations
 
 @router.post("/")
-async def create_item_group(item_group: APILendableGroupBase) -> APILendableGroup:
+async def create_lendable_group(item_group: APILendableGroupBase) -> APILendableGroup:
     """Create a new lendable group"""
     lendable_group = await LendableGroupService.create(
         CreateLendableGroup(
@@ -26,13 +26,13 @@ async def create_item_group(item_group: APILendableGroupBase) -> APILendableGrou
     return APILendableGroup.from_logic(lendable_group)
 
 @router.get("/")
-async def get_item_groups() -> list[APILendableGroup]:
+async def get_lendable_groups() -> list[APILendableGroup]:
     """Retrieve all lendable groups"""
     lendable_groups = await LendableGroupService.get_all()
     return [APILendableGroup.from_logic(group) for group in lendable_groups]
 
 @router.get("/{lendable_group_id}")
-async def get_item_group(lendable_group_id: UUID) -> APILendableGroup:
+async def get_lendable_group(lendable_group_id: UUID) -> APILendableGroup:
     """Retrieve a single lendable group by id"""
     try:
         lendable_group = await LendableGroupService.get_by_id(lendable_group_id)
@@ -41,7 +41,7 @@ async def get_item_group(lendable_group_id: UUID) -> APILendableGroup:
         raise HTTPException(status_code=404, detail="ItemGroup not found")
 
 @router.put("/{lendable_group_id}")
-async def update_item_group(lendable_group_id: UUID, item_group: APILendableGroupBase) -> APILendableGroup:
+async def update_lendable_group(lendable_group_id: UUID, item_group: APILendableGroupBase) -> APILendableGroup:
     """Update an existing lendable group"""
     try:
         lendable_group = await LendableGroupService.update_lendable_group(
@@ -57,7 +57,7 @@ async def update_item_group(lendable_group_id: UUID, item_group: APILendableGrou
         raise HTTPException(status_code=404, detail="ItemGroup not found")
 
 @router.delete("/{lendable_group_id}")
-async def delete_item_group(lendable_group_id: UUID) -> None:
+async def delete_lendable_group(lendable_group_id: UUID) -> None:
     """Delete a lendable group"""
     try:
         await LendableGroupService.delete_by_id(lendable_group_id)
@@ -67,7 +67,7 @@ async def delete_item_group(lendable_group_id: UUID) -> None:
 # Additional endpoints
 
 @router.get("/{lendable_group_id}/children")
-async def get_item_group_children(lendable_group_id: UUID) -> list[APILendableGroup]:
+async def get_lendable_group_children(lendable_group_id: UUID) -> list[APILendableGroup]:
     """Retrieve the children of a lendable group"""
     try:
         children = await LendableGroupRepo.get_children_by_parent_id(lendable_group_id)
