@@ -44,12 +44,12 @@ class ItemInstanceService:
 
     @classmethod
     async def get_expired_item_instances(cls) -> list[ItemInstanceDB]:
-        expired_item_instances = await ItemInstanceRepo.get_all()
+        expired_item_instances = await ItemInstanceRepo.get_full_items()
         return [inst for inst in expired_item_instances if inst.is_too_old]
 
     @classmethod
     async def get_item_instances_requiring_inspection(cls) -> list[ItemInstanceDB]:
-        item_instances = await ItemInstanceRepo.get_all()
+        item_instances = await ItemInstanceRepo.get_full_items()
         return [inst for inst in item_instances if await inst.requires_inspection()]
 
     @classmethod

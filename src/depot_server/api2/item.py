@@ -5,8 +5,9 @@ from fastapi import APIRouter, HTTPException
 from depot_server.db2.repository.base import ItemNotFound
 from depot_server.db2.repository.item.repo_item import ItemRepo
 from depot_server.db2.repository.item.repo_item_instance import ItemInstanceRepo
-from depot_server.logic.contracts.item import CreateItem, UpdateItemData
+from depot_server.logic.contracts.item import CreateItem, UpdateItemData, CreateItemInstance
 from depot_server.logic.item import ItemService
+from depot_server.logic.item_instance import ItemInstanceService, ItemInstanceUniqueConflict
 from .models.item import APIItem, APICreateItem, APIItemInstance, APIAddItemInstance
 
 
@@ -50,5 +51,9 @@ async def get_item_instances(item_id: UUID) -> list[APIItemInstance]:
 
 @router.post("/{item_id}/instance")
 async def create_item_instance(item_id: UUID, item_instance: APIAddItemInstance) -> APIItemInstance:
-    db_item_instance = await ItemInstanceRepo.create(item_id=item_id, **item_instance.model_dump())
-    return APIItemInstance.model_validate(db_item_instance, from_attributes=True)
+    # TODO infer purpose ad add to creation
+    try:
+        db_item_instance = await ItemInstanceService.create(CreateItemInstance(item_id=item_id, **item_instance.model_dump()))
+        return APIItemInstance.model_validate(db_item_instance, from_attributes=True)
+    except ItemInstanceUniqueConflict as ex:
+        raise HTTPException(400, detail=str(ex))

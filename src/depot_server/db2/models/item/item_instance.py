@@ -14,7 +14,7 @@ class ItemInstance(Model):
 
     id = fields.UUIDField(primary_key=True)
     item = fields.ForeignKeyField("depot.Item", on_delete=fields.RESTRICT, null=False, related_name="item_instances")
-    purpose = fields.ForeignKeyField("depot.ItemPurpose", on_delete=fields.RESTRICT, null=False, related_name="item_instances")
+    purpose = fields.ForeignKeyField("depot.ItemPurpose", on_delete=fields.RESTRICT, null=True, related_name="item_instances")
     external_id = fields.CharField(null=True, max_length=100)
     serial_number = fields.TextField(null=False)
     created_at = fields.DatetimeField(auto_now_add=True)
@@ -59,9 +59,10 @@ class ItemInstance(Model):
 
 @pre_save(ItemInstance)
 async def validate_item_purpose(sender: type[ItemInstance], instance: ItemInstance, using_db, update_fields) -> None:
-    items = await ItemInstance.filter(purpose=instance.purpose).distinct().values_list("item_id", flat=True)
-    if len(items) > 1 or (len(items) == 1 and items[0] != instance.item_id):
-        raise ValidationError(f"You can not assign different items to the same purpose. Conflicting item IDs: {items}")
+    if instance.purpose:
+        items = await ItemInstance.filter(purpose=instance.purpose).distinct().values_list("item_id", flat=True)
+        if len(items) > 1 or (len(items) == 1 and items[0] != instance.item_id):
+            raise ValidationError(f"You can not assign different items to the same purpose. Conflicting item IDs: {items}")
 
 @pre_save(ItemInstance)
 async def validate_colliding_serial_numbers(sender: type[ItemInstance], instance: ItemInstance, using_db, update_fields) -> None:
