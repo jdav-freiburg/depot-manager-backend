@@ -1,4 +1,5 @@
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from uuid import UUID
 
 from depot_server.db2.models.item.lendable import Lendable
@@ -44,13 +45,13 @@ class LendableService:
                             changed_at=lendable.changed_at)
     
     @classmethod
-    async def get_all(cls, timestamp: datetime) -> list[LogicLendable]:
+    async def get_all(cls, timestamp: datetime=datetime.now(ZoneInfo("Europe/Berlin"))) -> list[LogicLendable]:
         lendables = await LendableRepo.get_all_with_links(timestamp)
         return [cls._to_dataclass_lendable(lendable)
                 for lendable in lendables]
 
     @classmethod
-    async def get_by_id(cls, lendable_id: UUID, date: datetime) -> LogicLendable:
+    async def get_by_id(cls, lendable_id: UUID, date: datetime=datetime.now(ZoneInfo("Europe/Berlin"))) -> LogicLendable:
         lendable = await LendableRepo.get_by_id_with_links(lendable_id, date)
         if not lendable:
             raise ItemNotFound(f"Lendable with id {lendable_id} not found")
@@ -103,11 +104,11 @@ class LendableService:
         return
 
     @staticmethod
-    async def get_total_amount(id: UUID) -> int:
+    async def get_operational_amount(id: UUID) -> int:
         lendable = await LendableRepo.get_by_id_with_links(id)
         available_sets = []
         for link in lendable.lendable_purpose_link:
             required_amount = link.amount
-            in_service_amount = await ItemInstanceRepo.get_amount_by_purpose(link.purpose_id)
-            available_sets.append(in_service_amount // required_amount)
+            operational_amount = await ItemInstanceRepo.get_amount_by_purpose(link.purpose_id)
+            available_sets.append(operational_amount // required_amount)
         return min(available_sets) if available_sets else 0

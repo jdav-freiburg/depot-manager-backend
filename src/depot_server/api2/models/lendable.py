@@ -25,10 +25,12 @@ class APIUpdateLendable(BaseModel):
 
 class APILendable(APILendableBase):
     id: UUID
-    in_limbus: int
+    available: int = Field(description="How many could be reserved. Is smaller if some are already reserved.")
+    operational: int = Field(description="The amount of lendables that should exist if all things that are not broken are there")
+    in_limbus: int = Field(description="How many lendables nobody knows where they are. They are lost but could reappear")
 
     @classmethod
-    def from_logic(cls, logic_lendable: LogicLendable) -> "APILendable":
+    def from_logic(cls, logic_lendable: LogicLendable, available: int, operational: int) -> "APILendable":
         return cls(
             id=logic_lendable.id,
             name=logic_lendable.name,
@@ -36,5 +38,7 @@ class APILendable(APILendableBase):
             storage_location=logic_lendable.storage_location,
             ausgabepflichtig=logic_lendable.ausgabepflichtig,
             items={link.purpose_id: link.amount for link in logic_lendable.purposes},
-            in_limbus=logic_lendable.in_limbus
+            in_limbus=logic_lendable.in_limbus,
+            available=available,
+            operational=operational
         )

@@ -5,9 +5,12 @@ from fastapi import APIRouter, HTTPException
 from depot_server.db2.repository.base import ItemNotFound
 from depot_server.db2.repository.item.repo_item import ItemRepo
 from depot_server.db2.repository.item.repo_item_instance import ItemInstanceRepo
+from depot_server.db2.repository.item.repo_item_purpose import ItemPurposeRepo
 from depot_server.logic.contracts.item import CreateItem, UpdateItemData, CreateItemInstance
+from depot_server.logic.contracts.lendable import CreateLendable
 from depot_server.logic.item import ItemService
 from depot_server.logic.item_instance import ItemInstanceService, ItemInstanceUniqueConflict
+from depot_server.logic.lendable import LendableService
 from .models.item import APIItem, APICreateItem, APIItemInstance, APIAddItemInstance
 
 
@@ -27,6 +30,14 @@ async def get_item(item_id: UUID) -> APIItem:
 
 @router.post("/")
 async def create_item(item: APICreateItem) -> APIItem:
+    if item.create_single_lendable:
+        purpose = await ItemPurposeRepo.create(description=f"{item.name}")
+        await LendableService.create(CreateLendable(name=item.name,
+                                                    description=item.description,
+                                                    ausgabepflichtig=False,
+                                                    purposes={purpose.id: 1},
+                                                    storage_location=None,
+                                                    parent=None))
     db_item = await ItemService.create_item(CreateItem(**item.model_dump()))
     return APIItem.model_validate(db_item, from_attributes=True)
 

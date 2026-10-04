@@ -24,7 +24,7 @@ class APIItemBase(BaseModel):
     psa_category: PsaCategory = Field(...)
 
 class APICreateItem(APIItemBase):
-    pass
+    create_single_lendable: bool = Field(..., description="Whether a lendable containing only this item should also be created")
     
 class APIItem(APIItemBase):
     id: UUID = Field(...)

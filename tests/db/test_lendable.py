@@ -127,8 +127,8 @@ async def test_lendable_amount(init_db):
     await LinkLendablePurposeRepo.create(lendable=lendable_alpinexe, amount=1, purpose=purpose_schlinge_alpinexe)
     await LinkLendablePurposeRepo.create(lendable=lendable_alpinexe, amount=2, purpose=purpose_schnapper_alpinexe)
 
-    assert (await LendableService().get_total_amount(lendable_schlinge.id)) == 5
-    assert (await LendableService().get_total_amount(lendable_alpinexe.id)) == 1
+    assert (await LendableService().get_operational_amount(lendable_schlinge.id)) == 5
+    assert (await LendableService().get_operational_amount(lendable_alpinexe.id)) == 1
 
 
 @pytest.mark.asyncio
