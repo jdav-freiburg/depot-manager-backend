@@ -42,6 +42,11 @@ class LendableRepo(BaseRepo):
                                 queryset=LinkLendablePurpose.filter(created_at__lte=timestamp))
             ).select_related("lendable_group").first()
 
+    @classmethod
+    async def get_storage_locations(cls, lendables: list[UUID]) -> list[UUID]:
+        storage_locations = await cls.Db_type.filter(id__in=lendables).values_list("storage_location_id", flat=True)
+        print(f"\n\nStorage locations for lendables {lendables}: {storage_locations}")
+        return list(set([loc for loc in storage_locations if loc is not None]))
 
 
 class LinkLendablePurposeRepo(BaseRepo):
@@ -100,4 +105,3 @@ class LinkLenablePurposeArchiveRepo(BaseRepo):
     @classmethod
     async def bulk_delete(cls, ids: list) -> None:
         raise PermissionError("Entries form the archive are not allowed to be deleted.")
-

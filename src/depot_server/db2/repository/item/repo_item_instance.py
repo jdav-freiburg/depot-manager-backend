@@ -18,15 +18,15 @@ class ItemInstanceRepo(AuditableRepo):
         return item_instances
 
     @classmethod
-    async def get_amount_by_item(cls, item_id: UUID) -> int:
-        count = await cls.Db_type.filter(item_id=item_id, condition__in=[Condition.GOOD, Condition.MONITOR]).count()
-        return count
-
-    @classmethod
     async def get_purposes_by_item_id(cls, item_id: UUID) -> dict[UUID, int]:
         item_instances = await cls.Db_type.filter(item_id=item_id).all()
         return dict(Counter(inst.purpose_id for inst in item_instances if inst.purpose_id is not None))
 
+    @classmethod
+    async def get_amount_by_item(cls, item_id: UUID) -> int:
+        count = await cls.Db_type.filter(item_id=item_id, condition__in=[Condition.GOOD, Condition.MONITOR]).count()
+        return count
+    
     @classmethod
     async def get_amount_by_purpose(cls, purpose_id: UUID) -> int:
         count = await cls.Db_type.filter(purpose_id=purpose_id, condition__in=[Condition.GOOD, Condition.MONITOR]).count()

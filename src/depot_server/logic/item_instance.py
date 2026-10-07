@@ -57,12 +57,3 @@ class ItemInstanceService:
         """Check if the item belongs to the given lendable."""
         purposes = await ItemInstanceRepo.get_purposes_by_item_id(item_id)
         return await LinkLendablePurposeRepo.has_purpose(lendable_id, list(purposes.keys()))
-
-    @classmethod
-    async def get_linking_purpose(cls, item_id: UUID, lendable_id: UUID) -> UUID | None:
-        """Get the purpose that links the item to the lendable."""
-        purposes = await ItemInstanceRepo.get_purposes_by_item_id(item_id)
-        for purpose_id in purposes.keys():
-            if await LinkLendablePurposeRepo.has_purpose(lendable_id, [purpose_id]):
-                return purpose_id
-        return None

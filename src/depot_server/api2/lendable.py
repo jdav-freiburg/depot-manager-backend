@@ -1,3 +1,4 @@
+from pydantic_core import MISSING
 from uuid import UUID
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -22,13 +23,13 @@ async def create_lendable(lendable: APICreateLendable) -> APILendable:
     """Creates a new lendable
     Also creates a new purpose for each item in the lendable and assigns all item_instances without purpose to this lendable.
     """
-    # Chech if all items exist
+    # Check if all items exist
     for item_id in lendable.items.keys():
         if await ItemRepo.get_by_id(item_id) is None:
             raise HTTPException(status_code=404, detail=f"Item {item_id} does not exist")
     purposes = {}
     for item, amount in lendable.items.items():
-        purpose = await ItemPurposeRepo.create(description=f"{item} for {lendable.name}")
+        purpose = await ItemPurposeRepo.create(item_id=item)
         purposes[purpose.id] = amount
         await ItemInstanceRepo.assign_unassigned_to_purpose(item, purpose)
     db_lendable = await LendableService.create(CreateLendable(
@@ -44,12 +45,22 @@ async def create_lendable(lendable: APICreateLendable) -> APILendable:
                                                                      end_time=datetime.now(ZoneInfo("Europe/Berlin")))
     operational = await LendableService.get_operational_amount(db_lendable.id)
     available = operational - reserved
-    return APILendable.from_logic(db_lendable, available, operational)
+    items = await LendableService.get_items(db_lendable.id)
+    return APILendable.from_logic(db_lendable, items, available, operational)
 
 @router.get("/")
 async def get_lendables() -> list[APILendable]:
     db_lendables = await LendableService.get_all()
-    return [APILendable.model_validate(lendable, from_attributes=True) for lendable in db_lendables]
+    # TODO implement bulk get for reserved and operational amounts to avoid N+1 queries
+    items = {lendable.id: await LendableService.get_items(lendable.id) for lendable in db_lendables}
+    reserved_amounts = {lendable.id: await ReservationService.get_reserved_lendable_amount(lendable.id,
+                                                                                          start_time=datetime.now(ZoneInfo("Europe/Berlin")),
+                                                                                          end_time=datetime.now(ZoneInfo("Europe/Berlin"))) for lendable in db_lendables}
+    operational_amounts = {lendable.id: await LendableService.get_operational_amount(lendable.id) for lendable in db_lendables}
+    return [APILendable.from_logic(lendable, items[lendable.id],
+                                   operational_amounts[lendable.id] - reserved_amounts[lendable.id],
+                                   operational_amounts[lendable.id])
+                                   for lendable in db_lendables]
 
 @router.get("/{lendable_id}")
 async def get_lendable(lendable_id: UUID) -> APILendable:
@@ -59,23 +70,31 @@ async def get_lendable(lendable_id: UUID) -> APILendable:
                                                                         end_time=datetime.now(ZoneInfo("Europe/Berlin")))
     operational = await LendableService.get_operational_amount(db_lendable.id)
     available = operational - reserved
-    return APILendable.from_logic(db_lendable, available, operational)
+    items = await LendableService.get_items(db_lendable.id)
+    return APILendable.from_logic(db_lendable, items, available, operational)
 
 @router.put("/{lendable_id}")
 async def update_lendable(lendable_id: UUID, lendable: APIUpdateLendable) -> APILendable:
     update_data = lendable.model_dump(exclude_unset=True, exclude={"items"})
-    if lendable.items:
+    if lendable.items != MISSING:
         purposes = {}
         for item, amount in lendable.items.items():
-            purpose = await ItemPurposeRepo.create(description=f"{item} for {lendable.name}")
+            purpose = await ItemPurposeRepo.create(item_id=item)
             purposes[purpose.id] = amount
             await ItemInstanceRepo.assign_unassigned_to_purpose(item, purpose)
-        db_lendable = await LendableService.update(lendable_id, UpdateLendableData(
+        logic_lendable = await LendableService.update(lendable_id, UpdateLendableData(
                 **update_data, purposes=purposes))
     else:
-        db_lendable = await LendableService.update(lendable_id, UpdateLendableData(
+        logic_lendable = await LendableService.update(lendable_id, UpdateLendableData(
                 **update_data))
-    return APILendable.model_validate(db_lendable, from_attributes=True)
+    result = await LendableService.get_by_id(lendable_id)
+    reserved = await ReservationService.get_reserved_lendable_amount(result.id,
+                                                                        start_time=datetime.now(ZoneInfo("Europe/Berlin")),
+                                                                        end_time=datetime.now(ZoneInfo("Europe/Berlin")))
+    operational = await LendableService.get_operational_amount(result.id)
+    available = operational - reserved
+    items = await LendableService.get_items(result.id)
+    return APILendable.from_logic(result, items, available, operational)
 
 @router.delete("/{lendable_id}")
 async def delete_lendable(lendable_id: UUID) -> None:

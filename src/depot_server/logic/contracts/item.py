@@ -3,6 +3,7 @@ from datetime import date
 from uuid import UUID
 
 from depot_server.logic.contracts.base import _Unset, BaseContract
+from depot_server.db2.models.common import Condition
 
 @dataclass(frozen=True)
 class CreateItem(BaseContract):
@@ -22,10 +23,10 @@ class CreateItemInstance(BaseContract):
     manufacture_date: date
     purchase_date: date
     first_use_date: date
-    condition: str | None
+    condition: Condition
     condition_comment: str | None = None
     external_id: str | None = None
-    purpose: UUID | None = None
+    purpose_id: UUID | None = None
 
 @dataclass(frozen=True)
 class UpdateItemData(BaseContract):

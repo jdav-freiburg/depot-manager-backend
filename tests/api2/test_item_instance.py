@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from depot_server.api2.item_instance import router
-from depot_server.api2.models.item import APIItemInstance
+from depot_server.api2.models.item_instance import APIItemInstance
 from depot_server.db2.models.common import Condition
 from depot_server.logic.item_instance import ItemInstanceUniqueConflict
 

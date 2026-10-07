@@ -27,7 +27,7 @@ class UpdateLendableData(BaseContract):
     name: str | _Unset = _Unset()
     description: str | None | _Unset = _Unset()
     ausgabepflichtig: bool | _Unset = _Unset() 
-    storage_location: UUID | None | _Unset = _Unset()
+    storage_location_id: UUID | None | _Unset = _Unset()
     parent: UUID | None | _Unset = _Unset()  # UUID of the parent lendable group if it exists
     in_limbus: int | _Unset = _Unset()  # 0 or 1, if the lendable is in limbus or not
     purposes: dict[UUID, int] | _Unset = _Unset()  # how many of each purpose belong to one lendable

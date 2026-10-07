@@ -4,6 +4,7 @@ from uuid import UUID
 
 from depot_server.db2.models.item.lendable import Lendable
 from depot_server.db2.repository.item.repo_item_instance import ItemInstanceRepo
+from depot_server.db2.repository.item.repo_item_purpose import ItemPurposeRepo
 from depot_server.db2.repository.item.repo_lendable import LendableRepo, LinkLendablePurposeRepo
 from depot_server.db2.repository.item.repo_lendable_group import LendableGroupRepo
 from depot_server.db2.repository.base import ItemNotFound
@@ -41,7 +42,7 @@ class LendableService:
                             in_limbus=lendable.in_limbus,
                             ausgabepflichtig=lendable.ausgabepflichtig,
                             parent=lendable.lendable_group.parent_id if lendable.lendable_group else None,
-                            storage_location=lendable.storage_location if lendable.storage_location else None,
+                            storage_location_id=lendable.storage_location_id if lendable.storage_location else None,
                             changed_at=lendable.changed_at)
     
     @classmethod
@@ -75,7 +76,7 @@ class LendableService:
             group = await LendableGroupRepo.update(id=prev_lendable.lendable_group_id,
                                                     **command.to_kwargs("name", "description", "parent"))
             await LendableRepo.update(lendable_id,
-                                      **command.to_kwargs("name", "description", "ausgabepflichtig", "storage_location", "in_limbus"))
+                                      **command.to_kwargs("name", "description", "ausgabepflichtig", "storage_location_id", "in_limbus"))
             if "purposes" in command.to_kwargs("purposes"):
                 prev_links = await LinkLendablePurposeRepo.get_all_by_lendable_id(lendable_id)
                 # Update / Delete existing links
@@ -112,3 +113,14 @@ class LendableService:
             operational_amount = await ItemInstanceRepo.get_amount_by_purpose(link.purpose_id)
             available_sets.append(operational_amount // required_amount)
         return min(available_sets) if available_sets else 0
+
+    @staticmethod
+    async def get_items(id: UUID) -> dict:
+        lendable = await LendableRepo.get_by_id_with_links(id)
+        result = {}
+        for link in lendable.lendable_purpose_link:
+            purpose = await ItemPurposeRepo.get_by_id(link.purpose_id)
+            if not purpose:
+                raise ItemNotFound(f"No item found for purpose {link.purpose_id}")
+            result[purpose.item_id] = link.amount
+        return result

@@ -1,23 +1,25 @@
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, timedelta
 from uuid import UUID
 
 from depot_server.db2.models.common import Condition
+from depot_server.db2.models.item.item import PsaCategory
+from depot_server.logic.contracts.base import BaseContract
 
 @dataclass(frozen=True)
-class LogicItem:
+class LogicItem(BaseContract):
     id: UUID
     name: str
     description: str | None
     manufacturer: str | None
     model: str | None
     report_profile_id: UUID | None
-    max_lifespan: int | None
-    max_usage_lifespan: int | None
-    psa_category: str | None
+    max_lifespan: timedelta | None
+    max_usage_lifespan: timedelta | None
+    psa_category: PsaCategory
 
 @dataclass(frozen=True)
-class LogicItemInstance:
+class LogicItemInstance(BaseContract):
     id: UUID
     item_id: UUID
     external_id: str | None
@@ -30,7 +32,7 @@ class LogicItemInstance:
     purpose: UUID | None = None
 
 @dataclass(frozen=True)
-class LogicFullItem:
+class LogicFullItem(BaseContract):
     id: UUID  # item instance id
     item_id: UUID
     # item fields

@@ -6,12 +6,14 @@ from depot_server.db2.repository.base import ItemNotFound
 from depot_server.db2.repository.item.repo_item import ItemRepo
 from depot_server.db2.repository.item.repo_item_instance import ItemInstanceRepo
 from depot_server.db2.repository.item.repo_item_purpose import ItemPurposeRepo
+from depot_server.db2.repository.item.repo_lendable import LendableRepo
 from depot_server.logic.contracts.item import CreateItem, UpdateItemData, CreateItemInstance
 from depot_server.logic.contracts.lendable import CreateLendable
 from depot_server.logic.item import ItemService
 from depot_server.logic.item_instance import ItemInstanceService, ItemInstanceUniqueConflict
 from depot_server.logic.lendable import LendableService
-from .models.item import APIItem, APICreateItem, APIItemInstance, APIAddItemInstance
+from .models.item import APIItem, APICreateItem, APIUpdateItem
+from .models.item_instance import APIItemInstance, APIAddItemInstance
 
 
 router = APIRouter(tags=["V2_Item"], prefix="/item")
@@ -19,30 +21,37 @@ router = APIRouter(tags=["V2_Item"], prefix="/item")
 @router.get("/")
 async def get_items() -> list[APIItem]:
     db_items = await ItemService.get_all_items()
-    return [APIItem.model_validate(item, from_attributes=True) for item in db_items]
+    result = []
+    for item in db_items:
+        lendables = await ItemPurposeRepo.get_lendables_by_item(item.id)
+        storage_locations = await LendableRepo.get_storage_locations(lendables)
+        result.append(APIItem.from_logic(item, lendables=lendables, storage_locations=storage_locations))
+    return result
 
 @router.get("/{item_id}")
 async def get_item(item_id: UUID) -> APIItem:
     db_item = await ItemService.get_item(item_id)
     if not db_item:
         raise HTTPException(status_code=404, detail="Item not found")
-    return APIItem.model_validate(db_item, from_attributes=True)
+    lendables = await ItemPurposeRepo.get_lendables_by_item(item_id)
+    storage_locations = await LendableRepo.get_storage_locations(lendables)
+    return APIItem.from_logic(db_item, lendables=lendables, storage_locations=storage_locations)
 
 @router.post("/")
 async def create_item(item: APICreateItem) -> APIItem:
-    if item.create_single_lendable:
-        purpose = await ItemPurposeRepo.create(description=f"{item.name}")
+    db_item = await ItemService.create_item(CreateItem(**item.model_dump(exclude={"single_lendable"})))
+    if item.single_lendable:
+        purpose = await ItemPurposeRepo.create(item_id=db_item.id)
         await LendableService.create(CreateLendable(name=item.name,
                                                     description=item.description,
-                                                    ausgabepflichtig=False,
+                                                    ausgabepflichtig=item.single_lendable.ausgabepflichtig,
                                                     purposes={purpose.id: 1},
-                                                    storage_location=None,
-                                                    parent=None))
-    db_item = await ItemService.create_item(CreateItem(**item.model_dump()))
+                                                    storage_location=item.single_lendable.storage_location,
+                                                    parent=item.single_lendable.parent))
     return APIItem.model_validate(db_item, from_attributes=True)
 
 @router.put("/{item_id}")
-async def update_item(item_id: UUID, item: APICreateItem) -> APIItem:
+async def update_item(item_id: UUID, item: APIUpdateItem) -> APIItem:
     db_item = await ItemService.update_item(item_id, UpdateItemData(**item.model_dump()))
     if not db_item:
         raise HTTPException(status_code=404, detail="Item not found")
