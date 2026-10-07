@@ -25,18 +25,13 @@ async def init_db():
 
 @pytest.mark.asyncio
 async def test_lendable_duplicates(init_db):
-    # Create an item purpose
-    purpose = await ItemPurposeRepo.create(
-        name="Test Purpose",
-        description="Purpose description",
-    )
-    
     # Create an item
     item = await ItemRepo.create(
         name="Test Item",
         description="Item description",
         psa_category=PsaCategory.CAT_1,
     )
+    purpose = await ItemPurposeRepo.create(item=item)
     
     # Create item instances
     for i in range(5):
@@ -62,20 +57,6 @@ async def test_lendable_duplicates(init_db):
 
 @pytest.mark.asyncio
 async def test_lendable_amount(init_db):
-    # Create an item purpose
-    purpose_einzelschlinge = await ItemPurposeRepo.create(
-        name="Schlinge",
-        description="Einzelitem",
-    )
-    purpose_schlinge_alpinexe = await ItemPurposeRepo.create(
-            name="Schlinge",
-            description="Für Alpinexen",
-        )
-    purpose_schnapper_alpinexe = await ItemPurposeRepo.create(
-        name="Schnapper",
-        description="Für Alpinexen",
-    )
-    
     # Create an item
     item = await ItemRepo.create(
         name="Schlinge 60 cm",
@@ -87,6 +68,9 @@ async def test_lendable_amount(init_db):
         description="Schnapper",
         psa_category=PsaCategory.CAT_1,
     )
+    purpose_einzelschlinge = await ItemPurposeRepo.create(item=item)
+    purpose_schlinge_alpinexe = await ItemPurposeRepo.create(item=item)
+    purpose_schnapper_alpinexe = await ItemPurposeRepo.create(item=item2)
     # Create item instances
     for i in range(5):
         await ItemInstanceRepo.create(
@@ -133,13 +117,19 @@ async def test_lendable_amount(init_db):
 
 @pytest.mark.asyncio
 async def test_lendable_service_create_returns_first_lendable(init_db):
-    purpose = await ItemPurposeRepo.create(description="Purpose description")
+    item = await ItemRepo.create(
+        name="Test Item",
+        description="Item description",
+        psa_category=PsaCategory.NONE,
+    )
+    purpose = await ItemPurposeRepo.create(item=item)
 
     result = await LendableService.create(
         CreateLendable(
             name="First lendable",
             purposes={purpose.id: 1},
             description="A test lendable",
+            storage_location_id=None,
         )
     )
 

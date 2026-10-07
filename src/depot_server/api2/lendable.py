@@ -38,7 +38,7 @@ async def create_lendable(lendable: APICreateLendable) -> APILendable:
         description=lendable.description,
         parent=lendable.parent,
         ausgabepflichtig=lendable.ausgabepflichtig,
-        storage_location=lendable.storage_location
+        storage_location_id=lendable.storage_location_id
     ))
     reserved = await ReservationService.get_reserved_lendable_amount(db_lendable.id,
                                                                      start_time=datetime.now(ZoneInfo("Europe/Berlin")),

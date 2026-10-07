@@ -25,7 +25,7 @@ def lendable_result(lendable_id):
         description="A test lendable",
         parent=None,
         ausgabepflichtig=False,
-        storage_location=None,
+        storage_location_id=None,
         in_limbus=0,
         changed_at=datetime.now(),
     )
@@ -49,15 +49,23 @@ def test_create_lendable_assigns_items_and_calls_service(client):
         patch("depot_server.api2.lendable.ItemPurposeRepo.create", new_callable=AsyncMock) as create_purpose,
         patch("depot_server.api2.lendable.ItemInstanceRepo.assign_unassigned_to_purpose", new_callable=AsyncMock) as assign,
         patch("depot_server.api2.lendable.LendableService.create", new_callable=AsyncMock) as create_lendable,
+        patch("depot_server.api2.lendable.ItemRepo.get_by_id", new_callable=AsyncMock) as get_item,
+        patch("depot_server.api2.lendable.ReservationService.get_reserved_lendable_amount", new_callable=AsyncMock) as get_reserved,
+        patch("depot_server.api2.lendable.LendableService.get_operational_amount", new_callable=AsyncMock) as get_operational,
+        patch("depot_server.api2.lendable.LendableService.get_items", new_callable=AsyncMock) as get_items,
     ):
         create_purpose.return_value = purpose
         create_lendable.return_value = lendable_result(lendable_id)
+        get_item.return_value = object()
+        get_reserved.return_value = 0
+        get_operational.return_value = 0
+        get_items.return_value = {}
 
         response = client.post("/lendable/", json=lendable_payload(item_id))
 
     assert response.status_code == 200
     assert response.json()["id"] == str(lendable_id)
-    create_purpose.assert_awaited_once_with(description=f"{item_id} for Test lendable")
+    create_purpose.assert_awaited_once_with(item_id=item_id)
     assign.assert_awaited_once_with(item_id, purpose)
     assert create_lendable.call_args.args[0].purposes == {purpose.id: 1}
 
@@ -65,8 +73,16 @@ def test_create_lendable_assigns_items_and_calls_service(client):
 def test_get_lendable_calls_service(client):
     lendable_id = uuid4()
 
-    with patch("depot_server.api2.lendable.LendableService.get_by_id", new_callable=AsyncMock) as get_lendable:
+    with (
+        patch("depot_server.api2.lendable.LendableService.get_by_id", new_callable=AsyncMock) as get_lendable,
+        patch("depot_server.api2.lendable.ReservationService.get_reserved_lendable_amount", new_callable=AsyncMock) as get_reserved,
+        patch("depot_server.api2.lendable.LendableService.get_operational_amount", new_callable=AsyncMock) as get_operational,
+        patch("depot_server.api2.lendable.LendableService.get_items", new_callable=AsyncMock) as get_items,
+    ):
         get_lendable.return_value = lendable_result(lendable_id)
+        get_reserved.return_value = 0
+        get_operational.return_value = 0
+        get_items.return_value = {}
         response = client.get(f"/lendable/{lendable_id}")
 
     assert response.status_code == 200
@@ -83,9 +99,17 @@ def test_update_lendable_translates_items_to_purposes(client):
         patch("depot_server.api2.lendable.ItemPurposeRepo.create", new_callable=AsyncMock) as create_purpose,
         patch("depot_server.api2.lendable.ItemInstanceRepo.assign_unassigned_to_purpose", new_callable=AsyncMock),
         patch("depot_server.api2.lendable.LendableService.update", new_callable=AsyncMock) as update_lendable,
+        patch("depot_server.api2.lendable.LendableService.get_by_id", new_callable=AsyncMock) as get_lendable,
+        patch("depot_server.api2.lendable.ReservationService.get_reserved_lendable_amount", new_callable=AsyncMock) as get_reserved,
+        patch("depot_server.api2.lendable.LendableService.get_operational_amount", new_callable=AsyncMock) as get_operational,
+        patch("depot_server.api2.lendable.LendableService.get_items", new_callable=AsyncMock) as get_items,
     ):
         create_purpose.return_value = purpose
         update_lendable.return_value = lendable_result(lendable_id)
+        get_lendable.return_value = lendable_result(lendable_id)
+        get_reserved.return_value = 0
+        get_operational.return_value = 0
+        get_items.return_value = {}
 
         response = client.put(
             f"/lendable/{lendable_id}",

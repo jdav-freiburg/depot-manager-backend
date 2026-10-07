@@ -62,7 +62,7 @@ class LendableService:
     async def create(cls, command: CreateLendable) -> LogicLendable:
         async with in_transaction():
             group = await LendableGroupRepo.create(**command.to_kwargs("name", "description", "parent"))
-            lendable = await LendableRepo.create(**command.to_kwargs("name", "description", "ausgabepflichtig", "storage_location"), lendable_group=group)
+            lendable = await LendableRepo.create(**command.to_kwargs("name", "description", "ausgabepflichtig", "storage_location_id"), lendable_group=group)
             purpose_links = []
             for purpose_id, amount in command.purposes.items():
                 purpose_links.append(await LinkLendablePurposeRepo.create(lendable=lendable, purpose_id=purpose_id, amount=amount))

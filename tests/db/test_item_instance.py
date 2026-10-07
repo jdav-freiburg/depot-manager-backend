@@ -49,14 +49,6 @@ def instance_fields(item, purpose, serial_number, external_id):
 
 @pytest.mark.asyncio
 async def test_item_instance_repo_crud(init_db):
-    purpose = await ItemPurposeRepo.create(
-        name="Test Purpose",
-        description="Purpose description",
-    )
-    purpose2 = await ItemPurposeRepo.create(
-        name="Test Purpose 2",
-        description="Purpose description 2",
-    )
     item = await ItemRepo.create(
         name="Test Item",
         description="Item description",
@@ -67,6 +59,8 @@ async def test_item_instance_repo_crud(init_db):
         description="Item description 2",
         psa_category=PsaCategory.NONE,
     )
+    purpose = await ItemPurposeRepo.create(item=item)
+    purpose2 = await ItemPurposeRepo.create(item=item)
     instance = await ItemInstanceRepo.create(**instance_fields(item, purpose, serial_number="SN001",
                                                                external_id="EXT-001"))
     instance2 = await ItemInstanceRepo.create(**instance_fields(item, purpose, serial_number="SN002",
@@ -118,20 +112,6 @@ async def test_item_instance_repo_update_missing_instance_raises(item):
 
 @pytest.mark.asyncio
 async def test_amounts(init_db):
-    # Create an item purpose
-    purpose = await ItemPurposeRepo.create(
-        name="Test Purpose",
-        description="Purpose description",
-    )
-    purpose2 = await ItemPurposeRepo.create(
-        name="Test Purpose 2",
-        description="Purpose description 2",
-    )
-    purpose3 = await ItemPurposeRepo.create(
-        name="Test Purpose 3",
-        description="Purpose description 3",
-    )
-
     # Create an item
     item = await ItemRepo.create(
         name="Test Item",
@@ -145,6 +125,9 @@ async def test_amounts(init_db):
         lendable=True,
         psa_category=PsaCategory.NONE,
     )
+    purpose = await ItemPurposeRepo.create(item=item)
+    purpose2 = await ItemPurposeRepo.create(item=item2)
+    purpose3 = await ItemPurposeRepo.create(item=item2)
 
     # Create item instances with different conditions
     await ItemInstanceRepo.create(

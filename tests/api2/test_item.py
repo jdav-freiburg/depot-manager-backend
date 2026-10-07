@@ -1,4 +1,5 @@
 from unittest.mock import AsyncMock, patch
+from datetime import timedelta
 from uuid import uuid4
 
 import pytest
@@ -8,6 +9,7 @@ from fastapi.testclient import TestClient
 from depot_server.api2.item import router
 from depot_server.api2.models.item import APIItem
 from depot_server.db2.models.item.item import PsaCategory
+from depot_server.logic.results.item import LogicItem
 
 
 @pytest.fixture
@@ -18,12 +20,15 @@ def client():
 
 
 def item_model(item_id):
-    return APIItem(
+    return LogicItem(
         id=item_id,
         name="Test Item",
         description="Item description",
         manufacturer="Manufacturer",
         model="Model X",
+        report_profile_id=None,
+        max_lifespan=timedelta(days=365),
+        max_usage_lifespan=None,
         psa_category=PsaCategory.NONE,
     )
 
@@ -40,8 +45,14 @@ def item_payload():
 
 def test_get_items_calls_service(client):
     item_id = uuid4()
-    with patch("depot_server.api2.item.ItemService.get_all_items", new_callable=AsyncMock) as mock_get:
+    with (
+        patch("depot_server.api2.item.ItemService.get_all_items", new_callable=AsyncMock) as mock_get,
+        patch("depot_server.api2.item.ItemPurposeRepo.get_lendables_by_item", new_callable=AsyncMock) as get_lendables,
+        patch("depot_server.api2.item.LendableRepo.get_storage_locations", new_callable=AsyncMock) as get_storage_locations,
+    ):
         mock_get.return_value = [item_model(item_id)]
+        get_lendables.return_value = []
+        get_storage_locations.return_value = []
         response = client.get("/item")
 
     mock_get.assert_awaited_once_with()

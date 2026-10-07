@@ -11,7 +11,7 @@ class CreateLendable(BaseContract):
     description: str | None = None
     parent: UUID | None = None  # UUID of the parent lendable group if it exists
     ausgabepflichtig: bool = False 
-    storage_location: UUID | None = None
+    storage_location_id: UUID | None = None
 
 @dataclass(frozen=True)
 class CreateLendableGroup(BaseContract):

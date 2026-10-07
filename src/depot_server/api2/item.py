@@ -46,7 +46,7 @@ async def create_item(item: APICreateItem) -> APIItem:
                                                     description=item.description,
                                                     ausgabepflichtig=item.single_lendable.ausgabepflichtig,
                                                     purposes={purpose.id: 1},
-                                                    storage_location=item.single_lendable.storage_location,
+                                                    storage_location_id=item.single_lendable.storage_location,
                                                     parent=item.single_lendable.parent))
     return APIItem.model_validate(db_item, from_attributes=True)
 
