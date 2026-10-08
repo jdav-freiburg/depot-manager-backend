@@ -28,7 +28,6 @@ async def item(init_db):
     return await ItemRepo.create(
         name="Test Item",
         description="Item description",
-        lendable=True,
         psa_category=PsaCategory.NONE,
     )
 

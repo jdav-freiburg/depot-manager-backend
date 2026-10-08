@@ -7,6 +7,7 @@ from tortoise.exceptions import ValidationError
 
 from depot_server.db2.models.common import Condition
 from depot_server.db2.models.item.item import PsaCategory
+from depot_server.db2.models.item.item_purpose import ItemPurpose
 
 class ItemInstance(Model):
     class Meta:
@@ -59,10 +60,20 @@ class ItemInstance(Model):
 
 @pre_save(ItemInstance)
 async def validate_item_purpose(sender: type[ItemInstance], instance: ItemInstance, using_db, update_fields) -> None:
-    if instance.purpose:
-        items = await ItemInstance.filter(purpose=instance.purpose).distinct().values_list("item_id", flat=True)
-        if len(items) > 1 or (len(items) == 1 and items[0] != instance.item_id):
-            raise ValidationError(f"You can not assign different items to the same purpose. Conflicting item IDs: {items}")
+    if instance.purpose_id is None:
+        return
+
+    purpose = await ItemPurpose.get_or_none(id=instance.purpose_id)
+    purpose_item_id = purpose.item_id if purpose is not None else None
+    if purpose_item_id != instance.item_id:
+        raise ValidationError(
+            f"You can not assign an item instance to a purpose belonging to a different item. "
+            f"Purpose item ID: {purpose_item_id}, item ID: {instance.item_id}"
+        )
+
+    items = await ItemInstance.filter(purpose_id=instance.purpose_id).distinct().values_list("item_id", flat=True)
+    if len(items) > 1 or (len(items) == 1 and items[0] != instance.item_id):
+        raise ValidationError(f"You can not assign different items to the same purpose. Conflicting item IDs: {items}")
 
 @pre_save(ItemInstance)
 async def validate_colliding_serial_numbers(sender: type[ItemInstance], instance: ItemInstance, using_db, update_fields) -> None:
