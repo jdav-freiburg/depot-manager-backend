@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from pydantic_core import MISSING
 from fastapi import APIRouter, HTTPException
 
 from depot_server.db2.repository.item.repo_item_purpose import ItemPurposeRepo
@@ -11,7 +12,7 @@ from ..db2.repository.item.repo_lendable import LendableRepo
 from ..db2.repository.base import ItemNotFound
 from ..logic.item_instance import ItemInstanceService, ItemInstanceUniqueConflict
 
-from .models.item_instance import APICreateItemInstance, APIFullItem, APIItemInstance, APIUpdateItemInstance
+from .models.item_instance import APICreateItemInstance, APICreateSimilarItemInstance, APIFullItem, APIItemInstance, APIUpdateItemInstance
 
 router = APIRouter(tags=["V2_ItemInstance"], prefix="/item_instance")
 
@@ -20,11 +21,11 @@ router = APIRouter(tags=["V2_ItemInstance"], prefix="/item_instance")
 
 @router.post("/")
 async def create_item_instance(item_instance: APICreateItemInstance) -> APIItemInstance:
-    item_instance_data = item_instance.model_dump(exclude={"lendable"})
-    if item_instance.lendable:
-        linking_purpose = await ItemPurposeRepo.get_linking_purpose(item_instance.item_id, item_instance.lendable)
+    item_instance_data = item_instance.model_dump(exclude={"lendable_id"})
+    if item_instance.lendable_id:
+        linking_purpose = await ItemPurposeRepo.get_linking_purpose(item_instance.item_id, item_instance.lendable_id)
         if linking_purpose is None:
-            raise HTTPException(status_code=400, detail=f"Item {item_instance.item_id} is not in lendable {item_instance.lendable}")
+            raise HTTPException(status_code=400, detail=f"Item {item_instance.item_id} is not in lendable {item_instance.lendable_id}")
         contract = CreateItemInstance(**item_instance_data, purpose_id=linking_purpose)
     else:
         contract = CreateItemInstance(**item_instance_data)
@@ -67,17 +68,22 @@ async def get_item_instance(item_instance_id: UUID) -> APIFullItem:
     except ItemNotFound:
         raise HTTPException(status_code=404, detail="ItemInstance not found")
     
-
 @router.put("/{item_instance_id}")
 async def update_item_instance(item_instance_id: UUID, item_instance: APIUpdateItemInstance) -> APIItemInstance:
+    item_instance_old = await ItemInstanceRepo.get_by_id(item_instance_id)
+    if not item_instance_old:
+        raise HTTPException(status_code=404, detail="ItemInstance not found")
     try:
+        if item_instance.lendable_id != MISSING:
+            item_id = item_instance.item_id if item_instance.item_id != MISSING else item_instance_old.item_id
+            purpose = await ItemPurposeRepo.get_linking_purpose(item_id, item_instance.lendable_id)
         db_item_instance = await ItemInstanceService.update(item_instance_id,
-                                                UpdateItemInstanceData(**item_instance.model_dump(exclude={"lendable"})))
+                                                UpdateItemInstanceData(**item_instance.model_dump(exclude={"lendable_id"})))
     except ItemInstanceUniqueConflict as exception:
         raise HTTPException(status_code=409, detail=str(exception)) from exception
     except ItemNotFound:
         raise HTTPException(status_code=404, detail="ItemInstance not found")
-    
+
     return APIItemInstance.model_validate(db_item_instance, from_attributes=True)
 
 @router.delete("/{item_instance_id}")
@@ -86,6 +92,20 @@ async def delete_item_instance(item_instance_id: UUID) -> None:
         await ItemInstanceRepo.delete_by_id(item_instance_id)
     except ItemNotFound as ex:
         raise HTTPException(status_code=404, detail=str(ex)) from ex
+
+@router.post("/{item_instance_id}")
+async def create_similar(item_instance_id: UUID, item_instance: APICreateSimilarItemInstance) -> APIItemInstance:
+    progenitor_instance = await ItemInstanceRepo.get_by_id(item_instance_id)
+    if not progenitor_instance:
+        raise HTTPException(status_code=404, detail="ItemInstance not found")
+    try:
+        created_item_instance = await ItemInstanceService.create(CreateItemInstance(**item_instance.model_dump(),
+                                                                                    item_id=progenitor_instance.item_id,
+                                                                                    purpose_id=progenitor_instance.purpose_id))
+        return APIItemInstance.model_validate(created_item_instance, from_attributes=True)
+    except ItemInstanceUniqueConflict:
+        raise HTTPException(status_code=409, detail="Serial number or external id already exists.")
+
 
 @router.get("/{item_instance_id}/inspection_report")
 async def get_inspection_reports(item_instance_id: UUID):

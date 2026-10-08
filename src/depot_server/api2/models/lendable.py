@@ -15,6 +15,7 @@ class APILendableBase(BaseModel):
 class APICreateLendable(APILendableBase):
     parent: Optional[UUID] = None  # UUID of the parent lendable group if it exists
     items: dict[UUID, int] = Field(..., min_length=1)  # item_id -> quantity
+    assign_unassigned_instances: bool = True  # Whether to assign unassigned item instances to the new lendable
 
 class APIUpdateLendable(BaseModel):
     name: str | None | MISSING = MISSING

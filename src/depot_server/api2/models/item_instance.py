@@ -24,7 +24,16 @@ class APIItemInstanceBase(BaseModel):
     # created_by: UUID
 
 class APICreateItemInstance(APIItemInstanceBase):
-    lendable: Optional[UUID] = None
+    lendable_id: Optional[UUID] = None
+
+class APICreateSimilarItemInstance(BaseModel):
+    external_id: Optional[str] = None
+    serial_number: str = Field(...)
+    manufacture_date: date = Field(...)
+    purchase_date: date = Field(...)
+    first_use_date: date = Field(...)
+    condition: Optional[Condition] = None
+    condition_comment: Optional[str] = None
 
 class APIAddItemInstance(BaseModel):
     external_id: Optional[str] = None
@@ -36,14 +45,15 @@ class APIAddItemInstance(BaseModel):
     condition_comment: Optional[str] = None
 
 class APIUpdateItemInstance(BaseModel):
+    item_id: UUID | MISSING = MISSING
     external_id: str | None | MISSING = MISSING
-    serial_number: str | None | MISSING = MISSING
+    serial_number: str | MISSING = MISSING
     manufacture_date: date | None | MISSING = MISSING
     purchase_date: date | None | MISSING = MISSING
     first_use_date: date | None | MISSING = MISSING
-    condition: Condition | None | MISSING = MISSING
+    condition: Condition | MISSING = MISSING
     condition_comment: str | None | MISSING = MISSING
-    lendable: UUID | None | MISSING = MISSING
+    lendable_id: UUID | None | MISSING = MISSING
 
 class APIItemInstance(APIItemInstanceBase):
     id: UUID = Field(...)

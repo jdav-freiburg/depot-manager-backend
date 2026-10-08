@@ -7,6 +7,7 @@ from depot_server.db2.repository.item.repo_item import ItemRepo
 from depot_server.db2.repository.item.repo_item_instance import ItemInstanceRepo
 from depot_server.db2.repository.item.repo_item_purpose import ItemPurposeRepo
 from depot_server.db2.repository.item.repo_lendable import LendableRepo
+from depot_server.db2.repository.item.repo_storage_location import StorageLocationRepo
 from depot_server.logic.contracts.item import CreateItem, UpdateItemData, CreateItemInstance
 from depot_server.logic.contracts.lendable import CreateLendable
 from depot_server.logic.item import ItemService
@@ -41,6 +42,10 @@ async def get_item(item_id: UUID) -> APIItem:
 async def create_item(item: APICreateItem) -> APIItem:
     db_item = await ItemService.create_item(CreateItem(**item.model_dump(exclude={"single_lendable"})))
     if item.single_lendable:
+        if item.single_lendable.storage_location:
+            storage_location = await StorageLocationRepo.get_by_id(item.single_lendable.storage_location)
+            if not storage_location:
+                raise HTTPException(status_code=404, detail=f"Storage location with id {item.single_lendable.storage_location} not found")
         purpose = await ItemPurposeRepo.create(item_id=db_item.id)
         await LendableService.create(CreateLendable(name=item.name,
                                                     description=item.description,
@@ -68,12 +73,3 @@ async def delete_item(item_id: UUID) -> None:
 async def get_item_instances(item_id: UUID) -> list[APIItemInstance]:
     item_instances = await ItemInstanceRepo.get_item_instances_by_item_id(item_id)
     return [APIItemInstance.model_validate(item_instance, from_attributes=True) for item_instance in item_instances]
-
-@router.post("/{item_id}/instance")
-async def create_item_instance(item_id: UUID, item_instance: APIAddItemInstance) -> APIItemInstance:
-    # TODO infer purpose ad add to creation
-    try:
-        db_item_instance = await ItemInstanceService.create(CreateItemInstance(item_id=item_id, **item_instance.model_dump()))
-        return APIItemInstance.model_validate(db_item_instance, from_attributes=True)
-    except ItemInstanceUniqueConflict as ex:
-        raise HTTPException(400, detail=str(ex))

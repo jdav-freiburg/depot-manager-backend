@@ -31,7 +31,8 @@ async def create_lendable(lendable: APICreateLendable) -> APILendable:
     for item, amount in lendable.items.items():
         purpose = await ItemPurposeRepo.create(item_id=item)
         purposes[purpose.id] = amount
-        await ItemInstanceRepo.assign_unassigned_to_purpose(item, purpose)
+        if lendable.assign_unassigned_instances:
+            await ItemInstanceRepo.assign_unassigned_to_purpose(item, purpose)
     db_lendable = await LendableService.create(CreateLendable(
         name=lendable.name,
         purposes=purposes,
