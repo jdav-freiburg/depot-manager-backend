@@ -87,7 +87,7 @@ class ItemInstanceRepo(AuditableRepo):
     async def assign_unassigned_to_purpose(cls, item_id: UUID, purpose_id: UUID):
         entries = await cls.get_item_instances_by_item_id(item_id)
         for entry in entries:
-            if entry.purpose is None:
+            if entry.purpose_id is None:
                 entry.purpose_id = purpose_id
                 await entry.save()
 

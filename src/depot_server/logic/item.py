@@ -83,5 +83,5 @@ class ItemService:
     async def update_item_instance(cls, id: UUID, contract: UpdateItemInstanceData) -> LogicItemInstance:
         db_instance = await ItemInstanceRepo.update(id, **contract.to_kwargs("serial_number", "manufacture_date",
                                                     "purchase_date", "first_use_date", "condition",
-                                                    "condition_comment", "external_id", "purpose"))
+                                                    "condition_comment", "external_id", "purpose_id"))
         return cls._to_logic__item_instance(db_instance)

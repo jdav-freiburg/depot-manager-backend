@@ -49,4 +49,4 @@ class UpdateItemInstanceData(BaseContract):
     condition: str | None | _Unset = _Unset()
     condition_comment: str | None | _Unset = _Unset()
     external_id: str | None | _Unset = _Unset()
-    purpose: UUID | None | _Unset = _Unset()
+    purpose_id: UUID | None | _Unset = _Unset()

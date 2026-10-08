@@ -27,13 +27,13 @@ class APICreateItemInstance(APIItemInstanceBase):
     lendable_id: Optional[UUID] = None
 
 class APICreateSimilarItemInstance(BaseModel):
-    external_id: Optional[str] = None
     serial_number: str = Field(...)
-    manufacture_date: date = Field(...)
-    purchase_date: date = Field(...)
-    first_use_date: date = Field(...)
-    condition: Optional[Condition] = None
-    condition_comment: Optional[str] = None
+    external_id: str | None = None
+    manufacture_date: date | MISSING = MISSING
+    purchase_date: date | MISSING = MISSING
+    first_use_date: date | MISSING = MISSING
+    condition: Condition | MISSING = MISSING
+    condition_comment: str | None | MISSING = MISSING
 
 class APIAddItemInstance(BaseModel):
     external_id: Optional[str] = None
@@ -41,7 +41,7 @@ class APIAddItemInstance(BaseModel):
     manufacture_date: date = Field(...)
     purchase_date: date = Field(...)
     first_use_date: date = Field(...)
-    condition: Optional[Condition] = None
+    condition: Condition
     condition_comment: Optional[str] = None
 
 class APIUpdateItemInstance(BaseModel):

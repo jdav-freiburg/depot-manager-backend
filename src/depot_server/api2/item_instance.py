@@ -69,7 +69,7 @@ async def get_item_instance(item_instance_id: UUID) -> APIFullItem:
         raise HTTPException(status_code=404, detail="ItemInstance not found")
     
 @router.put("/{item_instance_id}")
-async def update_item_instance(item_instance_id: UUID, item_instance: APIUpdateItemInstance) -> APIItemInstance:
+async def update_item_instance(item_instance_id: UUID, item_instance: APIUpdateItemInstance) -> APIFullItem:
     item_instance_old = await ItemInstanceRepo.get_by_id(item_instance_id)
     if not item_instance_old:
         raise HTTPException(status_code=404, detail="ItemInstance not found")
@@ -77,14 +77,18 @@ async def update_item_instance(item_instance_id: UUID, item_instance: APIUpdateI
         if item_instance.lendable_id != MISSING:
             item_id = item_instance.item_id if item_instance.item_id != MISSING else item_instance_old.item_id
             purpose = await ItemPurposeRepo.get_linking_purpose(item_id, item_instance.lendable_id)
-        db_item_instance = await ItemInstanceService.update(item_instance_id,
-                                                UpdateItemInstanceData(**item_instance.model_dump(exclude={"lendable_id"})))
+            await ItemInstanceService.update(item_instance_id,
+                                            UpdateItemInstanceData(**item_instance.model_dump(exclude={"lendable_id"}),
+                                                                    purpose_id=purpose))
+        else:
+            await ItemInstanceService.update(item_instance_id,
+                                            UpdateItemInstanceData(**item_instance.model_dump(exclude={"lendable_id"})))
     except ItemInstanceUniqueConflict as exception:
         raise HTTPException(status_code=409, detail=str(exception)) from exception
     except ItemNotFound:
         raise HTTPException(status_code=404, detail="ItemInstance not found")
 
-    return APIItemInstance.model_validate(db_item_instance, from_attributes=True)
+    return await get_item_instance(item_instance_id)
 
 @router.delete("/{item_instance_id}")
 async def delete_item_instance(item_instance_id: UUID) -> None:
@@ -98,10 +102,10 @@ async def create_similar(item_instance_id: UUID, item_instance: APICreateSimilar
     progenitor_instance = await ItemInstanceRepo.get_by_id(item_instance_id)
     if not progenitor_instance:
         raise HTTPException(status_code=404, detail="ItemInstance not found")
+    progenitor_data = {key: val for key, val in progenitor_instance.__dict__.items() if not (key.startswith("_") or key in ["id", "created_at", "updated_at"])}
+    progenitor_data.update(item_instance.model_dump())
     try:
-        created_item_instance = await ItemInstanceService.create(CreateItemInstance(**item_instance.model_dump(),
-                                                                                    item_id=progenitor_instance.item_id,
-                                                                                    purpose_id=progenitor_instance.purpose_id))
+        created_item_instance = await ItemInstanceService.create(CreateItemInstance(**progenitor_data))
         return APIItemInstance.model_validate(created_item_instance, from_attributes=True)
     except ItemInstanceUniqueConflict:
         raise HTTPException(status_code=409, detail="Serial number or external id already exists.")

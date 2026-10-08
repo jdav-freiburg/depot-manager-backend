@@ -46,3 +46,19 @@ async def test_purpose_duplicate(init_db):
                                       serial_number="SN001", external_id="EXT001",
                                       manufacture_date=date(2024, 1, 1), purchase_date=date(2024, 2, 1),
                                       first_use_date=date(2024, 3, 1), condition="good")
+
+@pytest.mark.asyncio
+async def test_assign_unassigned(init_db):
+    item = await ItemRepo.create(
+        name="Test Item",
+        description="Item description",
+        psa_category=PsaCategory.NONE,
+    )
+    purpose = await ItemPurposeRepo.create(item=item, name="Purpose 1")
+    item_instance = await ItemInstanceRepo.create(item=item, purpose=None,
+                                                  serial_number="SN001", external_id="EXT001",
+                                                  manufacture_date=date(2024, 1, 1), purchase_date=date(2024, 2, 1),
+                                                  first_use_date=date(2024, 3, 1), condition="good")
+    await ItemInstanceRepo.assign_unassigned_to_purpose(item.id, purpose.id)
+    updated_instance = await ItemInstanceRepo.get_by_id(item_instance.id)
+    assert updated_instance.purpose_id == purpose.id
