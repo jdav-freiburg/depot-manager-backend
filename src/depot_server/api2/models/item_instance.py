@@ -1,11 +1,12 @@
 from uuid import UUID
-from datetime import date
+from datetime import date, timedelta
 
 from pydantic import BaseModel, Field
 from pydantic_core import MISSING
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from depot_server.api2.models.item import APIItemBase
+from depot_server.db2.models.item.item import PsaCategory
 from depot_server.logic.results.item import LogicItemInstance
 from depot_server.db2.models.common import Condition
 from depot_server.db2.models.item.item_instance import ItemInstance
@@ -23,7 +24,15 @@ class APIItemInstanceBase(BaseModel):
     condition_comment: Optional[str] = None
     # created_by: UUID
 
-class APICreateItemInstance(APIItemInstanceBase):
+class APICreateItemInstance(BaseModel):
+    item_id: UUID = Field(...)
+    external_id: Optional[str] = None
+    serial_number: str = Field(...)
+    manufacture_date: date = Field(...)
+    purchase_date: date = Field(...)
+    first_use_date: date = Field(...)
+    condition: Optional[Condition] = None
+    condition_comment: Optional[str] = None
     lendable_id: Optional[UUID] = None
 
 class APICreateSimilarItemInstance(BaseModel):
@@ -55,8 +64,16 @@ class APIUpdateItemInstance(BaseModel):
     condition_comment: str | None | MISSING = MISSING
     lendable_id: UUID | None | MISSING = MISSING
 
-class APIItemInstance(APIItemInstanceBase):
+class APIItemInstance(BaseModel):
     id: UUID = Field(...)
+    item_id: UUID = Field(...)
+    external_id: Optional[str] = None
+    serial_number: str = Field(...)
+    manufacture_date: date = Field(...)
+    purchase_date: date = Field(...)
+    first_use_date: date = Field(...)
+    condition: Optional[Condition] = None
+    condition_comment: Optional[str] = None
     #created_at: datetime = Field(...)
 
     @classmethod
@@ -74,12 +91,7 @@ class APIItemInstance(APIItemInstanceBase):
         )
 
 
-# Models to instantly create a lendable from nothing
-
-class APICreateFullItem(APIItemBase, APICreateItemInstance):
-    pass
-
-class APIFullItem(APICreateFullItem):
+class APIFullItem(BaseModel):
     id: UUID = Field(description="The unique identifier of the item type")
     item_id: UUID = Field(description="ID of the instance of this item")
     group_id: Optional[UUID] = None
@@ -87,6 +99,24 @@ class APIFullItem(APICreateFullItem):
     storage_location_id: Optional[UUID] = Field(description="ID of the storage location this item is linked to")
     too_old: bool = Field(description="Whether the item instance is too old")
     requires_inspection: bool = Field(description="Whether the item instance requires inspection")
+    # Item properties
+    name: str = Field(...)
+    description: Optional[str] = None
+    manufacturer: Optional[str] = None
+    model: Optional[str] = None
+    report_profile_id: Optional[UUID] = None
+    max_lifespan: Optional[timedelta] = None
+    max_usage_lifespan: Optional[timedelta] = None
+    psa_category: PsaCategory = Field(...)
+    # Item Instance properties
+    external_id: Optional[str] = None
+    serial_number: str = Field(...)
+    manufacture_date: date = Field(...)
+    purchase_date: date = Field(...)
+    first_use_date: date = Field(...)
+    condition: Optional[Condition] = None
+    condition_comment: Optional[str] = None
+    lendable_id: Optional[UUID] = None
 
     @classmethod
     async def from_db(cls, db_item_instance: ItemInstance, lendable_id: UUID | None = None, storage_location_id: UUID | None = None) -> "APIFullItem":

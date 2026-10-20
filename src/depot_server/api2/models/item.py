@@ -27,10 +27,18 @@ class OptionalCreateLendable(BaseModel):
 class APICreateItem(APIItemBase):
     single_lendable: OptionalCreateLendable | None = Field(default=None, description="If a lendable containing only this item should also be created")
     
-class APIItem(APIItemBase):
+class APIItem(BaseModel):
     id: UUID = Field(...)
+    name: str = Field(...)
+    description: Optional[str] = None
+    manufacturer: Optional[str] = None
+    model: Optional[str] = None
     lendables: List[UUID] = Field(default_factory=list)
     storage_locations: List[UUID] = Field(default_factory=list)
+    report_profile_id: Optional[UUID] = None
+    max_lifespan: Optional[timedelta] = None
+    max_usage_lifespan: Optional[timedelta] = None
+    psa_category: PsaCategory = Field(...)
 
     @classmethod
     def from_logic(cls, logic_item: LogicItem, lendables: List[UUID], storage_locations: List[UUID]) -> "APIItem":

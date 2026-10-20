@@ -25,11 +25,16 @@ class APIUpdateLendable(BaseModel):
     items: dict[UUID, int] | MISSING = MISSING
     in_limbus: int | MISSING = MISSING
 
-class APILendable(APILendableBase):
+class APILendable(BaseModel):
     id: UUID
+    name: str
+    description: Optional[str] = None
+    items: dict[UUID, int] = Field(default_factory=dict)# item_id -> quantity
+    ausgabepflichtig: bool
     available: int = Field(description="How many could be reserved. Is smaller if some are already reserved.")
     operational: int = Field(description="The amount of lendables that should exist if all things that are not broken are there")
     in_limbus: int = Field(description="How many lendables nobody knows where they are. They are lost but could reappear")
+    storage_location_id: Optional[UUID] = None
 
     @classmethod
     def from_logic(cls, logic_lendable: LogicLendable, items: dict, available: int, operational: int) -> "APILendable":
