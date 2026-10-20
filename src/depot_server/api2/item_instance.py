@@ -36,9 +36,13 @@ async def create_item_instance(item_instance: APICreateItemInstance) -> APIItemI
         raise HTTPException(status_code=409, detail=str(exception)) from exception
     
 @router.get("/")
-async def get_item_instances() -> list[APIItemInstance]:
+async def get_item_instances(name: str|None=None) -> list[APIFullItem]:
     db_item_instances = await ItemInstanceRepo.get_all()
-    return [APIItemInstance.model_validate(item_instance, from_attributes=True) for item_instance in db_item_instances]
+    fullitems = []
+    for item_instance in db_item_instances:
+        fullitems.append(await get_item_instance(item_instance.id))
+    return fullitems
+    #return [APIItemInstance.model_validate(item_instance, from_attributes=True) for item_instance in db_item_instances]
 
 @router.get("/expired")
 async def get_expired_item_instances() -> list[APIItemInstance]:

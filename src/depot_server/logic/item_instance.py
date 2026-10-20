@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from depot_server.db2.models.common import Condition
 from depot_server.db2.repository.base import ItemNotFound
 from depot_server.db2.repository.item.repo_item_instance import ItemInstanceRepo
 from depot_server.db2.repository.item.repo_lendable import LinkLendablePurposeRepo
@@ -45,12 +46,12 @@ class ItemInstanceService:
     @classmethod
     async def get_expired_item_instances(cls) -> list[ItemInstanceDB]:
         expired_item_instances = await ItemInstanceRepo.get_full_items()
-        return [inst for inst in expired_item_instances if inst.is_too_old]
+        return [inst for inst in expired_item_instances if (inst.is_too_old and not inst.condition == Condition.GONE)]
 
     @classmethod
     async def get_item_instances_requiring_inspection(cls) -> list[ItemInstanceDB]:
         item_instances = await ItemInstanceRepo.get_full_items()
-        return [inst for inst in item_instances if await inst.requires_inspection()]
+        return [inst for inst in item_instances if await inst.requires_inspection() and not inst.condition == Condition.GONE]
 
     @classmethod
     async def is_in_lendable(cls, item_id: UUID, lendable_id: UUID) -> bool:

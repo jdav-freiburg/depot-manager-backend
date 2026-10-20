@@ -2,6 +2,7 @@ from uuid import UUID, uuid4
 
 from fastapi import APIRouter, HTTPException
 
+from depot_server.api2.item_instance import get_item_instance
 from depot_server.db2.repository.base import ItemNotFound
 from depot_server.db2.repository.item.repo_item import ItemRepo
 from depot_server.db2.repository.item.repo_item_instance import ItemInstanceRepo
@@ -14,7 +15,7 @@ from depot_server.logic.item import ItemService
 from depot_server.logic.item_instance import ItemInstanceService, ItemInstanceUniqueConflict
 from depot_server.logic.lendable import LendableService
 from .models.item import APIItem, APICreateItem, APIUpdateItem
-from .models.item_instance import APIItemInstance, APIAddItemInstance
+from .models.item_instance import APIFullItem, APIItemInstance, APIAddItemInstance
 
 
 router = APIRouter(tags=["V2_Item"], prefix="/item")
@@ -70,6 +71,6 @@ async def delete_item(item_id: UUID) -> None:
         raise HTTPException(status_code=404, detail=str(ex)) from ex
 
 @router.get("/{item_id}/instance")
-async def get_item_instances(item_id: UUID) -> list[APIItemInstance]:
+async def get_item_instances(item_id: UUID) -> list[APIFullItem]:
     item_instances = await ItemInstanceRepo.get_item_instances_by_item_id(item_id)
-    return [APIItemInstance.model_validate(item_instance, from_attributes=True) for item_instance in item_instances]
+    return [await get_item_instance(item_instance.id) for item_instance in item_instances]
