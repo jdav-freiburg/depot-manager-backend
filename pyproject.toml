@@ -16,7 +16,7 @@ dependencies = [
     "motor>=3,<4",
     "oyaml>=1,<2",
     "pydantic>=2, <3",
-    "pillow>=12,<13",
+    "pillow>=12,<14",
     "python-multipart>=0.0,<0.1",
     "pytz~=2025.2",
     "tortoise-orm[asyncpg, accel]==1.1.3",
