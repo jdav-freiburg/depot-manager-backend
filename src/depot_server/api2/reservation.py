@@ -66,26 +66,9 @@ def reservation_to_update_contract(reservation: APIReservationPending) -> Update
 
 
 @router.get("/")
-async def get_all_reservations() -> list[APIReservation]:
-    reservations = await ReservationService.get_all_reservations()
-    return [reservation_to_api(reservation) for reservation in reservations]
-
-
-@router.get("/user/{user_id}")
-async def get_reservations_by_user(user_id: UUID) -> list[APIReservation]:
-    reservations = await ReservationService.get_reservations_by_user(user_id)
-    return [reservation_to_api(reservation) for reservation in reservations]
-
-
-@router.get("/lendable/{lendable_id}")
-async def get_reservations_by_lendable(lendable_id: UUID) -> list[APIReservation]:
-    reservations = await ReservationService.get_reservations_by_lendable(lendable_id)
-    return [reservation_to_api(reservation) for reservation in reservations]
-
-
-@router.get("/time-range/{start_date}/{end_date}")
-async def get_reservations_in_time_range(start_date: date, end_date: date) -> list[APIReservation]:
-    reservations = await ReservationService.get_reservations_in_time_range(start_date, end_date)
+async def get_all_reservations(user_id: UUID|None=None, start: date|None=None, end: date|None=None,
+                               name: str|None=None, lendable_id: UUID|None=None) -> list[APIReservation]:
+    reservations = await ReservationService.get_all_reservations(user_id=user_id, start=start, end=end, name=name, lendable_id=lendable_id)
     return [reservation_to_api(reservation) for reservation in reservations]
 
 

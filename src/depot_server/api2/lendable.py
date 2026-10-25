@@ -1,6 +1,6 @@
 from pydantic_core import MISSING
 from uuid import UUID
-from datetime import datetime
+from datetime import date, datetime
 from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, HTTPException
@@ -62,6 +62,13 @@ async def get_lendables() -> list[APILendable]:
                                    operational_amounts[lendable.id] - reserved_amounts[lendable.id],
                                    operational_amounts[lendable.id])
                                    for lendable in db_lendables]
+
+@router.get("/available")
+async def get_available_lendables(start:date, end:date) -> list[APILendable]:
+    lendables, available, operational = await LendableService.get_available_in_timespan(start, end)
+    return [APILendable.from_logic(lendable, await LendableService.get_items(lendable.id),
+                                   available[i], operational[i])
+            for i, lendable in enumerate(lendables)]
 
 @router.get("/{lendable_id}")
 async def get_lendable(lendable_id: UUID) -> APILendable:

@@ -10,7 +10,6 @@ from depot_server.logic.contracts.reservation import CreateReservation, CollectR
 from depot_server.logic.results.reservation import LogicFullReservation, LogicReservationLendableLink
 from depot_server.db2.repository.item.repo_reservation import ReservationRepo, ReservationRepoLinkLendable
 from depot_server.logic.item import ItemService
-from depot_server.logic.lendable import LendableService
 from depot_server.db2.repository.base import ItemNotFound
 
 
@@ -80,9 +79,9 @@ class ReservationService:
 
 
     @classmethod
-    async def get_reserved_lendable_amount(cls, item_id, start_time: date, end_time: date, exclude_reservations: list[UUID] | None = None) -> int:
+    async def get_reserved_lendable_amount(cls, lendable_id, start_time: date, end_time: date, exclude_reservations: list[UUID] | None = None) -> int:
         links = await ReservationRepoLinkLendable.get_lendable_links_in_timespan(
-            item_id,
+            lendable_id,
             start_time,
             end_time,
             exclude_reservations=exclude_reservations
@@ -140,31 +139,22 @@ class ReservationService:
         return cls._to_dataclass_reservation(reservation[0])
 
     @classmethod
-    async def get_all_reservations(cls) -> list[LogicFullReservation]:
-        reservations = await ReservationRepo.get_all_with_links()
+    async def get_all_reservations(cls, user_id: UUID|None=None, start: date|None=None, end: date|None=None,
+                                   name: str|None=None, lendable_id: UUID|None=None) -> list[LogicFullReservation]:
+        filter_params = {}
+        if user_id is not None:
+            filter_params["user"] = user_id
+        if start is not None:
+            filter_params["start__gte"] = start
+        if end is not None:
+            filter_params["end__lte"] = end
+        if name is not None:
+            filter_params["name__icontains"] = name
+        if lendable_id is not None:
+            filter_params["reservation_lendable_links__lendable_id"] = lendable_id  #TODO: Check if this works since it is a reverse relation
+        reservations = await ReservationRepo.get_by_filter_with_links(**filter_params)
         return [cls._to_dataclass_reservation(reservation) for reservation in reservations]
 
-    @classmethod
-    async def get_reservations_by_user(cls, user_id: UUID) -> list[LogicFullReservation]:
-        reservation = await ReservationRepo.get_by_filter_with_links(user=user_id)
-        if not reservation:
-            return []
-        return [cls._to_dataclass_reservation(res) for res in reservation]
-
-    @classmethod
-    async def get_reservations_by_lendable(cls, lendable_id: UUID) -> list[LogicFullReservation]:
-        reservations = await ReservationRepo.get_by_filter_with_links(
-            reservation_lendable_links__lendable_id=lendable_id,
-        )
-        return [cls._to_dataclass_reservation(reservation) for reservation in reservations]
-
-    @classmethod
-    async def get_reservations_in_time_range(cls, start_time: date, end_time: date) -> list[LogicFullReservation]:
-        reservation = await ReservationRepo.get_by_filter_with_links(start__lt=end_time + timedelta(days=1),
-                                                                     end__gt=start_time - timedelta(days=1))
-        if not reservation:
-            return []
-        return [cls._to_dataclass_reservation(res) for res in reservation]
 
     @classmethod
     async def update_reservation(cls, reservation_id: UUID, contract: UpdateReservationData) -> LogicFullReservation:

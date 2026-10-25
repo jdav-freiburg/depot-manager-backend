@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime, time
 from zoneinfo import ZoneInfo
 from uuid import UUID
 
@@ -10,6 +10,7 @@ from depot_server.db2.repository.item.repo_lendable_group import LendableGroupRe
 from depot_server.db2.repository.base import ItemNotFound
 from depot_server.logic.contracts.lendable import CreateLendable, CreateLendableGroup, UpdateLendableData
 from depot_server.logic.results.lendable import LogicLendable, LogicLendableLink
+from depot_server.logic.reservation import ReservationService
 from tortoise.transactions import in_transaction
 
 
@@ -50,6 +51,22 @@ class LendableService:
         lendables = await LendableRepo.get_all_with_links(timestamp)
         return [cls._to_dataclass_lendable(lendable)
                 for lendable in lendables]
+
+    @classmethod
+    async def get_available_in_timespan(cls, start_time: date, end_time: date) -> tuple[list[LogicLendable], list[int], list[int]]:
+        all_lendables = await cls.get_all(datetime.combine(start_time, time.min, tzinfo=ZoneInfo("Europe/Berlin")))
+        r_lendables = []
+        r_available = []
+        r_operational = []
+        for lendable in all_lendables:
+            reserved_amount = await ReservationService.get_reserved_lendable_amount(lendable.id, start_time, end_time)
+            operational_amount = await cls.get_operational_amount(lendable.id)
+            available_amount = operational_amount - reserved_amount
+            if available_amount > 0:
+                r_lendables.append(lendable)
+                r_available.append(available_amount)
+                r_operational.append(operational_amount)
+        return r_lendables, r_available, r_operational
 
     @classmethod
     async def get_by_id(cls, lendable_id: UUID, date: datetime=datetime.now(ZoneInfo("Europe/Berlin"))) -> LogicLendable:
